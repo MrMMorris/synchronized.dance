@@ -1,6 +1,16 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-ES1PX9BXHM"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-ES1PX9BXHM');
+  </script>
+  <!-- Mailchimp -->
   <script id="mcjs">!function(c,h,i,m,p){m=c.createElement(h),p=c.getElementsByTagName(h)[0],m.async=1,m.src=i,p.parentNode.insertBefore(m,p)}(document,"script","https://chimpstatic.com/mcjs-connected/js/users/272070d92e53075a671cd8fcf/f95756222a5ba6bd24ccfb9fd.js");</script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
@@ -18,52 +28,13 @@
       font-family: sans-serif;
     }
 
-    .content {
-      background: rgba(255, 255, 255, 0.8);
-      padding: 15px;
-      border-radius: 16px;
-      text-align: center;
-      max-width: 250px;
-      width: 90%;
-      backdrop-filter: blur(6px);
-    }
-
     h1 {
       margin-top: 0;
       font-size: 1.8rem;
     }
 
-    form input[type="email"] {
-      width: 80%;
-      padding: 12px;
-      margin: 10px auto;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      font-size: 1rem;
-      box-sizing: border-box;
-      display: block;
-      text-align: center;
-    }
-
-    form button {
-      width: 50%;
-      padding: 12px;
-      background: black;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 1rem;
-      display: block;
-      margin: 0 auto;
-    }
-
-    form button:hover {
-      opacity: 0.85;
-    }
-
     .poster-box {
-      margin: 40px; 
+      margin: 30px; 
       display: flex;
       justify-content: center;
       max-width: 300px;
@@ -104,14 +75,70 @@
     .modal:target {
       display: flex;
     }
+
+    .form {
+      background: rgba(255, 255, 255, 0.8);
+      padding: 15px;
+      border-radius: 16px;
+      text-align: center;
+      max-width: 250px;
+      width: 90%;
+      backdrop-filter: blur(6px);
+      margin: 30px;
+    }
+
+    form input[type="email"] {
+      width: 80%;
+      padding: 12px;
+      margin: 10px auto;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      font-size: 1rem;
+      box-sizing: border-box;
+      display: block;
+      text-align: center;
+    }
+
+    form button {
+      width: 50%;
+      padding: 12px;
+      background: black;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      display: block;
+      margin: 0 auto;
+    }
+
+    form button:hover {
+      opacity: 0.85;
+    }
+
+    .map-link {
+      display: flex;
+      justify-content: center;
+    }
+
+    .map-icon {
+      width: 50px;  
+      height: auto;
+    }
+
   </style>
 </head>
 <body>
   <!-- Comment this div if no current poster -->
   <div class="poster-box">
+    <!-- Path to poster -->
     <img src="assets/poster.jpg" alt="Event Poster" />
   </div>
-  <div class="content">
+  <!-- Google maps link -->
+  <a href="https://maps.app.goo.gl/ydp6Mhwxcr12rHjs9" target="_blank" class="map-link">
+      <img src="assets/google_maps.png" alt="Google Maps" class="map-icon">
+  </a>
+  <div class="form">
     <h2>Get Notified About Our Next Party</h2>
     <!-- Replace with your Mailchimp/MailerLite embed if desired -->
     <form action="https://example.com/submit" method="POST">
