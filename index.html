@@ -51,6 +51,12 @@
       transform: scale(1.02);
     }
 
+    .map-box {
+      background: rgba(255, 255, 255);
+      padding: 15px;
+      border-radius: 16px;
+    }
+
     .modal {
       display: none;
       position: fixed;
@@ -136,17 +142,11 @@
     <!-- Path to poster -->
     <img src="assets/poster.png" alt="Event Poster" />
   </div>
-  <!-- Google maps link -->
-  <a href="https://maps.app.goo.gl/ydp6Mhwxcr12rHjs9" target="_blank" class="map-link">
-      <img src="assets/google_maps.png" alt="Google Maps" class="map-icon" alt="Open map">
-  </a>
-  <div class="form">
-    <h2>Get Notified About Our Next Party</h2>
-    <!-- Replace with your Mailchimp/MailerLite embed if desired -->
-    <form action="https://example.com/submit" method="POST">
-      <input type="email" name="email" placeholder="Enter your email" required />
-      <button type="submit">Sign Up</button>
-    </form>
+  <div class="map-box">
+    <!-- Google maps link -->
+    <a href="https://maps.app.goo.gl/ydp6Mhwxcr12rHjs9" target="_blank" class="map-link">
+        <img src="assets/google_maps.png" alt="Google Maps" class="map-icon" alt="Open map">
+    </a> 
   </div>
 </body>
 <script>
