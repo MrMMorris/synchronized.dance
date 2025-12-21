@@ -174,22 +174,37 @@
     <div class="form">
       <h2>Get Notified About Our Next Party</h2>
       <h4>*we will <b>never</b> share your email with anyone*</h4>
-      <!-- Replace with your Mailchimp/MailerLite embed if desired -->
-      <form action="https://gmail.us15.list-manage.com/subscribe/post?u=272070d92e53075a671cd8fcf&amp;id=aab747b9ca&amp;f_id=00bc92e0f0" method="POST" target="_blank">
-        <input type="email" name="email" placeholder="Enter your email" required />
-        <button type="button" id="mc-submit">Sign Up</button>
+      
+      <form id="signup-form" action="https://gmail.us15.list-manage.com/subscribe/post?u=272070d92e53075a671cd8fcf&id=aab747b9ca&f_id=00bc92e0f0" method="POST" target="hidden-iframe">
+        
+        <input type="email" name="EMAIL" placeholder="Enter your email" required />
+        
+        <!-- Anti-bot honeypot field -->
+        <div style="position: absolute; left: -5000px;" aria-hidden="true">
+          <input type="text" name="b_272070d92e53075a671cd8fcf_aab747b9ca" tabindex="-1" value="">
+        </div>
+        
+        <button type="submit" id="mc-submit">Sign Up</button>
       </form>
+      
+      <!-- Hidden iframe to catch the response -->
+      <iframe name="hidden-iframe" style="display:none;"></iframe>
     </div>
 </body>
 
-<!-- Form change on email submit -->
+<!-- Mailchimp form script -->
 <script>
-  document.getElementById('mc-submit').addEventListener('click', function(e) {
+  document.getElementById('signup-form').addEventListener('submit', function(e) {
+    e.preventDefault(); // Prevent immediate form submission
+    
     const formDiv = document.querySelector('.form');
-    const emailInput = document.querySelector('input[name="email"]');
+    const emailInput = document.querySelector('input[name="EMAIL"]');
     
     // Check if email is valid
     if (emailInput.validity.valid) {
+      // Submit the form to Mailchimp
+      e.target.submit();
+      
       // First fade out
       formDiv.classList.add('fade-out');
       
@@ -204,6 +219,7 @@
     }
   });
 </script>
+
 <!-- Enlarge poster on click -->
 <script>
   const poster = document.querySelector('.poster-box img');
