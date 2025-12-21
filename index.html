@@ -26,13 +26,25 @@
       font-family: sans-serif;
     }
 
-    h1 {
-      margin-top: 0;
-      font-size: 1.8rem;
+    h2 {
+      margin: 0;
     }
 
+    h3 {
+      margin: 0px;
+      font-size: 12px;
+      font-weight: normal;
+    }
+
+    h4 {
+      font-size: 10px;
+      margin-top: 10px;
+      font-weight: normal;
+    }
+
+    
     .poster-box {
-      margin: 30px; 
+      margin: 0px; 
       display: flex;
       justify-content: center;
       max-width: 300px;
@@ -54,7 +66,18 @@
     .map-box {
       background: rgba(255, 255, 255);
       padding: 15px;
-      border-radius: 16px;
+      border-radius: 12px;
+      margin: 20px;
+    }
+
+    .map-link {
+      display: flex;
+      justify-content: center;
+    }
+
+    .map-icon {
+      width: 50px;  
+      height: auto;
     }
 
     .modal {
@@ -82,13 +105,23 @@
 
     .form {
       background: rgba(255, 255, 255, 0.8);
-      padding: 15px;
+      padding: 10px;
       border-radius: 16px;
       text-align: center;
       max-width: 250px;
       width: 90%;
       backdrop-filter: blur(6px);
-      margin: 30px;
+      margin: 0px;
+      transition: all 0.6s ease;
+    }
+    
+    .form.fade-out {
+      opacity: 0;
+      transform: scale(0.95);
+    }
+    
+    .form h2 {
+      transition: all 0.6s ease;
     }
 
     form input[type="email"] {
@@ -120,16 +153,6 @@
       opacity: 0.85;
     }
 
-    .map-link {
-      display: flex;
-      justify-content: center;
-    }
-
-    .map-icon {
-      width: 50px;  
-      height: auto;
-    }
-
   </style>
 </head>
 <body>
@@ -148,7 +171,40 @@
         <img src="assets/google_maps.png" alt="Google Maps" class="map-icon" alt="Open map">
     </a> 
   </div>
+    <div class="form">
+      <h2>Get Notified About Our Next Party</h2>
+      <h4>*we will <b>never</b> share your email with anyone*</h4>
+      <!-- Replace with your Mailchimp/MailerLite embed if desired -->
+      <form action="https://gmail.us15.list-manage.com/subscribe/post?u=272070d92e53075a671cd8fcf&amp;id=aab747b9ca&amp;f_id=00bc92e0f0" method="POST" target="_blank">
+        <input type="email" name="email" placeholder="Enter your email" required />
+        <button type="button" id="mc-submit">Sign Up</button>
+      </form>
+    </div>
 </body>
+
+<!-- Form change on email submit -->
+<script>
+  document.getElementById('mc-submit').addEventListener('click', function(e) {
+    const formDiv = document.querySelector('.form');
+    const emailInput = document.querySelector('input[name="email"]');
+    
+    // Check if email is valid
+    if (emailInput.validity.valid) {
+      // First fade out
+      formDiv.classList.add('fade-out');
+      
+      // After fade out completes, change content and fade back in
+      setTimeout(() => {
+        formDiv.innerHTML = '<h2>Success!</h2><h3>*check your inbox or spam for confirmation*</h3>';
+        formDiv.classList.remove('fade-out');
+      }, 600); // Match the transition duration
+    } else {
+      // Show browser's default validation message
+      emailInput.reportValidity();
+    }
+  });
+</script>
+<!-- Enlarge poster on click -->
 <script>
   const poster = document.querySelector('.poster-box img');
   const body = document.body;
@@ -167,4 +223,5 @@
     });
   });
 </script>
+
 </html>
