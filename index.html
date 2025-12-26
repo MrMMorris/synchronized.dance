@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <!-- Google Tag Manager -->
-  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-  })(window,document,'script','dataLayer','GTM-KJSZL5F4');</script>
-  <!-- End Google Tag Manager -->
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RE0PHC72VJ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-RE0PHC72VJ');
+  </script>
   <!-- Mailchimp -->
   <script id="mcjs">!function(c,h,i,m,p){m=c.createElement(h),p=c.getElementsByTagName(h)[0],m.async=1,m.src=i,p.parentNode.insertBefore(m,p)}(document,"script","https://chimpstatic.com/mcjs-connected/js/users/272070d92e53075a671cd8fcf/f95756222a5ba6bd24ccfb9fd.js");</script>
   <meta charset="UTF-8" />
@@ -156,10 +157,6 @@
   </style>
 </head>
 <body>
-  <!-- Google Tag Manager (noscript) -->
-  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KJSZL5F4"
-  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
-  <!-- End Google Tag Manager (noscript) -->
   <!-- Comment this div if no current poster -->
   <div class="poster-box">
     <!-- Path to poster -->
@@ -167,7 +164,7 @@
   </div>
   <div class="map-box">
     <!-- Google maps link -->
-    <a href="https://maps.app.goo.gl/ydp6Mhwxcr12rHjs9" target="_blank" class="map-link">
+    <a href="https://maps.app.goo.gl/ydp6Mhwxcr12rHjs9" target="_blank" class="map-link" onclick="trackMapClick()">
         <img src="assets/google_maps.png" alt="Google Maps" class="map-icon" alt="Open map">
     </a> 
   </div>
@@ -184,13 +181,33 @@
           <input type="text" name="b_272070d92e53075a671cd8fcf_aab747b9ca" tabindex="-1" value="">
         </div>
         
-        <button type="submit" id="mc-submit">Sign Up</button>
+        <button type="submit" id="mc-submit" onClick="trackSignupClick()">Sign Up</button>
       </form>
       
       <!-- Hidden iframe to catch the response -->
       <iframe name="hidden-iframe" style="display:none;"></iframe>
     </div>
 </body>
+
+<!-- GA tracking for map click -->
+<script>
+  function trackMapClick() {
+    gtag('event', 'map_click', {
+      'event_category': 'engagement',
+      'event_label': 'location_link'
+    });
+  }
+</script>
+
+<!-- GA tracking for signup click -->
+<script>
+  function trackSignupClick() {
+    gtag('event', 'signup_click', {
+      'event_category': 'engagement',
+      'event_label': 'email_link'
+    });
+  }
+</script>
 
 <!-- Mailchimp form script -->
 <script>
