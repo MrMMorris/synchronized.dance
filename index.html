@@ -159,6 +159,10 @@
       opacity: 0.85;
     }
 
+    .input--hidden {
+      display: none;
+    }
+
   </style>
 </head>
 <body>
@@ -177,16 +181,14 @@
       <h2>Get Notified About Our Next Party</h2>
       <h4>*we will <b>never</b> share your email with anyone*</h4>
       
-      <form id="signup-form" action="https://gmail.us15.list-manage.com/subscribe/post?u=272070d92e53075a671cd8fcf&id=aab747b9ca&f_id=00bc92e0f0" method="POST" target="hidden-iframe">
-        
+      <form id="sib-form" method="POST" action="https://d2fdd58e.sibforms.com/serve/MUIFAE8Vrj85rMcXC3sDXfp374lWxst71GzPrGpg7uetefPBvh7zFVGpTSwkDGf1tGCDylqEBiOo9HWVBzZlEQbft4YLel9n9vdJ4QL1ZgSeTTEBNUfCiKIxagoApnr8EnbI3ogO4XW8Hn8F5YMmo_5WTpO52x-RztGL6O9F-W9s00sJEbIjm5iwtB8vLwW_wq9A0Ht3iD5CoeVdNw==">
         <input type="email" name="EMAIL" placeholder="Enter your email" required />
         
-        <!-- Anti-bot honeypot field -->
-        <div style="position: absolute; left: -5000px;" aria-hidden="true">
-          <input type="text" name="b_272070d92e53075a671cd8fcf_aab747b9ca" tabindex="-1" value="">
-        </div>
+        <input type="text" name="email_address_check" value="" class="input--hidden" style="position: absolute; left: -5000px;">
+        <input type="hidden" name="locale" value="en">
+        <input type="hidden" name="html_type" value="simple">
         
-        <button type="submit" id="mc-submit" onClick="trackSignupClick()">Sign Up</button>
+        <button type="submit" onClick="trackSignupClick()">Sign Up</button>
       </form>
       
       <!-- Hidden iframe to catch the response -->
@@ -224,9 +226,9 @@
   }
 </script>
 
-<!-- Mailchimp form script -->
+<!-- Brevo form script -->
 <script>
-  document.getElementById('signup-form').addEventListener('submit', function(e) {
+  document.getElementById('sib-form').addEventListener('submit', function(e) {
     e.preventDefault(); // Prevent immediate form submission
     
     const formDiv = document.querySelector('.form');
