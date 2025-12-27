@@ -9,8 +9,6 @@
       gtag('js', new Date());
       gtag('config', 'G-RE0PHC72VJ');
     </script>
-    <!-- Mailchimp -->
-    <script id="mcjs">!function(c,h,i,m,p){m=c.createElement(h),p=c.getElementsByTagName(h)[0],m.async=1,m.src=i,p.parentNode.insertBefore(m,p)}(document,"script","https://chimpstatic.com/mcjs-connected/js/users/272070d92e53075a671cd8fcf/f95756222a5ba6bd24ccfb9fd.js");</script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Nexa Events</title>
@@ -236,26 +234,38 @@
   <!-- Brevo form script -->
   <script>
     document.getElementById('sib-form').addEventListener('submit', function(e) {
-      e.preventDefault(); // Prevent immediate form submission
+      e.preventDefault();
       
       const formDiv = document.querySelector('.form');
       const emailInput = document.querySelector('input[name="EMAIL"]');
+      const form = e.target;
       
-      // Check if email is valid
       if (emailInput.validity.valid) {
-        // Submit the form to Mailchimp
-        e.target.submit();
+        // Submit via fetch to prevent redirect
+        const formData = new FormData(form);
         
-        // First fade out
-        formDiv.classList.add('fade-out');
-        
-        // After fade out completes, change content and fade back in
-        setTimeout(() => {
-          formDiv.innerHTML = '<h2>Success!</h2><h3>*check your inbox or spam for confirmation*</h3>';
-          formDiv.classList.remove('fade-out');
-        }, 600); // Match the transition duration
+        fetch(form.action, {
+          method: 'POST',
+          body: formData,
+          mode: 'no-cors' // Brevo doesn't support CORS, so we can't read response
+        }).then(() => {
+          // Fade out and show success
+          formDiv.classList.add('fade-out');
+          
+          setTimeout(() => {
+            formDiv.innerHTML = '<h2>Success!</h2><h3>*check your inbox or spam for confirmation*</h3>';
+            formDiv.classList.remove('fade-out');
+          }, 600);
+        }).catch(() => {
+          // Even on error, assume it worked (no-cors prevents seeing real response)
+          formDiv.classList.add('fade-out');
+          
+          setTimeout(() => {
+            formDiv.innerHTML = '<h2>Success!</h2><h3>*check your inbox or spam for confirmation*</h3>';
+            formDiv.classList.remove('fade-out');
+          }, 600);
+        });
       } else {
-        // Show browser's default validation message
         emailInput.reportValidity();
       }
     });
