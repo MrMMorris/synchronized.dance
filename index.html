@@ -23,8 +23,13 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      background: url('assets/background.gif') center/cover no-repeat fixed;
+      background: url('assets/background.jpg') center/cover no-repeat fixed;
       font-family: sans-serif;
+      transition: background-image 0.5s ease-in-out;
+    }
+
+    body.gif-loaded {
+      background: url('assets/background.gif') center/cover no-repeat fixed;
     }
 
     h2 {
@@ -187,6 +192,16 @@
       <!-- Hidden iframe to catch the response -->
       <iframe name="hidden-iframe" style="display:none;"></iframe>
     </div>
+
+    <script>
+      // Preload the GIF
+      const gifImage = new Image();
+      gifImage.src = 'assets/background.gif';
+      
+      gifImage.onload = function() {
+        document.body.classList.add('gif-loaded');
+      };
+</script>
 </body>
 
 <!-- GA tracking for map click -->
