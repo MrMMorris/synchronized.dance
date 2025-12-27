@@ -25,12 +25,6 @@
       justify-content: center;
       background: url('assets/background.gif') center/cover no-repeat fixed;
       font-family: sans-serif;
-      opacity: 0;
-      transition: opacity 0.3s ease-in;
-    }
-
-    body.loaded {
-      opacity: 1;
     }
 
     h2 {
@@ -193,21 +187,6 @@
       <!-- Hidden iframe to catch the response -->
       <iframe name="hidden-iframe" style="display:none;"></iframe>
     </div>
-
-  <script>
-    // Preload background image
-    const bgImage = new Image();
-    bgImage.src = 'assets/background.gif';
-    
-    bgImage.onload = function() {
-      document.body.classList.add('loaded');
-    };
-    
-    // Fallback in case image fails to load
-    setTimeout(function() {
-      document.body.classList.add('loaded');
-    }, 3000); // Show content after 3 seconds regardless
-  </script>
 </body>
 
 <!-- GA tracking for map click -->
