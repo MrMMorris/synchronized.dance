@@ -9,4 +9,4 @@
 // copy the Web App URL (it should end in /exec, not /dev).
 // ============================================================================
 
-window.WEB_APP_URL = 'PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE';
+window.WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyGjcOc-GEDjtzzZoWuQPhteJfSRTDImAyCCYfz5vNxUkygm4IGAW-bIBRuwS2etqh0Zg/exec';
