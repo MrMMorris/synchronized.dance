@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
+<script src="config.js"></script>
 <style>
   :root {
     --ink: #0a0a0a;
@@ -330,9 +331,9 @@
 
 <script>
   // ======================================================================
-  // CONFIG — paste your Apps Script Web App URL here
+  // WEB_APP_URL is set in config.js (loaded above)
   // ======================================================================
-  const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyGjcOc-GEDjtzzZoWuQPhteJfSRTDImAyCCYfz5vNxUkygm4IGAW-bIBRuwS2etqh0Zg/exec';
+  const WEB_APP_URL = window.WEB_APP_URL;
 
   const main = document.getElementById('main');
   const staffNameEl = document.getElementById('staffName');
@@ -376,7 +377,10 @@
   // ======================================================================
   async function boot() {
     if (!WEB_APP_URL || WEB_APP_URL.includes('PASTE_YOUR')) {
-      renderError('Configuration incomplete', 'Edit scanner.html and set WEB_APP_URL to your deployed Apps Script URL.');
+      const msg = WEB_APP_URL === undefined
+        ? 'config.js did not load or does not set window.WEB_APP_URL. Make sure config.js exists alongside scanner.html.'
+        : 'Edit config.js and set WEB_APP_URL to your deployed Apps Script URL.';
+      renderError('Configuration incomplete', msg);
       return;
     }
     if (!token) {
