@@ -7,7 +7,29 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;500;700&family=Fraunces:ital,wght@0,400;0,600;0,800;1,400&display=swap" rel="stylesheet" />
-<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script>
+  // Load QR library with fallback: try jsDelivr, then unpkg, then cdnjs
+  (function loadQR() {
+    const cdns = [
+      'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js',
+      'https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js',
+      'https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js',
+    ];
+    let i = 0;
+    function tryNext() {
+      if (i >= cdns.length) {
+        window.__qrLoadError = 'All CDN sources failed';
+        return;
+      }
+      const s = document.createElement('script');
+      s.src = cdns[i++];
+      s.onload = () => { window.__qrLoaded = true; };
+      s.onerror = tryNext;
+      document.head.appendChild(s);
+    }
+    tryNext();
+  })();
+</script>
 <script src="config.js"></script>
 <style>
   :root {
@@ -591,7 +613,7 @@
     }
   }
 
-  function render(buyerName, tickets) {
+  async function render(buyerName, tickets) {
     const unused = tickets.filter(t => !t.scanned).length;
     const total = tickets.length;
     subtitle.innerHTML = `Issued to <span class="buyer">${escapeHtml(buyerName)}</span>`;
@@ -635,18 +657,53 @@
     `;
     content.innerHTML = html;
 
+    // Wait for the QR library to load (it's loaded in parallel with the page)
+    await waitForQR();
+
     // Generate QR codes
     tickets.forEach((t, idx) => {
       const canvas = document.getElementById('qr-' + idx);
-      if (canvas) {
+      if (!canvas) return;
+      if (typeof QRCode === 'undefined') {
+        renderQRFallback(canvas, t.ticket_id);
+        return;
+      }
+      try {
         QRCode.toCanvas(canvas, t.ticket_id, {
           width: 220,
           margin: 1,
           color: { dark: '#1a1612', light: '#ffffff' },
           errorCorrectionLevel: 'M',
+        }, (err) => {
+          if (err) renderQRFallback(canvas, t.ticket_id, err.message);
         });
+      } catch (e) {
+        renderQRFallback(canvas, t.ticket_id, e.message);
       }
     });
+  }
+
+  function waitForQR() {
+    return new Promise((resolve) => {
+      const start = Date.now();
+      (function check() {
+        if (typeof QRCode !== 'undefined') return resolve();
+        if (window.__qrLoadError || (Date.now() - start > 8000)) return resolve();
+        setTimeout(check, 100);
+      })();
+    });
+  }
+
+  function renderQRFallback(canvas, ticketId, errMsg) {
+    // Replace the canvas with a visible error block plus a remote fallback image
+    const wrap = canvas.parentElement;
+    const fallbackUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=' + encodeURIComponent(ticketId);
+    wrap.innerHTML = `
+      <img src="${fallbackUrl}" alt="QR code" width="220" height="220" style="display:block;"
+           onerror="this.outerHTML='<div style=\\'width:220px;height:220px;background:#fee;border:2px solid #c2410c;display:flex;align-items:center;justify-content:center;text-align:center;padding:12px;font-family:monospace;font-size:11px;color:#c2410c;\\'>QR library failed to load. Show this code to staff: <br/><b>${escapeHtml(ticketId)}</b></div>'"
+      />
+    `;
+    if (errMsg) console.error('QR generation failed:', errMsg);
   }
 
   boot();
