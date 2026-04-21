@@ -8,6 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;500;700&family=Fraunces:ital,wght@0,400;0,600;0,800;1,400&display=swap" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script src="config.js"></script>
 <style>
   :root {
     --ink: #1a1612;
@@ -375,9 +376,9 @@
 
 <script>
   // ======================================================================
-  // CONFIG — paste your Apps Script Web App URL here
+  // WEB_APP_URL is set in config.js (loaded above)
   // ======================================================================
-  const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyGjcOc-GEDjtzzZoWuQPhteJfSRTDImAyCCYfz5vNxUkygm4IGAW-bIBRuwS2etqh0Zg/exec';
+  const WEB_APP_URL = window.WEB_APP_URL;
 
   const subtitle = document.getElementById('subtitle');
   const content = document.getElementById('content');
@@ -533,7 +534,7 @@
   function getDebugHint() {
     // Offer a contextual hint based on what we saw
     if (!debugState.webAppUrl || debugState.webAppUrl.includes('PASTE_YOUR')) {
-      return '<b>Fix:</b> WEB_APP_URL has not been set in tickets.html. Open the file, find the WEB_APP_URL line near the top of the &lt;script&gt; block, and paste your Apps Script /exec URL there.';
+      return '<b>Fix:</b> WEB_APP_URL has not been set in config.js. Open the file and paste your Apps Script /exec URL.';
     }
     if (debugState.webAppUrl && !debugState.webAppUrl.endsWith('/exec')) {
       return '<b>Fix:</b> WEB_APP_URL does not end in /exec. You may have copied the /dev (test) URL instead of the deployed /exec URL. In Apps Script go to Deploy → Manage deployments, and copy the URL shown there.';
@@ -562,7 +563,10 @@
 
   async function boot() {
     if (!WEB_APP_URL || WEB_APP_URL.includes('PASTE_YOUR')) {
-      showError('Not configured', 'WEB_APP_URL has not been set in tickets.html.', true);
+      const msg = WEB_APP_URL === undefined
+        ? 'config.js did not load or does not set window.WEB_APP_URL. Check that config.js exists alongside this file.'
+        : 'WEB_APP_URL has not been set in config.js.';
+      showError('Not configured', msg, true);
       return;
     }
     if (!key) {
