@@ -297,7 +297,62 @@
     body { background: white; padding: 0; }
     body::before { display: none; }
     .instructions { display: none; }
+    .debug-panel { display: none !important; }
     .ticket { page-break-inside: avoid; box-shadow: none; border: 1px solid #000; }
+  }
+
+  /* Debug panel */
+  .debug-panel {
+    margin-top: 30px;
+    padding: 20px;
+    background: #1a1612;
+    color: #a3e635;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    line-height: 1.6;
+    border-radius: 6px;
+    border: 2px solid #1a1612;
+    overflow-x: auto;
+  }
+  .debug-panel h3 {
+    color: #facc15;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed #3a332a;
+  }
+  .debug-row {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 10px;
+    padding: 4px 0;
+  }
+  .debug-row .k { color: #facc15; }
+  .debug-row .v { color: #f5eee0; word-break: break-all; }
+  .debug-row .v.ok { color: #a3e635; }
+  .debug-row .v.bad { color: #fb7185; }
+  .debug-pre {
+    margin-top: 10px;
+    padding: 10px;
+    background: #0a0807;
+    border-radius: 4px;
+    white-space: pre-wrap;
+    word-break: break-all;
+    color: #f5eee0;
+    max-height: 240px;
+    overflow-y: auto;
+  }
+  .debug-hint {
+    margin-top: 12px;
+    padding: 10px;
+    background: #3a2510;
+    border-left: 3px solid #facc15;
+    color: #fde68a;
+    font-size: 11px;
+    line-height: 1.5;
   }
 </style>
 </head>
@@ -322,24 +377,82 @@
   // ======================================================================
   // CONFIG — paste your Apps Script Web App URL here
   // ======================================================================
-  const WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbyGjcOc-GEDjtzzZoWuQPhteJfSRTDImAyCCYfz5vNxUkygm4IGAW-bIBRuwS2etqh0Zg/exec';
+  const WEB_APP_URL = 'PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE';
 
   const subtitle = document.getElementById('subtitle');
   const content = document.getElementById('content');
   const params = new URLSearchParams(window.location.search);
   const key = params.get('k');
 
+  // Debug state — captures everything for the debug panel
+  const debugState = {
+    url: null,
+    key: key,
+    webAppUrl: WEB_APP_URL,
+    startTime: null,
+    endTime: null,
+    error: null,
+    errorType: null,
+    response: null,
+    diagnosticFetch: null,
+  };
+
   function jsonp(url) {
     return new Promise((resolve, reject) => {
+      debugState.url = url;
+      debugState.startTime = Date.now();
       const cbName = 'cb_' + Math.random().toString(36).slice(2);
       const script = document.createElement('script');
-      const timeout = setTimeout(() => { cleanup(); reject(new Error('timeout')); }, 15000);
-      function cleanup() { clearTimeout(timeout); delete window[cbName]; script.remove(); }
+      const timeout = setTimeout(() => {
+        cleanup();
+        const err = new Error('timeout');
+        err.type = 'TIMEOUT';
+        err.detail = 'The server did not respond within 15 seconds.';
+        reject(err);
+      }, 15000);
+      function cleanup() {
+        debugState.endTime = Date.now();
+        clearTimeout(timeout);
+        delete window[cbName];
+        script.remove();
+      }
       window[cbName] = (data) => { cleanup(); resolve(data); };
-      script.onerror = () => { cleanup(); reject(new Error('network')); };
+      script.onerror = (e) => {
+        cleanup();
+        const err = new Error('script load failed');
+        err.type = 'SCRIPT_ERROR';
+        err.detail = 'The <script> tag failed to load. This usually means the URL is wrong, the server returned HTML instead of JavaScript (permissions issue), or the network is blocking the request.';
+        reject(err);
+      };
       script.src = url + (url.includes('?') ? '&' : '?') + 'callback=' + cbName;
       document.body.appendChild(script);
     });
+  }
+
+  // A diagnostic fetch that runs when JSONP fails — tells us what the server is actually returning
+  async function runDiagnostic(url) {
+    try {
+      // First try a no-cors fetch just to see if network reaches it at all
+      const resp = await fetch(url, { method: 'GET', redirect: 'follow', mode: 'cors' });
+      const text = await resp.text();
+      return {
+        reached: true,
+        status: resp.status,
+        statusText: resp.statusText,
+        contentType: resp.headers.get('content-type') || '(none)',
+        bodyPreview: text.slice(0, 500),
+        redirected: resp.redirected,
+        finalUrl: resp.url,
+      };
+    } catch (err) {
+      // CORS block or network failure
+      return {
+        reached: false,
+        error: err.message,
+        errorName: err.name,
+        hint: 'Fetch was blocked — usually CORS. Try opening the URL directly in a new tab to see the raw response.',
+      };
+    }
   }
 
   function escapeHtml(s) {
@@ -347,34 +460,121 @@
     return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   }
 
-  function showError(title, msg) {
+  function showError(title, msg, includeDebug = false) {
     subtitle.textContent = '';
-    content.innerHTML = `
+    let html = `
       <div class="error-state">
         <h2>${escapeHtml(title)}</h2>
         <p>${escapeHtml(msg)}</p>
       </div>
     `;
+    if (includeDebug) {
+      html += renderDebugPanel();
+    }
+    content.innerHTML = html;
+  }
+
+  function renderDebugPanel() {
+    const durationMs = (debugState.endTime && debugState.startTime) ? (debugState.endTime - debugState.startTime) : null;
+
+    const hint = getDebugHint();
+
+    const rows = [
+      ['Page URL', window.location.href, 'v'],
+      ['Key param', debugState.key || '(missing)', debugState.key ? 'v' : 'v bad'],
+      ['WEB_APP_URL', debugState.webAppUrl, debugState.webAppUrl && debugState.webAppUrl.endsWith('/exec') ? 'v ok' : 'v bad'],
+      ['Request URL', debugState.url || '(not yet called)', 'v'],
+      ['Error type', debugState.errorType || '(none)', 'v bad'],
+      ['Error detail', debugState.error || '(none)', 'v bad'],
+      ['Duration', durationMs !== null ? durationMs + 'ms' : '(n/a)', 'v'],
+    ];
+
+    let diagHtml = '';
+    if (debugState.diagnosticFetch) {
+      const d = debugState.diagnosticFetch;
+      if (d.reached) {
+        diagHtml = `
+          <h3 style="margin-top:18px;">Diagnostic fetch</h3>
+          <div class="debug-row"><span class="k">Status</span><span class="v ${d.status === 200 ? 'ok' : 'bad'}">${d.status} ${escapeHtml(d.statusText)}</span></div>
+          <div class="debug-row"><span class="k">Content-Type</span><span class="v">${escapeHtml(d.contentType)}</span></div>
+          <div class="debug-row"><span class="k">Redirected</span><span class="v">${d.redirected ? 'yes → ' + escapeHtml(d.finalUrl) : 'no'}</span></div>
+          <div class="debug-row"><span class="k">Body preview</span><span class="v"></span></div>
+          <div class="debug-pre">${escapeHtml(d.bodyPreview) || '(empty)'}</div>
+        `;
+      } else {
+        diagHtml = `
+          <h3 style="margin-top:18px;">Diagnostic fetch</h3>
+          <div class="debug-row"><span class="k">Result</span><span class="v bad">Blocked (${escapeHtml(d.errorName || 'error')})</span></div>
+          <div class="debug-row"><span class="k">Message</span><span class="v">${escapeHtml(d.error || '')}</span></div>
+          <div class="debug-hint">${escapeHtml(d.hint || '')}</div>
+        `;
+      }
+    }
+
+    return `
+      <div class="debug-panel">
+        <h3>Debug info</h3>
+        ${rows.map(([k, v, cls]) => `<div class="debug-row"><span class="k">${escapeHtml(k)}</span><span class="${cls}">${escapeHtml(String(v))}</span></div>`).join('')}
+        ${diagHtml}
+        ${hint ? `<div class="debug-hint">${hint}</div>` : ''}
+      </div>
+    `;
+  }
+
+  function getDebugHint() {
+    // Offer a contextual hint based on what we saw
+    if (!debugState.webAppUrl || debugState.webAppUrl.includes('PASTE_YOUR')) {
+      return '<b>Fix:</b> WEB_APP_URL has not been set in tickets.html. Open the file, find the WEB_APP_URL line near the top of the &lt;script&gt; block, and paste your Apps Script /exec URL there.';
+    }
+    if (debugState.webAppUrl && !debugState.webAppUrl.endsWith('/exec')) {
+      return '<b>Fix:</b> WEB_APP_URL does not end in /exec. You may have copied the /dev (test) URL instead of the deployed /exec URL. In Apps Script go to Deploy → Manage deployments, and copy the URL shown there.';
+    }
+    if (debugState.diagnosticFetch && debugState.diagnosticFetch.reached) {
+      const d = debugState.diagnosticFetch;
+      const body = (d.bodyPreview || '').toLowerCase();
+      if (d.redirected && (d.finalUrl || '').includes('accounts.google.com')) {
+        return '<b>Fix:</b> The request is being redirected to a Google login page. In Apps Script → Manage deployments → edit your deployment, set "Who has access" to "Anyone" (not "Anyone with Google account").';
+      }
+      if (body.includes('<!doctype') || body.includes('<html')) {
+        return '<b>Fix:</b> Apps Script returned an HTML page instead of JSON. Almost always a permissions issue — set "Who has access" to "Anyone" in your deployment settings.';
+      }
+      if (d.status === 404) {
+        return '<b>Fix:</b> The URL returned 404. The deployment may have been deleted or the URL has a typo. Check Apps Script → Manage deployments.';
+      }
+      if (body.includes('authorization') || body.includes('exception')) {
+        return '<b>Fix:</b> Apps Script returned an error. Check the body preview above for details. Also make sure you ran First-time setup from the Ticket System menu.';
+      }
+    }
+    if (debugState.errorType === 'SCRIPT_ERROR') {
+      return '<b>Likely fix:</b> The Apps Script URL returned HTML instead of JavaScript (caused by wrong permissions), or the URL is invalid. Check Manage deployments → "Who has access" is "Anyone", and that the URL in tickets.html exactly matches the deployment URL.';
+    }
+    return '';
   }
 
   async function boot() {
     if (!WEB_APP_URL || WEB_APP_URL.includes('PASTE_YOUR')) {
-      showError('Not configured', 'This page has not been configured yet. Please contact the organizer.');
+      showError('Not configured', 'WEB_APP_URL has not been set in tickets.html.', true);
       return;
     }
     if (!key) {
-      showError('Invalid link', 'This ticket link is missing its access key.');
+      showError('Invalid link', 'This ticket link is missing its access key (?k=...).', true);
       return;
     }
+    const requestUrl = `${WEB_APP_URL}?action=get_tickets&key=${encodeURIComponent(key)}`;
     try {
-      const resp = await jsonp(`${WEB_APP_URL}?action=get_tickets&key=${encodeURIComponent(key)}`);
+      const resp = await jsonp(requestUrl);
+      debugState.response = resp;
       if (!resp.ok) {
-        showError('Not found', resp.error || 'Could not find tickets for this link.');
+        showError('Not found', resp.error || 'Could not find tickets for this link.', true);
         return;
       }
       render(resp.buyer_name, resp.tickets);
     } catch (err) {
-      showError('Connection error', 'Could not load your tickets. Please try again in a moment.');
+      debugState.error = err.detail || err.message || String(err);
+      debugState.errorType = err.type || 'UNKNOWN';
+      // Run a diagnostic fetch to get more info about what the server is actually returning
+      debugState.diagnosticFetch = await runDiagnostic(requestUrl);
+      showError('Connection error', 'Could not load your tickets. See debug info below.', true);
     }
   }
 
