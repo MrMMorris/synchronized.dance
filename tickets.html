@@ -3,12 +3,11 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Your Tickets</title>
+<title>Your Tickets — Labour Day Beach Party</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=JetBrains+Mono:wght@400;500;700&family=Fraunces:ital,wght@0,400;0,600;0,800;1,400&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Caveat:wght@600;700&family=DM+Mono:wght@400;500&family=Archivo+Black&display=swap" rel="stylesheet" />
 <script>
-  // Load QR library with fallback: try jsDelivr, then unpkg, then cdnjs
   (function loadQR() {
     const cdns = [
       'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js',
@@ -17,10 +16,7 @@
     ];
     let i = 0;
     function tryNext() {
-      if (i >= cdns.length) {
-        window.__qrLoadError = 'All CDN sources failed';
-        return;
-      }
+      if (i >= cdns.length) { window.__qrLoadError = 'All CDN sources failed'; return; }
       const s = document.createElement('script');
       s.src = cdns[i++];
       s.onload = () => { window.__qrLoaded = true; };
@@ -33,313 +29,362 @@
 <script src="config.js"></script>
 <style>
   :root {
-    --ink: #1a1612;
-    --paper: #f5eee0;
-    --paper-dim: #ece3d0;
-    --accent: #c2410c;
-    --gold: #b8860b;
-    --muted: #8a7e6a;
+    --orange-1: #ff6a1a;
+    --orange-2: #ff3d00;
+    --orange-3: #ffb347;
+    --lime: #c6ff3a;
+    --purple: #c89df0;
+    --ink: #0a0a0a;
+    --paper: #fff7e8;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body {
-    background: var(--paper);
+    background: var(--orange-2);
     color: var(--ink);
-    font-family: 'Fraunces', serif;
+    font-family: 'DM Mono', monospace;
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
   }
   body {
-    padding: 24px 16px 60px;
-    background-image:
-      radial-gradient(circle at 20% 30%, rgba(194, 65, 12, 0.04) 0, transparent 50%),
-      radial-gradient(circle at 80% 70%, rgba(184, 134, 11, 0.04) 0, transparent 50%);
+    background:
+      radial-gradient(ellipse at top right, rgba(255, 200, 80, 0.5), transparent 60%),
+      radial-gradient(ellipse at bottom left, rgba(255, 50, 0, 0.6), transparent 60%),
+      linear-gradient(180deg, var(--orange-1) 0%, var(--orange-2) 100%);
+    padding: 20px 14px 60px;
+    overflow-x: hidden;
   }
   body::before {
     content: '';
     position: fixed;
-    inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.06 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    top: -40px; left: -40px;
+    width: 240px; height: 240px;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M100 180 Q 90 100 30 50 M100 180 Q 110 100 170 50 M100 180 Q 100 90 100 20 M100 180 Q 70 120 10 100 M100 180 Q 130 120 190 100' stroke='%230a0a0a' stroke-width='3' fill='none' opacity='0.15'/%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
     pointer-events: none;
+    transform: rotate(-30deg);
     z-index: 0;
-    opacity: 0.6;
   }
-  .container {
-    max-width: 480px;
-    margin: 0 auto;
-    position: relative;
-    z-index: 1;
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -60px; right: -60px;
+    width: 280px; height: 280px;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M100 180 Q 90 100 30 50 M100 180 Q 110 100 170 50 M100 180 Q 100 90 100 20 M100 180 Q 70 120 10 100 M100 180 Q 130 120 190 100' stroke='%230a0a0a' stroke-width='3' fill='none' opacity='0.15'/%3E%3C/svg%3E");
+    background-size: contain;
+    background-repeat: no-repeat;
+    pointer-events: none;
+    transform: rotate(150deg);
+    z-index: 0;
   }
-
-  header {
-    text-align: center;
-    margin-bottom: 32px;
-    padding-bottom: 24px;
-    border-bottom: 1px solid var(--ink);
-    position: relative;
-  }
-  header::after {
-    content: '✦';
-    position: absolute;
-    bottom: -10px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: var(--paper);
-    padding: 0 12px;
-    color: var(--gold);
-    font-size: 16px;
-  }
-  .brand {
-    font-family: 'JetBrains Mono', monospace;
+  .container { max-width: 480px; margin: 0 auto; position: relative; z-index: 1; }
+  header { text-align: center; margin-bottom: 28px; padding: 24px 12px 20px; }
+  .event-badge {
+    display: inline-block;
+    background: var(--ink);
+    color: var(--orange-3);
+    padding: 6px 14px;
+    font-family: 'Archivo Black', sans-serif;
     font-size: 10px;
-    letter-spacing: 4px;
+    letter-spacing: 3px;
     text-transform: uppercase;
-    color: var(--muted);
-    margin-bottom: 12px;
+    transform: rotate(-2deg);
+    margin-bottom: 18px;
   }
   h1 {
-    font-family: 'Bebas Neue', sans-serif;
+    font-family: 'Bowlby One', sans-serif;
     font-size: 56px;
-    line-height: 0.9;
-    letter-spacing: 2px;
-    margin-bottom: 8px;
+    line-height: 0.85;
+    letter-spacing: -1px;
+    color: var(--ink);
+    text-transform: uppercase;
+  }
+  h1 .tickets {
+    display: inline-block;
+    background: var(--lime);
+    padding: 4px 16px 8px;
+    transform: rotate(-3deg);
+    margin-top: 6px;
+    box-shadow: 4px 4px 0 var(--ink);
   }
   .subtitle {
-    font-style: italic;
-    font-size: 18px;
-    color: var(--muted);
+    margin-top: 18px;
+    font-family: 'Caveat', cursive;
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--ink);
   }
   .buyer {
-    font-weight: 600;
-    color: var(--accent);
-    font-style: normal;
+    background: var(--purple);
+    padding: 0 8px;
+    display: inline-block;
+    transform: rotate(-1deg);
   }
-
+  .meta-wrap { text-align: center; margin-bottom: 24px; }
   .meta {
-    text-align: center;
-    margin-bottom: 32px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 11px;
     letter-spacing: 2px;
     text-transform: uppercase;
-    color: var(--muted);
-  }
-
-  /* Ticket card */
-  .ticket {
-    background: white;
-    margin-bottom: 20px;
-    position: relative;
-    box-shadow:
-      0 1px 0 rgba(0,0,0,0.04),
-      0 12px 24px -12px rgba(0,0,0,0.15);
-    border-radius: 4px;
-    overflow: hidden;
-  }
-  .ticket::before,
-  .ticket::after {
-    content: '';
-    position: absolute;
-    top: 50%;
-    width: 20px;
-    height: 20px;
+    color: var(--ink);
     background: var(--paper);
-    border-radius: 50%;
-    transform: translateY(-50%);
+    display: inline-block;
+    padding: 6px 14px;
+    transform: rotate(0.5deg);
+    border: 2px solid var(--ink);
+    box-shadow: 3px 3px 0 var(--ink);
   }
-  .ticket::before { left: -10px; }
-  .ticket::after { right: -10px; }
-
+  .ticket {
+    background: var(--paper);
+    margin-bottom: 28px;
+    position: relative;
+    border: 3px solid var(--ink);
+    box-shadow: 8px 8px 0 var(--ink);
+    transform: rotate(-0.4deg);
+  }
+  .ticket:nth-child(even) {
+    transform: rotate(0.6deg);
+    box-shadow: -8px 8px 0 var(--ink);
+  }
   .ticket-top {
-    padding: 20px 24px 16px;
     background: var(--ink);
-    color: var(--paper);
+    color: var(--orange-3);
+    padding: 14px 18px;
     display: flex;
     justify-content: space-between;
     align-items: center;
   }
   .ticket-number {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 28px;
-    letter-spacing: 2px;
-    line-height: 1;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 22px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
   }
+  .ticket-number .num { color: var(--lime); }
   .ticket-type {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 10px;
     letter-spacing: 2px;
     text-transform: uppercase;
+    background: var(--lime);
+    color: var(--ink);
     padding: 4px 10px;
-    border: 1px solid var(--paper);
-    border-radius: 2px;
+    transform: rotate(2deg);
   }
-
   .ticket-body {
-    padding: 28px 24px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
+    padding: 28px 20px 20px;
     text-align: center;
-    border-bottom: 2px dashed rgba(0,0,0,0.15);
     position: relative;
   }
-
+  .ticket-body::before, .ticket-body::after {
+    content: '✦';
+    position: absolute;
+    top: 0;
+    font-size: 18px;
+    color: var(--orange-2);
+    background: var(--paper);
+    padding: 0 6px;
+    transform: translateY(-50%);
+  }
+  .ticket-body::before { left: 12px; }
+  .ticket-body::after { right: 12px; }
   .qr-wrap {
     background: white;
-    padding: 8px;
-    border-radius: 4px;
-    margin-bottom: 16px;
+    padding: 10px;
+    border: 3px solid var(--ink);
+    margin: 0 auto 18px;
+    width: 240px;
+    height: 240px;
     position: relative;
+    box-shadow: 4px 4px 0 var(--orange-2);
   }
-  .qr-wrap canvas {
+  .qr-wrap canvas, .qr-wrap img {
     display: block;
     width: 220px !important;
     height: 220px !important;
   }
-  .qr-wrap.used {
-    opacity: 0.25;
-    filter: grayscale(1);
-  }
-  .used-badge {
+  .qr-wrap.used { opacity: 0.25; filter: grayscale(1); }
+  .used-stamp {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%) rotate(-15deg);
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 42px;
-    letter-spacing: 4px;
-    color: var(--accent);
-    border: 3px solid var(--accent);
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) rotate(-12deg);
+    font-family: 'Bowlby One', sans-serif;
+    font-size: 44px;
+    color: var(--orange-2);
+    background: rgba(255, 247, 232, 0.9);
+    border: 4px solid var(--orange-2);
     padding: 6px 18px;
-    background: rgba(245, 238, 224, 0.9);
+    letter-spacing: 3px;
     pointer-events: none;
     display: none;
   }
-  .ticket.used .used-badge { display: block; }
-
+  .ticket.used .used-stamp { display: block; }
   .ticket-label {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 9px;
-    letter-spacing: 3px;
+    letter-spacing: 2.5px;
     text-transform: uppercase;
-    color: var(--muted);
+    color: var(--ink);
+    opacity: 0.6;
     margin-bottom: 4px;
   }
   .ticket-code {
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 13px;
-    letter-spacing: 1px;
     word-break: break-all;
     padding: 0 12px;
+    color: var(--ink);
   }
-
   .ticket-foot {
-    padding: 16px 24px;
+    padding: 14px 18px;
+    border-top: 2px dashed var(--ink);
+    background: linear-gradient(90deg, var(--orange-3) 0%, var(--paper) 100%);
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 11px;
     letter-spacing: 1.5px;
     text-transform: uppercase;
-    color: var(--muted);
   }
-  .status-dot {
-    display: inline-block;
-    width: 8px;
-    height: 8px;
+  .status-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--lime);
+    border: 2px solid var(--ink);
+    padding: 4px 10px;
+  }
+  .status-pill::before {
+    content: '';
+    width: 8px; height: 8px;
+    background: var(--ink);
     border-radius: 50%;
-    background: #16a34a;
-    margin-right: 6px;
-    vertical-align: middle;
   }
-  .ticket.used .status-dot { background: var(--accent); }
-
-  /* Instructions card */
-  .instructions {
-    background: var(--paper-dim);
-    border: 1px solid var(--ink);
-    border-radius: 4px;
-    padding: 24px;
+  .ticket.used .status-pill { background: var(--purple); }
+  .ticket.used .status-pill::before { background: var(--orange-2); }
+  .event-info {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 24px 20px;
     margin-top: 32px;
-    font-size: 15px;
-    line-height: 1.7;
+    border: 3px solid var(--ink);
+    box-shadow: -6px 6px 0 var(--lime);
+    transform: rotate(-0.5deg);
+  }
+  .event-info h3 {
+    font-family: 'Bowlby One', sans-serif;
+    font-size: 22px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--lime);
+    margin-bottom: 14px;
+  }
+  .event-info-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 6px 0;
+    border-bottom: 1px dashed rgba(255, 247, 232, 0.2);
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    gap: 16px;
+  }
+  .event-info-row:last-child { border-bottom: 0; }
+  .event-info-row .k {
+    color: var(--orange-3);
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    font-size: 10px;
+    flex-shrink: 0;
+  }
+  .event-info-row .v {
+    color: var(--paper);
+    text-align: right;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+  .instructions {
+    background: var(--paper);
+    border: 3px solid var(--ink);
+    padding: 22px 20px;
+    margin-top: 24px;
+    box-shadow: 6px 6px 0 var(--ink);
   }
   .instructions h3 {
-    font-family: 'Bebas Neue', sans-serif;
-    font-size: 22px;
-    letter-spacing: 2px;
+    font-family: 'Archivo Black', sans-serif;
+    font-size: 16px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
     margin-bottom: 12px;
+    background: var(--lime);
+    display: inline-block;
+    padding: 4px 10px;
+    transform: rotate(-1deg);
   }
   .instructions ol {
-    padding-left: 20px;
+    padding-left: 22px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--ink);
   }
   .instructions li {
-    margin-bottom: 8px;
+    margin-bottom: 6px;
+    font-family: 'DM Mono', monospace;
   }
-
-  .error-state {
-    text-align: center;
-    padding: 60px 20px;
-  }
+  .error-state { text-align: center; padding: 60px 20px; }
   .error-state h2 {
-    font-family: 'Bebas Neue', sans-serif;
+    font-family: 'Bowlby One', sans-serif;
     font-size: 56px;
-    letter-spacing: 2px;
-    color: var(--accent);
-    margin-bottom: 12px;
+    letter-spacing: 1px;
+    color: var(--ink);
+    background: var(--lime);
+    display: inline-block;
+    padding: 8px 16px;
+    transform: rotate(-2deg);
+    margin-bottom: 16px;
   }
   .error-state p {
-    color: var(--muted);
-    font-style: italic;
-    font-size: 16px;
+    color: var(--ink);
+    font-family: 'Caveat', cursive;
+    font-size: 22px;
+    font-weight: 700;
   }
-
   .loading {
     text-align: center;
     padding: 80px 20px;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 12px;
     letter-spacing: 3px;
     text-transform: uppercase;
-    color: var(--muted);
+    color: var(--ink);
   }
-
   footer {
     margin-top: 40px;
-    padding-top: 20px;
-    border-top: 1px solid var(--ink);
     text-align: center;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 10px;
     letter-spacing: 2px;
     text-transform: uppercase;
-    color: var(--muted);
+    color: var(--ink);
+    opacity: 0.7;
   }
-
-  @media print {
-    body { background: white; padding: 0; }
-    body::before { display: none; }
-    .instructions { display: none; }
-    .debug-panel { display: none !important; }
-    .ticket { page-break-inside: avoid; box-shadow: none; border: 1px solid #000; }
-  }
-
-  /* Debug panel */
   .debug-panel {
     margin-top: 30px;
     padding: 20px;
     background: #1a1612;
     color: #a3e635;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 11px;
     line-height: 1.6;
     border-radius: 6px;
-    border: 2px solid #1a1612;
+    border: 3px solid var(--ink);
+    box-shadow: 6px 6px 0 var(--ink);
     overflow-x: auto;
+    text-align: left;
   }
   .debug-panel h3 {
     color: #facc15;
-    font-family: 'JetBrains Mono', monospace;
+    font-family: 'DM Mono', monospace;
     font-size: 12px;
     letter-spacing: 2px;
     text-transform: uppercase;
@@ -377,59 +422,43 @@
     font-size: 11px;
     line-height: 1.5;
   }
+  @media print {
+    body { background: white; padding: 0; }
+    body::before, body::after { display: none; }
+    .instructions, .event-info, .debug-panel { display: none !important; }
+    .ticket { page-break-inside: avoid; box-shadow: none; transform: none; border: 2px solid #000; }
+  }
 </style>
 </head>
 <body>
 <div class="container">
   <header>
-    <div class="brand">Admit One • Non-Transferable</div>
-    <h1>Your Tickets</h1>
+    <div class="event-badge">★ Nexa Events ★</div>
+    <h1>Labour Day<br/>Beach<span class="tickets">Tickets</span></h1>
     <div class="subtitle" id="subtitle">Loading…</div>
   </header>
-
-  <div id="content">
-    <div class="loading">Fetching your tickets…</div>
-  </div>
-
-  <footer>
-    Present each QR code to staff at entry ✦ One scan per ticket
-  </footer>
+  <div id="content"><div class="loading">Fetching your tickets…</div></div>
+  <footer>May 1 ✦ Northern Cove Penang ✦ 4PM–12AM</footer>
 </div>
-
 <script>
-  // ======================================================================
-  // WEB_APP_URL is set in config.js (loaded above)
-  // ======================================================================
   const WEB_APP_URL = window.WEB_APP_URL;
-
   const subtitle = document.getElementById('subtitle');
   const content = document.getElementById('content');
   const params = new URLSearchParams(window.location.search);
   const key = params.get('k');
 
-  // Debug state — captures everything for the debug panel
   const debugState = {
-    url: null,
-    key: key,
-    webAppUrl: WEB_APP_URL,
-    startTime: null,
-    endTime: null,
-    error: null,
-    errorType: null,
-    response: null,
-    diagnosticFetch: null,
+    url: null, key: key, webAppUrl: WEB_APP_URL,
+    startTime: null, endTime: null, error: null, errorType: null,
+    response: null, diagnosticFetch: null,
   };
 
-  function jsonp(url) {
-    // Despite the name — Apps Script returns proper JSON with CORS headers,
-    // so a regular fetch() works and avoids the "script tag tried to execute JSON" problem.
+  function fetchJson(url) {
     return new Promise(async (resolve, reject) => {
       debugState.url = url;
       debugState.startTime = Date.now();
       const controller = new AbortController();
-      const timeout = setTimeout(() => {
-        controller.abort();
-      }, 15000);
+      const timeout = setTimeout(() => controller.abort(), 15000);
       try {
         const resp = await fetch(url, { method: 'GET', redirect: 'follow', signal: controller.signal });
         clearTimeout(timeout);
@@ -446,25 +475,16 @@
         clearTimeout(timeout);
         debugState.endTime = Date.now();
         const err = new Error(e.message || 'fetch failed');
-        if (e.name === 'AbortError') {
-          err.type = 'TIMEOUT';
-          err.detail = 'The server did not respond within 15 seconds.';
-        } else if (e.name === 'SyntaxError') {
-          err.type = 'BAD_JSON';
-          err.detail = 'Server response was not valid JSON: ' + e.message;
-        } else {
-          err.type = 'FETCH_ERROR';
-          err.detail = e.message || String(e);
-        }
+        if (e.name === 'AbortError') { err.type = 'TIMEOUT'; err.detail = 'Server did not respond within 15 seconds.'; }
+        else if (e.name === 'SyntaxError') { err.type = 'BAD_JSON'; err.detail = 'Server response was not valid JSON: ' + e.message; }
+        else { err.type = 'FETCH_ERROR'; err.detail = e.message || String(e); }
         reject(err);
       }
     });
   }
 
-  // A diagnostic fetch that runs when JSONP fails — tells us what the server is actually returning
   async function runDiagnostic(url) {
     try {
-      // First try a no-cors fetch just to see if network reaches it at all
       const resp = await fetch(url, { method: 'GET', redirect: 'follow', mode: 'cors' });
       const text = await resp.text();
       return {
@@ -477,13 +497,7 @@
         finalUrl: resp.url,
       };
     } catch (err) {
-      // CORS block or network failure
-      return {
-        reached: false,
-        error: err.message,
-        errorName: err.name,
-        hint: 'Fetch was blocked — usually CORS. Try opening the URL directly in a new tab to see the raw response.',
-      };
+      return { reached: false, error: err.message, errorName: err.name, hint: 'Fetch was blocked — usually CORS.' };
     }
   }
 
@@ -494,23 +508,14 @@
 
   function showError(title, msg, includeDebug = false) {
     subtitle.textContent = '';
-    let html = `
-      <div class="error-state">
-        <h2>${escapeHtml(title)}</h2>
-        <p>${escapeHtml(msg)}</p>
-      </div>
-    `;
-    if (includeDebug) {
-      html += renderDebugPanel();
-    }
+    let html = `<div class="error-state"><h2>${escapeHtml(title)}</h2><p>${escapeHtml(msg)}</p></div>`;
+    if (includeDebug) html += renderDebugPanel();
     content.innerHTML = html;
   }
 
   function renderDebugPanel() {
     const durationMs = (debugState.endTime && debugState.startTime) ? (debugState.endTime - debugState.startTime) : null;
-
     const hint = getDebugHint();
-
     const rows = [
       ['Page URL', window.location.href, 'v'],
       ['Key param', debugState.key || '(missing)', debugState.key ? 'v' : 'v bad'],
@@ -520,7 +525,6 @@
       ['Error detail', debugState.error || '(none)', 'v bad'],
       ['Duration', durationMs !== null ? durationMs + 'ms' : '(n/a)', 'v'],
     ];
-
     let diagHtml = '';
     if (debugState.diagnosticFetch) {
       const d = debugState.diagnosticFetch;
@@ -542,145 +546,56 @@
         `;
       }
     }
-
-    return `
-      <div class="debug-panel">
-        <h3>Debug info</h3>
-        ${rows.map(([k, v, cls]) => `<div class="debug-row"><span class="k">${escapeHtml(k)}</span><span class="${cls}">${escapeHtml(String(v))}</span></div>`).join('')}
-        ${diagHtml}
-        ${hint ? `<div class="debug-hint">${hint}</div>` : ''}
-      </div>
-    `;
+    return `<div class="debug-panel"><h3>Debug info</h3>${rows.map(([k, v, cls]) => `<div class="debug-row"><span class="k">${escapeHtml(k)}</span><span class="${cls}">${escapeHtml(String(v))}</span></div>`).join('')}${diagHtml}${hint ? `<div class="debug-hint">${hint}</div>` : ''}</div>`;
   }
 
   function getDebugHint() {
-    // Offer a contextual hint based on what we saw
     if (!debugState.webAppUrl || debugState.webAppUrl.includes('PASTE_YOUR')) {
-      return '<b>Fix:</b> WEB_APP_URL has not been set in config.js. Open the file and paste your Apps Script /exec URL.';
+      return '<b>Fix:</b> WEB_APP_URL has not been set in config.js.';
     }
     if (debugState.webAppUrl && !debugState.webAppUrl.endsWith('/exec')) {
-      return '<b>Fix:</b> WEB_APP_URL does not end in /exec. You may have copied the /dev (test) URL instead of the deployed /exec URL. In Apps Script go to Deploy → Manage deployments, and copy the URL shown there.';
+      return '<b>Fix:</b> WEB_APP_URL does not end in /exec.';
     }
     if (debugState.diagnosticFetch && debugState.diagnosticFetch.reached) {
       const d = debugState.diagnosticFetch;
       const body = (d.bodyPreview || '').toLowerCase();
       if (d.redirected && (d.finalUrl || '').includes('accounts.google.com')) {
-        return '<b>Fix:</b> The request is being redirected to a Google login page. In Apps Script → Manage deployments → edit your deployment, set "Who has access" to "Anyone" (not "Anyone with Google account").';
+        return '<b>Fix:</b> Request redirected to Google login. Set "Who has access" to "Anyone" on your deployment.';
       }
       if (body.includes('<!doctype') || body.includes('<html')) {
-        return '<b>Fix:</b> Apps Script returned an HTML page instead of JSON. Almost always a permissions issue — set "Who has access" to "Anyone" in your deployment settings.';
+        return '<b>Fix:</b> Apps Script returned HTML instead of JSON — likely a permissions issue.';
       }
       if (d.status === 404) {
-        return '<b>Fix:</b> The URL returned 404. The deployment may have been deleted or the URL has a typo. Check Apps Script → Manage deployments.';
+        return '<b>Fix:</b> URL returned 404. Check Manage deployments.';
       }
-      if (body.includes('authorization') || body.includes('exception')) {
-        return '<b>Fix:</b> Apps Script returned an error. Check the body preview above for details. Also make sure you ran First-time setup from the Ticket System menu.';
-      }
-    }
-    if (debugState.errorType === 'SCRIPT_ERROR') {
-      return '<b>Likely fix:</b> The Apps Script URL returned HTML instead of JavaScript (caused by wrong permissions), or the URL is invalid. Check Manage deployments → "Who has access" is "Anyone", and that the URL in tickets.html exactly matches the deployment URL.';
     }
     return '';
   }
 
   async function boot() {
     if (!WEB_APP_URL || WEB_APP_URL.includes('PASTE_YOUR')) {
-      const msg = WEB_APP_URL === undefined
-        ? 'config.js did not load or does not set window.WEB_APP_URL. Check that config.js exists alongside this file.'
-        : 'WEB_APP_URL has not been set in config.js.';
-      showError('Not configured', msg, true);
+      showError('Not configured', 'WEB_APP_URL has not been set in config.js.', true);
       return;
     }
     if (!key) {
-      showError('Invalid link', 'This ticket link is missing its access key (?k=...).', true);
+      showError('Invalid link', 'This ticket link is missing its access key.', true);
       return;
     }
     const requestUrl = `${WEB_APP_URL}?action=get_tickets&key=${encodeURIComponent(key)}`;
     try {
-      const resp = await jsonp(requestUrl);
+      const resp = await fetchJson(requestUrl);
       debugState.response = resp;
       if (!resp.ok) {
-        showError('Not found', resp.error || 'Could not find tickets for this link.', true);
+        showError('Not Found', resp.error || 'Could not find tickets for this link.', true);
         return;
       }
-      render(resp.buyer_name, resp.tickets);
+      await render(resp.buyer_name, resp.tickets);
     } catch (err) {
       debugState.error = err.detail || err.message || String(err);
       debugState.errorType = err.type || 'UNKNOWN';
-      // Run a diagnostic fetch to get more info about what the server is actually returning
       debugState.diagnosticFetch = await runDiagnostic(requestUrl);
-      showError('Connection error', 'Could not load your tickets. See debug info below.', true);
+      showError('Connection Error', 'Could not load your tickets. See debug info below.', true);
     }
-  }
-
-  async function render(buyerName, tickets) {
-    const unused = tickets.filter(t => !t.scanned).length;
-    const total = tickets.length;
-    subtitle.innerHTML = `Issued to <span class="buyer">${escapeHtml(buyerName)}</span>`;
-
-    let html = `
-      <div class="meta">${unused} of ${total} unused ✦ ${total} ticket${total === 1 ? '' : 's'} total</div>
-    `;
-    tickets.forEach((t, idx) => {
-      const num = String(idx + 1).padStart(2, '0');
-      const totalStr = String(tickets.length).padStart(2, '0');
-      html += `
-        <div class="ticket ${t.scanned ? 'used' : ''}">
-          <div class="ticket-top">
-            <div class="ticket-number">Ticket ${num} / ${totalStr}</div>
-            <div class="ticket-type">${escapeHtml(t.ticket_type || 'General')}</div>
-          </div>
-          <div class="ticket-body">
-            <div class="qr-wrap ${t.scanned ? 'used' : ''}">
-              <canvas id="qr-${idx}"></canvas>
-            </div>
-            <div class="used-badge">USED</div>
-            <div class="ticket-label">Ticket ID</div>
-            <div class="ticket-code">${escapeHtml(t.ticket_id)}</div>
-          </div>
-          <div class="ticket-foot">
-            <span><span class="status-dot"></span>${t.scanned ? 'Scanned' : 'Valid'}</span>
-            <span>Admits 1</span>
-          </div>
-        </div>
-      `;
-    });
-    html += `
-      <div class="instructions">
-        <h3>How to use</h3>
-        <ol>
-          <li>Save this page to your home screen or bookmark it.</li>
-          <li>At the door, show each QR code to staff — one per guest.</li>
-          <li>Each code can only be scanned once; keep this page safe.</li>
-        </ol>
-      </div>
-    `;
-    content.innerHTML = html;
-
-    // Wait for the QR library to load (it's loaded in parallel with the page)
-    await waitForQR();
-
-    // Generate QR codes
-    tickets.forEach((t, idx) => {
-      const canvas = document.getElementById('qr-' + idx);
-      if (!canvas) return;
-      if (typeof QRCode === 'undefined') {
-        renderQRFallback(canvas, t.ticket_id);
-        return;
-      }
-      try {
-        QRCode.toCanvas(canvas, t.ticket_id, {
-          width: 220,
-          margin: 1,
-          color: { dark: '#1a1612', light: '#ffffff' },
-          errorCorrectionLevel: 'M',
-        }, (err) => {
-          if (err) renderQRFallback(canvas, t.ticket_id, err.message);
-        });
-      } catch (e) {
-        renderQRFallback(canvas, t.ticket_id, e.message);
-      }
-    });
   }
 
   function waitForQR() {
@@ -695,15 +610,77 @@
   }
 
   function renderQRFallback(canvas, ticketId, errMsg) {
-    // Replace the canvas with a visible error block plus a remote fallback image
     const wrap = canvas.parentElement;
     const fallbackUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=' + encodeURIComponent(ticketId);
-    wrap.innerHTML = `
-      <img src="${fallbackUrl}" alt="QR code" width="220" height="220" style="display:block;"
-           onerror="this.outerHTML='<div style=\\'width:220px;height:220px;background:#fee;border:2px solid #c2410c;display:flex;align-items:center;justify-content:center;text-align:center;padding:12px;font-family:monospace;font-size:11px;color:#c2410c;\\'>QR library failed to load. Show this code to staff: <br/><b>${escapeHtml(ticketId)}</b></div>'"
-      />
-    `;
+    wrap.innerHTML = `<img src="${fallbackUrl}" alt="QR" width="220" height="220" style="display:block;" onerror="this.outerHTML='<div style=\\'width:220px;height:220px;background:#fee;border:2px solid #ff3d00;display:flex;align-items:center;justify-content:center;text-align:center;padding:12px;font-family:monospace;font-size:11px;color:#ff3d00;\\'>QR library failed. Show staff: <br/><b>${escapeHtml(ticketId)}</b></div>'" />`;
     if (errMsg) console.error('QR generation failed:', errMsg);
+  }
+
+  async function render(buyerName, tickets) {
+    const unused = tickets.filter(t => !t.scanned).length;
+    const total = tickets.length;
+    subtitle.innerHTML = `Issued to <span class="buyer">${escapeHtml(buyerName)}</span>`;
+
+    let html = `<div class="meta-wrap"><div class="meta">${unused}/${total} unused ✦ ${total} ticket${total === 1 ? '' : 's'}</div></div>`;
+
+    tickets.forEach((t, idx) => {
+      const num = String(idx + 1).padStart(2, '0');
+      const totalStr = String(tickets.length).padStart(2, '0');
+      html += `
+        <div class="ticket ${t.scanned ? 'used' : ''}">
+          <div class="ticket-top">
+            <div class="ticket-number">Ticket <span class="num">${num}/${totalStr}</span></div>
+            <div class="ticket-type">${escapeHtml(t.ticket_type || 'General')}</div>
+          </div>
+          <div class="ticket-body">
+            <div class="qr-wrap ${t.scanned ? 'used' : ''}">
+              <canvas id="qr-${idx}"></canvas>
+            </div>
+            <div class="used-stamp">USED</div>
+            <div class="ticket-label">Ticket ID</div>
+            <div class="ticket-code">${escapeHtml(t.ticket_id)}</div>
+          </div>
+          <div class="ticket-foot">
+            <span class="status-pill">${t.scanned ? 'Scanned' : 'Valid'}</span>
+            <span>Admits 1</span>
+          </div>
+        </div>
+      `;
+    });
+
+    html += `
+      <div class="event-info">
+        <h3>Event Details</h3>
+        <div class="event-info-row"><span class="k">Date</span><span class="v">May 1 — Labour Day</span></div>
+        <div class="event-info-row"><span class="k">Time</span><span class="v">4PM – 12AM</span></div>
+        <div class="event-info-row"><span class="k">Venue</span><span class="v">Northern Cove Penang</span></div>
+        <div class="event-info-row"><span class="k">Address</span><span class="v">515 Jalan C M Hashim,<br/>Tanjung Tokong, George Town</span></div>
+        <div class="event-info-row"><span class="k">After</span><span class="v">Prime Reloaded · 12AM–3AM</span></div>
+      </div>
+      <div class="instructions">
+        <h3>How to use</h3>
+        <ol>
+          <li>Save this page or screenshot the QRs.</li>
+          <li>At the door, show each QR code to staff — one per guest.</li>
+          <li>Each code can only be scanned once. Keep this safe.</li>
+        </ol>
+      </div>
+    `;
+    content.innerHTML = html;
+
+    await waitForQR();
+    tickets.forEach((t, idx) => {
+      const canvas = document.getElementById('qr-' + idx);
+      if (!canvas) return;
+      if (typeof QRCode === 'undefined') { renderQRFallback(canvas, t.ticket_id); return; }
+      try {
+        QRCode.toCanvas(canvas, t.ticket_id, {
+          width: 220, margin: 1,
+          color: { dark: '#0a0a0a', light: '#ffffff' },
+          errorCorrectionLevel: 'M',
+        }, (err) => { if (err) renderQRFallback(canvas, t.ticket_id, err.message); });
+      } catch (e) { renderQRFallback(canvas, t.ticket_id, e.message); }
+    });
   }
 
   boot();
