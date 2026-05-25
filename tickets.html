@@ -33,10 +33,12 @@
     --ember: #1a0a05;
     --amber: #ff6b1a;
     --amber-deep: #c83e0a;
-    --gold: #ffb547;
+    --gold: #fcd116;           /* Cameroonian flag yellow */
+    --gold-soft: #ffb547;      /* warmer secondary yellow */
     --flame: #ff3d00;
-    --green: #007a3d;          /* Cameroonian flag accent */
-    --red: #ce1126;            /* Cameroonian flag accent */
+    --green: #009b4c;          /* Cameroonian flag green */
+    --green-deep: #006633;     /* darker green for depth */
+    --red: #ce1126;            /* Cameroonian flag red */
     --cream: #f4e8d4;
     --paper: #faf0dd;
     --smoke: rgba(255, 180, 100, 0.08);
@@ -78,12 +80,14 @@
     height: 50vh;
     background-image:
       radial-gradient(circle 2px at 15% 20%, var(--gold), transparent),
-      radial-gradient(circle 1px at 80% 30%, var(--amber), transparent),
+      radial-gradient(circle 1px at 80% 30%, var(--green), transparent),
       radial-gradient(circle 1.5px at 45% 60%, var(--gold), transparent),
       radial-gradient(circle 1px at 70% 80%, var(--flame), transparent),
       radial-gradient(circle 2px at 25% 75%, var(--amber), transparent),
-      radial-gradient(circle 1px at 90% 55%, var(--gold), transparent);
-    opacity: 0.6;
+      radial-gradient(circle 1px at 90% 55%, var(--gold), transparent),
+      radial-gradient(circle 1.5px at 60% 15%, var(--green), transparent),
+      radial-gradient(circle 1px at 10% 50%, var(--gold), transparent);
+    opacity: 0.7;
     pointer-events: none;
     z-index: 0;
   }
@@ -134,9 +138,16 @@
     margin-top: -6px;
     text-shadow:
       0 2px 0 rgba(0,0,0,0.6),
-      0 0 25px rgba(255, 181, 71, 0.5);
+      0 0 25px rgba(252, 209, 22, 0.5);
   }
-
+  
+  .logo {
+     display: block;
+     margin: 0 auto 18px;
+     height: 150px;
+     width: auto;
+     transform: rotate(-2deg);
+  }
   .subtitle {
     margin-top: 18px;
     font-family: 'Dancing Script', cursive;
@@ -180,27 +191,21 @@
       0 12px 30px -10px rgba(0,0,0,0.8),
       inset 0 1px 0 rgba(255, 255, 255, 0.04);
   }
-  /* Subtle amber glow border */
+  /* Tri-color border drawing from the flag */
   .ticket::before {
     content: '';
     position: absolute;
     inset: 0;
     border-radius: 14px;
-    padding: 1px;
-    background: linear-gradient(135deg, var(--amber) 0%, transparent 30%, transparent 70%, var(--gold) 100%);
+    padding: 1.5px;
+    background: linear-gradient(135deg, var(--green) 0%, var(--amber) 50%, var(--gold) 100%);
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     pointer-events: none;
-    opacity: 0.5;
+    opacity: 0.7;
   }
-  .logo {
-     display: block;
-     margin: 0 auto 18px;
-     height: 150px;
-     width: auto;
-     transform: rotate(-2deg);
-  }
+
   .ticket-top {
     padding: 16px 18px;
     display: flex;
@@ -227,11 +232,12 @@
     font-weight: 700;
     letter-spacing: 2px;
     text-transform: uppercase;
-    color: var(--ember);
-    background: linear-gradient(135deg, var(--gold) 0%, var(--amber) 100%);
+    color: var(--cream);
+    background: linear-gradient(135deg, var(--green) 0%, var(--green-deep) 100%);
     padding: 5px 12px;
     border-radius: 100px;
-    box-shadow: 0 2px 10px rgba(255, 107, 26, 0.4);
+    box-shadow: 0 2px 12px rgba(0, 155, 76, 0.4);
+    border: 1px solid rgba(252, 209, 22, 0.4);
   }
 
   .ticket-body {
@@ -249,9 +255,10 @@
     height: 244px;
     position: relative;
     box-shadow:
-      0 0 30px rgba(255, 107, 26, 0.3),
-      0 0 0 2px rgba(255, 181, 71, 0.4),
-      0 0 0 4px var(--ember);
+      0 0 30px rgba(0, 155, 76, 0.25),
+      0 0 0 2px var(--green),
+      0 0 0 4px var(--gold),
+      0 0 0 6px var(--ember);
   }
   .qr-wrap canvas, .qr-wrap img {
     display: block;
@@ -297,8 +304,8 @@
 
   .ticket-foot {
     padding: 14px 18px;
-    border-top: 1px dashed rgba(255, 181, 71, 0.2);
-    background: linear-gradient(90deg, rgba(255, 107, 26, 0.1) 0%, transparent 100%);
+    border-top: 1px dashed rgba(252, 209, 22, 0.25);
+    background: linear-gradient(90deg, rgba(0, 155, 76, 0.15) 0%, transparent 100%);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -311,15 +318,15 @@
     display: inline-flex;
     align-items: center;
     gap: 7px;
-    color: var(--gold);
+    color: var(--green);
     font-weight: 700;
   }
   .status-pill::before {
     content: '';
     width: 8px; height: 8px;
     border-radius: 50%;
-    background: var(--gold);
-    box-shadow: 0 0 10px var(--gold);
+    background: var(--green);
+    box-shadow: 0 0 12px var(--green);
     animation: pulse 1.6s ease-in-out infinite;
   }
   @keyframes pulse {
@@ -379,28 +386,30 @@
     font-family: 'Caveat Brush', cursive;
     font-size: 36px;
     line-height: 1;
-    color: var(--amber-deep);
+    color: var(--green-deep);
     margin-bottom: 16px;
     transform: rotate(-2deg);
     display: inline-block;
+    border-bottom: 4px solid var(--gold);
+    padding-bottom: 2px;
   }
   .event-info-row {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
     padding: 8px 0;
-    border-bottom: 1px dashed rgba(26, 10, 5, 0.2);
+    border-bottom: 1px dashed rgba(0, 102, 51, 0.25);
     font-family: 'Inter', sans-serif;
     font-size: 13px;
     gap: 16px;
   }
   .event-info-row:last-child { border-bottom: 0; }
   .event-info-row .k {
-    color: var(--amber-deep);
+    color: var(--green-deep);
     text-transform: uppercase;
     letter-spacing: 1.5px;
     font-size: 10px;
-    font-weight: 700;
+    font-weight: 800;
     flex-shrink: 0;
     padding-top: 2px;
   }
@@ -550,7 +559,7 @@
 <body>
 <div class="container">
   <header>
-    <img src="assets/NEXA_black.png" alt="Nexa Events" class="logo" />
+    <img src="assets/NEXA_white.png" alt="Nexa Events" class="logo" />
     <div class="top-tagline">Good People <span class="dot">•</span> Good Music <span class="dot">•</span> Good Vibes</div>
     <h1>Afrohouse<span class="tickets">Tickets</span></h1>
     <div class="subtitle" id="subtitle">Loading…</div>
