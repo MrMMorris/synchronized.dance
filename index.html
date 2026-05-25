@@ -173,6 +173,24 @@
         display: none;
       }
 
+      .ticket-box {
+        background: rgba(255, 255, 255);
+        padding: 15px;
+        border-radius: 12px;
+        margin: 20px;
+      }
+
+      .ticket-link {
+        display: flex;
+        justify-content: center;
+        text-decoration: none;
+      }
+
+      .ticket-icon {
+        font-size: 50px;
+        line-height: 1;
+      }
+
     </style>
   </head>
   <body>
@@ -192,23 +210,32 @@
           <img src="assets/google_maps.webp" alt="Google Maps" class="map-icon" alt="Open map">
       </a> 
     </div>
+      <!-- Ticket purchase button -->
+      <div class="ticket-box">
+        <a href="https://forms.gle/bNom85rrSMayCTLAA" target="_blank" class="ticket-link" onclick="trackTicketClick()">
+          <span class="ticket-icon">🎟️</span>
+        </a>
+      </div>
+
+      <!-- Email signup (commented out — kept for future use)
       <div class="form">
         <h2>Get Notified About Our Next Party</h2>
         <h4>*we will <b>never</b> share your email with anyone*</h4>
-        
+
         <form id="sib-form" method="POST" action="https://d2fdd58e.sibforms.com/serve/MUIFAE8Vrj85rMcXC3sDXfp374lWxst71GzPrGpg7uetefPBvh7zFVGpTSwkDGf1tGCDylqEBiOo9HWVBzZlEQbft4YLel9n9vdJ4QL1ZgSeTTEBNUfCiKIxagoApnr8EnbI3ogO4XW8Hn8F5YMmo_5WTpO52x-RztGL6O9F-W9s00sJEbIjm5iwtB8vLwW_wq9A0Ht3iD5CoeVdNw==">
           <input type="email" name="EMAIL" placeholder="Enter your email" required />
-          
+
           <input type="text" name="email_address_check" value="" class="input--hidden" style="position: absolute; left: -5000px;">
           <input type="hidden" name="locale" value="en">
           <input type="hidden" name="html_type" value="simple">
-          
+
           <button type="submit" onClick="trackSignupClick()">Sign Up</button>
         </form>
-        
-        <!-- Hidden iframe to catch the response -->
+
+        Hidden iframe to catch the response
         <iframe name="hidden-iframe" style="display:none;"></iframe>
       </div>
+      -->
   </body>
 
   <!-- GA tracking for map click -->
@@ -221,7 +248,17 @@
     }
   </script>
 
-  <!-- GA tracking for signup click -->
+  <!-- GA tracking for ticket click -->
+  <script>
+    function trackTicketClick() {
+      gtag('event', 'ticket_click', {
+        'event_category': 'engagement',
+        'event_label': 'ticket_link'
+      });
+    }
+  </script>
+
+  <!-- GA tracking for signup click (kept for the commented-out email signup) -->
   <script>
     function trackSignupClick() {
       gtag('event', 'signup_click', {
@@ -231,7 +268,7 @@
     }
   </script>
 
-  <!-- Brevo form script -->
+  <!-- Brevo form script (commented out — re-enable with the email signup form above)
   <script>
     document.getElementById('sib-form').addEventListener('submit', function(e) {
       e.preventDefault();
@@ -270,6 +307,7 @@
       }
     });
   </script>
+  -->
 
   <!-- Enlarge poster on click -->
   <script>
