@@ -3,55 +3,56 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Door Scanner — Labour Day Beach Party</title>
+<title>Door Scanner — Afrohouse Party</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Caveat:wght@600;700&family=DM+Mono:wght@400;500;700&family=Archivo+Black&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Caveat+Brush&family=Dancing+Script:wght@600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script src="config.js"></script>
 <style>
   :root {
-    --orange-1: #ff6a1a;
-    --orange-2: #ff3d00;
-    --orange-3: #ffb347;
-    --lime: #c6ff3a;
-    --purple: #c89df0;
-    --ink: #0a0a0a;
-    --paper: #fff7e8;
+    --night: #0d0604;
+    --ember: #1a0a05;
+    --amber: #ff6b1a;
+    --amber-deep: #c83e0a;
+    --gold: #ffb547;
+    --flame: #ff3d00;
+    --green: #007a3d;
+    --red: #ce1126;
+    --cream: #f4e8d4;
     --valid: #16a34a;
     --invalid: #dc2626;
     --warn: #f59e0b;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body {
-    background: var(--orange-2);
-    color: var(--ink);
-    font-family: 'DM Mono', monospace;
+    background: var(--night);
+    color: var(--cream);
+    font-family: 'Inter', sans-serif;
     min-height: 100vh;
     -webkit-font-smoothing: antialiased;
     overscroll-behavior: none;
   }
   body {
     background:
-      radial-gradient(ellipse at top right, rgba(255, 200, 80, 0.5), transparent 60%),
-      radial-gradient(ellipse at bottom left, rgba(255, 50, 0, 0.6), transparent 60%),
-      linear-gradient(180deg, var(--orange-1) 0%, var(--orange-2) 100%);
+      radial-gradient(ellipse 90% 60% at 50% 0%, rgba(255, 107, 26, 0.35) 0%, transparent 55%),
+      radial-gradient(ellipse 100% 70% at 50% 35%, rgba(200, 62, 10, 0.2) 0%, transparent 60%),
+      linear-gradient(180deg, var(--ember) 0%, var(--night) 60%, var(--ember) 100%);
     padding: 16px 12px;
     padding-top: max(16px, env(safe-area-inset-top));
     padding-bottom: max(16px, env(safe-area-inset-bottom));
     overflow-x: hidden;
+    position: relative;
   }
   body::before {
     content: '';
     position: fixed;
-    top: -40px; right: -40px;
-    width: 200px; height: 200px;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M100 180 Q 90 100 30 50 M100 180 Q 110 100 170 50 M100 180 Q 100 90 100 20 M100 180 Q 70 120 10 100 M100 180 Q 130 120 190 100' stroke='%230a0a0a' stroke-width='3' fill='none' opacity='0.12'/%3E%3C/svg%3E");
-    background-size: contain;
-    background-repeat: no-repeat;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 0.7 0 0 0 0 0.3 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     pointer-events: none;
-    transform: rotate(45deg);
     z-index: 0;
+    opacity: 0.6;
+    mix-blend-mode: screen;
   }
   .app {
     max-width: 520px;
@@ -60,109 +61,145 @@
     z-index: 1;
   }
 
-  /* Header — sticker style matching tickets.html */
   header {
     text-align: center;
-    margin-bottom: 18px;
-    padding: 14px 0 10px;
+    margin-bottom: 20px;
+    padding: 10px 0 8px;
   }
-  .event-badge {
-    display: inline-block;
-    background: var(--ink);
-    color: var(--orange-3);
-    padding: 5px 12px;
-    font-family: 'Archivo Black', sans-serif;
+
+  .logo {
+     display: block;
+     margin: 0 auto 14px;
+     height: 48px;
+     width: auto;
+     transform: rotate(-2deg);
+  }
+  .top-tagline {
+    font-family: 'Inter', sans-serif;
     font-size: 9px;
-    letter-spacing: 3px;
+    font-weight: 600;
+    letter-spacing: 4px;
+    color: var(--gold);
+    margin-bottom: 12px;
     text-transform: uppercase;
-    transform: rotate(-2deg);
-    margin-bottom: 14px;
   }
+  .top-tagline .dot { color: var(--amber); margin: 0 6px; }
+
   h1 {
-    font-family: 'Bowlby One', sans-serif;
+    font-family: 'Bagel Fat One', cursive;
     font-size: 44px;
-    line-height: 0.85;
+    line-height: 0.9;
     letter-spacing: -1px;
-    color: var(--ink);
+    color: var(--cream);
     text-transform: uppercase;
+    text-shadow:
+      0 2px 0 rgba(0,0,0,0.5),
+      0 0 25px rgba(255, 107, 26, 0.4);
+    transform: rotate(-1deg);
   }
   h1 .door {
-    display: inline-block;
-    background: var(--lime);
-    padding: 2px 12px 6px;
+    display: block;
+    font-family: 'Caveat Brush', cursive;
+    font-size: 42px;
+    color: var(--gold);
+    letter-spacing: 1px;
+    text-transform: none;
     transform: rotate(-3deg);
-    box-shadow: 4px 4px 0 var(--ink);
+    margin-top: -4px;
+    text-shadow:
+      0 2px 0 rgba(0,0,0,0.6),
+      0 0 20px rgba(255, 181, 71, 0.5);
   }
   .staff-line {
     margin-top: 12px;
-    font-family: 'Caveat', cursive;
+    font-family: 'Dancing Script', cursive;
     font-size: 22px;
     font-weight: 700;
-    color: var(--ink);
+    color: var(--cream);
   }
   .staff-line .name {
-    background: var(--purple);
-    padding: 0 8px;
-    display: inline-block;
-    transform: rotate(-1deg);
+    color: var(--gold);
+    font-style: italic;
   }
 
-  /* Gate (auth) */
+  /* Gate */
   .gate {
     text-align: center;
-    padding: 40px 20px;
-    background: var(--paper);
-    border: 3px solid var(--ink);
-    box-shadow: 8px 8px 0 var(--ink);
+    padding: 40px 24px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 181, 71, 0.3);
+    border-radius: 14px;
+    backdrop-filter: blur(8px);
   }
   .gate h2 {
-    font-family: 'Bowlby One', sans-serif;
+    font-family: 'Bagel Fat One', cursive;
     font-size: 44px;
-    letter-spacing: 1px;
-    color: var(--orange-2);
+    color: var(--flame);
+    text-shadow: 0 0 25px rgba(255, 60, 0, 0.5);
     margin-bottom: 14px;
+    letter-spacing: 1px;
   }
   .gate p {
-    font-family: 'Caveat', cursive;
-    font-size: 22px;
+    font-family: 'Dancing Script', cursive;
+    font-size: 20px;
     font-weight: 700;
-    color: var(--ink);
+    color: var(--cream);
     line-height: 1.4;
   }
 
-  /* Camera frame — heavy ticket-style border */
+  /* Scanner camera */
   .scanner-card {
-    background: var(--ink);
-    border: 3px solid var(--ink);
-    box-shadow: 8px 8px 0 var(--ink);
+    background: var(--night);
+    border-radius: 14px;
     overflow: hidden;
     margin-bottom: 18px;
     position: relative;
+    border: 1px solid rgba(255, 181, 71, 0.3);
+    box-shadow:
+      0 0 0 1px rgba(0,0,0,0.5),
+      0 12px 30px -10px rgba(0,0,0,0.8),
+      0 0 40px rgba(255, 107, 26, 0.15);
+  }
+  .scanner-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 14px;
+    padding: 1px;
+    background: linear-gradient(135deg, var(--amber) 0%, transparent 30%, transparent 70%, var(--gold) 100%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    opacity: 0.5;
+    z-index: 2;
   }
   .scanner-meta {
     padding: 10px 14px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-family: 'DM Mono', monospace;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 10px;
     font-weight: 700;
     letter-spacing: 2px;
     text-transform: uppercase;
-    color: var(--orange-3);
-    border-bottom: 1px dashed rgba(255, 179, 71, 0.3);
+    color: var(--gold);
+    border-bottom: 1px dashed rgba(255, 181, 71, 0.2);
+    position: relative;
+    z-index: 1;
   }
-  .scanner-meta .live { color: var(--lime); }
+  .scanner-meta .live { color: var(--amber); }
   .scanner-meta .live::before {
     content: '';
     display: inline-block;
     width: 7px; height: 7px;
     border-radius: 50%;
-    background: var(--lime);
+    background: var(--amber);
     margin-right: 6px;
     vertical-align: middle;
     animation: pulse 1.4s infinite;
-    box-shadow: 0 0 8px var(--lime);
+    box-shadow: 0 0 10px var(--amber);
   }
   @keyframes pulse {
     0%, 100% { opacity: 1; transform: scale(1); }
@@ -180,62 +217,62 @@
   #reader__scan_region { background: #000 !important; }
   #reader__scan_region img { display: none !important; }
 
-  /* RESULT — high contrast for door staff to read instantly */
+  /* RESULT — high contrast for fast reading at the door */
   .result {
-    border: 3px solid var(--ink);
     padding: 22px;
     min-height: 150px;
     margin-bottom: 16px;
-    box-shadow: 6px 6px 0 var(--ink);
+    border-radius: 14px;
     transition: transform 0.12s ease;
     position: relative;
     overflow: hidden;
+    border: 1px solid rgba(255, 181, 71, 0.25);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
   }
   .result.idle {
-    background: var(--paper);
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(8px);
     text-align: center;
-    color: var(--ink);
-    font-family: 'Bowlby One', sans-serif;
-    font-size: 24px;
+    color: var(--gold);
+    font-family: 'Caveat Brush', cursive;
+    font-size: 34px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transform: rotate(-1deg);
+  }
+  .result.loading {
+    background: var(--ember);
+    color: var(--gold);
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
     letter-spacing: 2px;
     text-transform: uppercase;
     display: flex;
     align-items: center;
     justify-content: center;
   }
-  .result.idle::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background-image:
-      linear-gradient(45deg, transparent 48%, var(--orange-3) 48%, var(--orange-3) 52%, transparent 52%),
-      linear-gradient(-45deg, transparent 48%, var(--orange-3) 48%, var(--orange-3) 52%, transparent 52%);
-    background-size: 14px 14px;
-    opacity: 0.15;
-    pointer-events: none;
-  }
-  .result.loading {
-    background: var(--ink);
-    color: var(--lime);
-    text-align: center;
-  }
   .result.valid {
-    background: var(--valid);
+    background: linear-gradient(135deg, var(--valid) 0%, #15803d 100%);
     color: white;
-    border-color: var(--ink);
+    border-color: var(--valid);
     animation: stamp 0.4s ease;
+    box-shadow: 0 0 40px rgba(22, 163, 74, 0.5);
   }
   .result.invalid {
-    background: var(--invalid);
+    background: linear-gradient(135deg, var(--invalid) 0%, #991b1b 100%);
     color: white;
-    border-color: var(--ink);
+    border-color: var(--invalid);
     animation: shake 0.4s ease;
+    box-shadow: 0 0 40px rgba(220, 38, 38, 0.5);
   }
   .result.warn {
-    background: var(--warn);
-    color: var(--ink);
-    border-color: var(--ink);
+    background: linear-gradient(135deg, var(--warn) 0%, #b45309 100%);
+    color: var(--night);
+    border-color: var(--warn);
     animation: stamp 0.4s ease;
+    box-shadow: 0 0 40px rgba(245, 158, 11, 0.5);
   }
   @keyframes stamp {
     0% { transform: scale(0.94) rotate(-1deg); }
@@ -251,19 +288,21 @@
   }
 
   .result-status {
-    font-family: 'Bowlby One', sans-serif;
-    font-size: 64px;
+    font-family: 'Bagel Fat One', cursive;
+    font-size: 60px;
     line-height: 0.9;
-    letter-spacing: 2px;
+    letter-spacing: 1px;
     text-transform: uppercase;
     margin-bottom: 12px;
+    text-shadow: 0 2px 0 rgba(0,0,0,0.3);
   }
   .result-detail {
-    font-family: 'DM Mono', monospace;
+    font-family: 'Inter', sans-serif;
     font-size: 14px;
     line-height: 1.6;
   }
   .result-detail .label {
+    font-family: 'JetBrains Mono', monospace;
     text-transform: uppercase;
     letter-spacing: 2px;
     font-size: 10px;
@@ -276,16 +315,15 @@
     font-size: 16px;
     font-weight: 500;
   }
-
-  /* Big buyer name treatment for valid scans */
   .result.valid .result-detail .name-big,
   .result.warn .result-detail .name-big {
-    font-family: 'Archivo Black', sans-serif;
-    font-size: 28px;
+    font-family: 'Bagel Fat One', cursive;
+    font-size: 30px;
     line-height: 1.1;
     letter-spacing: -0.5px;
     margin-top: 4px;
     text-transform: uppercase;
+    text-shadow: 0 2px 0 rgba(0,0,0,0.2);
   }
 
   /* Controls */
@@ -296,135 +334,119 @@
     margin-bottom: 22px;
   }
   button {
-    font-family: 'Archivo Black', sans-serif;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 12px;
+    font-weight: 700;
     text-transform: uppercase;
     letter-spacing: 2px;
     padding: 14px;
-    border: 3px solid var(--ink);
-    background: var(--paper);
-    color: var(--ink);
+    border: 1px solid rgba(255, 181, 71, 0.3);
+    background: rgba(0, 0, 0, 0.5);
+    color: var(--cream);
     cursor: pointer;
-    transition: transform 0.1s ease, box-shadow 0.1s ease;
-    box-shadow: 4px 4px 0 var(--ink);
+    transition: all 0.1s ease;
+    border-radius: 10px;
+    backdrop-filter: blur(8px);
   }
   button:active {
-    transform: translate(4px, 4px);
-    box-shadow: 0 0 0 var(--ink);
+    transform: scale(0.97);
   }
   button.primary {
-    background: var(--lime);
-    color: var(--ink);
+    background: linear-gradient(135deg, var(--amber) 0%, var(--amber-deep) 100%);
+    color: var(--ember);
+    border-color: var(--amber);
+    box-shadow: 0 0 20px rgba(255, 107, 26, 0.3);
   }
 
-  /* Scan log */
+  /* Log */
   .log {
-    background: var(--paper);
-    border: 3px solid var(--ink);
-    box-shadow: -4px 4px 0 var(--ink);
+    background: rgba(0, 0, 0, 0.4);
+    border: 1px solid rgba(255, 181, 71, 0.25);
+    border-radius: 12px;
     padding: 18px;
-    transform: rotate(-0.3deg);
+    backdrop-filter: blur(8px);
   }
   .log-title {
-    font-family: 'Archivo Black', sans-serif;
-    font-size: 12px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-    color: var(--ink);
+    font-family: 'Caveat Brush', cursive;
+    font-size: 24px;
+    color: var(--gold);
     margin-bottom: 12px;
-    background: var(--lime);
-    display: inline-block;
-    padding: 4px 10px;
     transform: rotate(-1deg);
+    display: inline-block;
   }
   .log-entry {
-    font-family: 'DM Mono', monospace;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 12px;
-    padding: 6px 0;
-    border-bottom: 1px dashed rgba(0, 0, 0, 0.12);
+    padding: 7px 0;
+    border-bottom: 1px dashed rgba(255, 181, 71, 0.15);
     display: flex;
     justify-content: space-between;
     gap: 10px;
   }
   .log-entry:last-child { border-bottom: 0; }
   .log-entry .time {
-    color: rgba(0, 0, 0, 0.5);
+    color: rgba(244, 232, 212, 0.5);
     flex-shrink: 0;
     font-size: 11px;
   }
-  .log-entry.valid {
-    color: var(--valid);
-    font-weight: 500;
-  }
-  .log-entry.invalid {
-    color: var(--invalid);
-    font-weight: 500;
-  }
-  .log-entry.warn {
-    color: #b45309;
-    font-weight: 500;
-  }
+  .log-entry.valid { color: #4ade80; font-weight: 500; }
+  .log-entry.invalid { color: #f87171; font-weight: 500; }
+  .log-entry.warn { color: var(--gold); font-weight: 500; }
 
-  /* Stub at bottom */
+  /* Stub */
   .stub {
     margin-top: 18px;
     padding-top: 14px;
-    border-top: 2px dashed var(--ink);
+    border-top: 1px dashed rgba(255, 181, 71, 0.2);
     display: flex;
     justify-content: space-between;
-    font-family: 'DM Mono', monospace;
+    font-family: 'JetBrains Mono', monospace;
     font-size: 9px;
     letter-spacing: 2px;
     text-transform: uppercase;
-    color: var(--ink);
-    opacity: 0.7;
+    color: var(--cream);
+    opacity: 0.6;
   }
   .stub b {
-    background: var(--ink);
-    color: var(--lime);
-    padding: 2px 6px;
+    color: var(--gold);
+    font-weight: 700;
   }
 
   .error-box {
-    background: var(--paper);
-    border: 3px solid var(--orange-2);
+    background: rgba(206, 17, 38, 0.15);
+    border: 1px solid var(--red);
     padding: 18px;
-    box-shadow: 6px 6px 0 var(--ink);
+    border-radius: 12px;
     margin-bottom: 18px;
-    font-family: 'DM Mono', monospace;
+    font-family: 'Inter', sans-serif;
     font-size: 13px;
     line-height: 1.5;
+    color: var(--cream);
   }
   .error-box strong {
-    font-family: 'Bowlby One', sans-serif;
+    font-family: 'Bagel Fat One', cursive;
     font-size: 22px;
-    color: var(--orange-2);
+    color: var(--flame);
     display: block;
     margin-bottom: 8px;
     letter-spacing: 1px;
-  }
-  .logo {
-     display: block;
-     margin: 0 auto 14px;
-     height: 48px;
-     width: auto;
-     transform: rotate(-2deg);
+    text-shadow: 0 0 15px rgba(255, 60, 0, 0.5);
   }
 </style>
 </head>
 <body>
 <div class="app">
   <header>
-    <img src="assets/NEXA_black.png" alt="Nexa Events" class="logo" />
-    <h1>Beach<br/><span class="door">Door Scan</span></h1>
+    <div class="top-tagline">Good People <span class="dot">•</span> Good Music <span class="dot">•</span> Good Vibes</div>
+    <h1>Afrohouse<span class="door">Door Scan</span></h1>
     <div class="staff-line">Hi, <span class="name" id="staffName">…</span></div>
   </header>
 
   <div id="main"></div>
 
   <div class="stub">
-    <span><b>DOOR OPS</b></span>
-    <span id="stubCount">00 SCANS</span>
+    <span><b>Door Ops</b></span>
+    <span id="stubCount">00 Scans</span>
     <span id="stubDate"></span>
   </div>
 </div>
@@ -510,8 +532,8 @@
     main.innerHTML = `
       <div class="scanner-card">
         <div class="scanner-meta">
-          <span class="live">LIVE</span>
-          <span id="camStatus">INITIALIZING…</span>
+          <span class="live">Live</span>
+          <span id="camStatus">Initializing…</span>
         </div>
         <div id="reader"></div>
       </div>
@@ -521,7 +543,7 @@
         <button id="manualBtn" class="primary">Enter ID</button>
       </div>
       <div class="log" id="logSection" style="display:none;">
-        <div class="log-title">Scan history</div>
+        <div class="log-title">Scan History</div>
         <div id="logList"></div>
       </div>
     `;
@@ -545,9 +567,9 @@
         () => {}
       );
       scanning = true;
-      camStatus.textContent = 'READY';
+      camStatus.textContent = 'Ready';
     } catch (err) {
-      camStatus.textContent = 'CAMERA ERROR';
+      camStatus.textContent = 'Camera Error';
       renderError('Camera unavailable', 'Could not start the camera. Grant camera permission and reload, or try a different browser.');
     }
   }
@@ -560,12 +582,12 @@
       await html5QrCode.pause(true);
       scanning = false;
       btn.textContent = 'Resume';
-      camStatus.textContent = 'PAUSED';
+      camStatus.textContent = 'Paused';
     } else {
       await html5QrCode.resume();
       scanning = true;
       btn.textContent = 'Pause';
-      camStatus.textContent = 'READY';
+      camStatus.textContent = 'Ready';
     }
   }
 
@@ -585,13 +607,13 @@
   }
 
   async function validate(ticketId) {
-    showResult('loading', 'CHECKING', 'Validating ticket…');
+    showResult('loading', 'Checking', 'Validating ticket…');
     try {
       const url = `${WEB_APP_URL}?action=validate&ticket_id=${encodeURIComponent(ticketId)}&token=${encodeURIComponent(token)}`;
       const resp = await fetchJson(url);
 
       if (!resp.ok) {
-        showResult('invalid', 'ERROR', resp.reason || 'Validation failed');
+        showResult('invalid', 'Error', resp.reason || 'Validation failed');
         addLog('invalid', ticketId, resp.reason || 'error');
         beep(150);
         return;
@@ -603,30 +625,30 @@
       const logName = pos ? `${resp.buyer_name} (${pos})` : resp.buyer_name;
 
       if (resp.status === 'valid') {
-        showResult('valid', 'VALID', resp.buyer_name, resp.ticket_type, null, pos);
+        showResult('valid', 'Valid', resp.buyer_name, resp.ticket_type, null, pos);
         addLog('valid', ticketId, `${logName} — ${resp.ticket_type}`);
         scanCount++;
-        stubCountEl.textContent = `${String(scanCount).padStart(2, '0')} SCAN${scanCount === 1 ? '' : 'S'}`;
+        stubCountEl.textContent = `${String(scanCount).padStart(2, '0')} Scan${scanCount === 1 ? '' : 's'}`;
         beep(1);
       } else if (resp.status === 'already_scanned') {
         const when = resp.scanned_at ? new Date(resp.scanned_at).toLocaleTimeString() : '';
-        showResult('warn', 'ALREADY IN', resp.buyer_name, resp.ticket_type, `Previously scanned${when ? ' at ' + when : ''}${resp.scanned_by ? ' by ' + resp.scanned_by : ''}`, pos);
+        showResult('warn', 'Already In', resp.buyer_name, resp.ticket_type, `Previously scanned${when ? ' at ' + when : ''}${resp.scanned_by ? ' by ' + resp.scanned_by : ''}`, pos);
         addLog('warn', ticketId, `${logName} — already scanned`);
         beep(2);
       } else if (resp.status === 'invalid') {
-        showResult('invalid', 'INVALID', 'Ticket not found');
+        showResult('invalid', 'Invalid', 'Ticket not found');
         addLog('invalid', ticketId, 'not found');
         beep(150);
       } else if (resp.status === 'unauthorized') {
-        showResult('invalid', 'DENIED', resp.reason || 'Not authorized');
+        showResult('invalid', 'Denied', resp.reason || 'Not authorized');
         addLog('invalid', ticketId, 'unauthorized');
         beep(150);
       } else {
-        showResult('invalid', 'UNKNOWN', 'Unexpected response');
+        showResult('invalid', 'Unknown', 'Unexpected response');
         addLog('invalid', ticketId, 'unknown');
       }
     } catch (err) {
-      showResult('invalid', 'NO SIGNAL', 'Could not reach server');
+      showResult('invalid', 'No Signal', 'Could not reach server');
       addLog('invalid', ticketId, 'network error');
     }
   }
