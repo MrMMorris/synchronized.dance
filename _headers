@@ -6,3 +6,8 @@
 
 /assets/*
   Cache-Control: public, max-age=86400
+
+# Always revalidate the poster (strip the inherited /assets/* rule first, then override)
+/assets/poster.webp
+  ! Cache-Control
+  Cache-Control: public, no-cache, must-revalidate
