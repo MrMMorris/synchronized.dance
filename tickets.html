@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Your Tickets — Afrohouse Party</title>
+<title>Your Tickets — Beach Party</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Caveat+Brush&family=Dancing+Script:wght@600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
@@ -29,19 +29,19 @@
 <script src="config.js"></script>
 <style>
   :root {
-    --night: #0d0604;
-    --ember: #1a0a05;
-    --amber: #ff6b1a;
-    --amber-deep: #c83e0a;
-    --gold: #fcd116;           /* Cameroonian flag yellow */
-    --gold-soft: #ffb547;      /* warmer secondary yellow */
-    --flame: #ff3d00;
-    --green: #009b4c;          /* Cameroonian flag green */
-    --green-deep: #006633;     /* darker green for depth */
-    --red: #ce1126;            /* Cameroonian flag red */
+    --night: #080c1a;
+    --ember: #0d1630;
+    --amber: #ff7035;
+    --amber-deep: #c84a00;
+    --gold: #ffc547;
+    --gold-soft: #ffad3b;
+    --flame: #ff4c00;
+    --teal: #0d9488;
+    --teal-deep: #065f46;
+    --red: #ce1126;
     --cream: #f4e8d4;
     --paper: #faf0dd;
-    --smoke: rgba(255, 180, 100, 0.08);
+    --smoke: rgba(100, 160, 255, 0.06);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body {
@@ -53,9 +53,9 @@
   }
   body {
     background:
-      radial-gradient(ellipse 90% 60% at 50% 0%, rgba(255, 107, 26, 0.35) 0%, transparent 55%),
-      radial-gradient(ellipse 100% 70% at 50% 35%, rgba(200, 62, 10, 0.25) 0%, transparent 60%),
-      radial-gradient(ellipse 70% 50% at 30% 80%, rgba(255, 60, 0, 0.15) 0%, transparent 60%),
+      radial-gradient(ellipse 90% 60% at 50% 0%, rgba(255, 120, 50, 0.4) 0%, transparent 55%),
+      radial-gradient(ellipse 100% 70% at 50% 35%, rgba(200, 70, 0, 0.2) 0%, transparent 60%),
+      radial-gradient(ellipse 70% 50% at 80% 80%, rgba(13, 148, 136, 0.18) 0%, transparent 60%),
       linear-gradient(180deg, var(--ember) 0%, var(--night) 60%, var(--ember) 100%);
     padding: 20px 14px 60px;
     overflow-x: hidden;
@@ -80,12 +80,12 @@
     height: 50vh;
     background-image:
       radial-gradient(circle 2px at 15% 20%, var(--gold), transparent),
-      radial-gradient(circle 1px at 80% 30%, var(--green), transparent),
+      radial-gradient(circle 1px at 80% 30%, var(--teal), transparent),
       radial-gradient(circle 1.5px at 45% 60%, var(--gold), transparent),
       radial-gradient(circle 1px at 70% 80%, var(--flame), transparent),
       radial-gradient(circle 2px at 25% 75%, var(--amber), transparent),
       radial-gradient(circle 1px at 90% 55%, var(--gold), transparent),
-      radial-gradient(circle 1.5px at 60% 15%, var(--green), transparent),
+      radial-gradient(circle 1.5px at 60% 15%, var(--teal), transparent),
       radial-gradient(circle 1px at 10% 50%, var(--gold), transparent);
     opacity: 0.7;
     pointer-events: none;
@@ -198,7 +198,7 @@
     inset: 0;
     border-radius: 14px;
     padding: 1.5px;
-    background: linear-gradient(135deg, var(--green) 0%, var(--amber) 50%, var(--gold) 100%);
+    background: linear-gradient(135deg, var(--teal) 0%, var(--amber) 50%, var(--gold) 100%);
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
@@ -233,10 +233,10 @@
     letter-spacing: 2px;
     text-transform: uppercase;
     color: var(--cream);
-    background: linear-gradient(135deg, var(--green) 0%, var(--green-deep) 100%);
+    background: linear-gradient(135deg, var(--teal) 0%, var(--teal-deep) 100%);
     padding: 5px 12px;
     border-radius: 100px;
-    box-shadow: 0 2px 12px rgba(0, 155, 76, 0.4);
+    box-shadow: 0 2px 12px rgba(13, 148, 136, 0.4);
     border: 1px solid rgba(252, 209, 22, 0.4);
   }
 
@@ -255,8 +255,8 @@
     height: 244px;
     position: relative;
     box-shadow:
-      0 0 30px rgba(0, 155, 76, 0.25),
-      0 0 0 2px var(--green),
+      0 0 30px rgba(13, 148, 136, 0.3),
+      0 0 0 2px var(--teal),
       0 0 0 4px var(--gold),
       0 0 0 6px var(--ember);
   }
@@ -305,7 +305,7 @@
   .ticket-foot {
     padding: 14px 18px;
     border-top: 1px dashed rgba(252, 209, 22, 0.25);
-    background: linear-gradient(90deg, rgba(0, 155, 76, 0.15) 0%, transparent 100%);
+    background: linear-gradient(90deg, rgba(13, 148, 136, 0.15) 0%, transparent 100%);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -318,15 +318,15 @@
     display: inline-flex;
     align-items: center;
     gap: 7px;
-    color: var(--green);
+    color: var(--teal);
     font-weight: 700;
   }
   .status-pill::before {
     content: '';
     width: 8px; height: 8px;
     border-radius: 50%;
-    background: var(--green);
-    box-shadow: 0 0 12px var(--green);
+    background: var(--teal);
+    box-shadow: 0 0 12px var(--teal);
     animation: pulse 1.6s ease-in-out infinite;
   }
   @keyframes pulse {
@@ -386,7 +386,7 @@
     font-family: 'Caveat Brush', cursive;
     font-size: 36px;
     line-height: 1;
-    color: var(--green-deep);
+    color: var(--teal-deep);
     margin-bottom: 16px;
     transform: rotate(-2deg);
     display: inline-block;
@@ -398,14 +398,14 @@
     justify-content: space-between;
     align-items: flex-start;
     padding: 8px 0;
-    border-bottom: 1px dashed rgba(0, 102, 51, 0.25);
+    border-bottom: 1px dashed rgba(13, 148, 136, 0.2);
     font-family: 'Inter', sans-serif;
     font-size: 13px;
     gap: 16px;
   }
   .event-info-row:last-child { border-bottom: 0; }
   .event-info-row .k {
-    color: var(--green-deep);
+    color: var(--teal-deep);
     text-transform: uppercase;
     letter-spacing: 1.5px;
     font-size: 10px;
@@ -561,11 +561,11 @@
   <header>
     <img src="assets/NEXA_white.png" alt="Nexa Events" class="top-logo" />
     <div class="top-tagline">Good People <span class="dot">•</span> Good Music <span class="dot">•</span> Good Vibes</div>
-    <h1>Afrohouse<span class="tickets">Tickets</span></h1>
+    <h1>Beach<span class="tickets">Tickets</span></h1>
     <div class="subtitle" id="subtitle">Loading…</div>
   </header>
   <div id="content"><div class="loading">Fetching your tickets…</div></div>
-  <footer>May 30 <span class="accent">✦</span> Northern Cove Penang <span class="accent">✦</span> 4PM until 12AM</footer>
+  <footer>June 27 <span class="accent">✦</span> Northern Cove Penang <span class="accent">✦</span> 4PM until 12AM</footer>
 </div>
 <script>
   const WEB_APP_URL = window.WEB_APP_URL;
@@ -778,11 +778,11 @@
     html += `
       <div class="event-info">
         <h3>Event Details</h3>
-        <div class="event-info-row"><span class="k">Date</span><span class="v">May 30 — Afrohouse Party</span></div>
+        <div class="event-info-row"><span class="k">Date</span><span class="v">June 27 — Beach Party</span></div>
         <div class="event-info-row"><span class="k">Time</span><span class="v">4PM – 12AM</span></div>
         <div class="event-info-row"><span class="k">Venue</span><span class="v">Northern Cove, Penang</span></div>
-        <div class="event-info-row"><span class="k">On Deck</span><span class="v">DJ Shlant × DJ Vic</span></div>
-        <div class="event-info-row"><span class="k">Vibes</span><span class="v">Afrohouse · Cameroonian Food · Sunset Beach</span></div>
+        <div class="event-info-row"><span class="k">On Deck</span><span class="v">DJ Shlant · DJ Awie · DJ Vic</span></div>
+        <div class="event-info-row"><span class="k">Vibes</span><span class="v">Afrohouse · Deep House · Amapiano · Sunset Beach</span></div>
       </div>
       <div class="instructions">
         <h3>How to use</h3>

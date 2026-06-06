@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Door Scanner — Afrohouse Party</title>
+<title>Door Scanner — Beach Party</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Caveat+Brush&family=Dancing+Script:wght@600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
@@ -11,18 +11,18 @@
 <script src="config.js"></script>
 <style>
   :root {
-    --night: #0d0604;
-    --ember: #1a0a05;
-    --amber: #ff6b1a;
-    --amber-deep: #c83e0a;
-    --gold: #fcd116;           /* Cameroonian flag yellow */
-    --gold-soft: #ffb547;
-    --flame: #ff3d00;
-    --green: #009b4c;          /* Cameroonian flag green */
-    --green-deep: #006633;
+    --night: #080c1a;
+    --ember: #0d1630;
+    --amber: #ff7035;
+    --amber-deep: #c84a00;
+    --gold: #ffc547;
+    --gold-soft: #ffad3b;
+    --flame: #ff4c00;
+    --teal: #0d9488;
+    --teal-deep: #065f46;
     --red: #ce1126;
     --cream: #f4e8d4;
-    --valid: #16a34a;
+    --valid: #0d9488;
     --invalid: #dc2626;
     --warn: #f59e0b;
   }
@@ -37,8 +37,9 @@
   }
   body {
     background:
-      radial-gradient(ellipse 90% 60% at 50% 0%, rgba(255, 107, 26, 0.35) 0%, transparent 55%),
-      radial-gradient(ellipse 100% 70% at 50% 35%, rgba(200, 62, 10, 0.2) 0%, transparent 60%),
+      radial-gradient(ellipse 90% 60% at 50% 0%, rgba(255, 120, 50, 0.4) 0%, transparent 55%),
+      radial-gradient(ellipse 100% 70% at 50% 35%, rgba(200, 70, 0, 0.2) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 80%, rgba(13, 148, 136, 0.18) 0%, transparent 60%),
       linear-gradient(180deg, var(--ember) 0%, var(--night) 60%, var(--ember) 100%);
     padding: 16px 12px;
     padding-top: max(16px, env(safe-area-inset-top));
@@ -167,7 +168,7 @@
     inset: 0;
     border-radius: 14px;
     padding: 1.5px;
-    background: linear-gradient(135deg, var(--green) 0%, var(--amber) 50%, var(--gold) 100%);
+    background: linear-gradient(135deg, var(--teal) 0%, var(--amber) 50%, var(--gold) 100%);
     -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
     -webkit-mask-composite: xor;
     mask-composite: exclude;
@@ -190,17 +191,17 @@
     position: relative;
     z-index: 1;
   }
-  .scanner-meta .live { color: var(--green); }
+  .scanner-meta .live { color: var(--teal); }
   .scanner-meta .live::before {
     content: '';
     display: inline-block;
     width: 7px; height: 7px;
     border-radius: 50%;
-    background: var(--green);
+    background: var(--teal);
     margin-right: 6px;
     vertical-align: middle;
     animation: pulse 1.4s infinite;
-    box-shadow: 0 0 12px var(--green);
+    box-shadow: 0 0 12px var(--teal);
   }
   @keyframes pulse {
     0%, 100% { opacity: 1; transform: scale(1); }
@@ -255,11 +256,11 @@
     justify-content: center;
   }
   .result.valid {
-    background: linear-gradient(135deg, var(--green) 0%, var(--green-deep) 100%);
+    background: linear-gradient(135deg, var(--teal) 0%, var(--teal-deep) 100%);
     color: white;
     border-color: var(--gold);
     animation: stamp 0.4s ease;
-    box-shadow: 0 0 40px rgba(0, 155, 76, 0.5);
+    box-shadow: 0 0 40px rgba(13, 148, 136, 0.5);
   }
   .result.invalid {
     background: linear-gradient(135deg, var(--invalid) 0%, #991b1b 100%);
@@ -390,7 +391,7 @@
     flex-shrink: 0;
     font-size: 11px;
   }
-  .log-entry.valid { color: #4ade80; font-weight: 500; }
+  .log-entry.valid { color: #2dd4bf; font-weight: 500; }
   .log-entry.invalid { color: #f87171; font-weight: 500; }
   .log-entry.warn { color: var(--gold); font-weight: 500; }
 
@@ -440,7 +441,7 @@
   <header>
     <img src="assets/NEXA_white.png" alt="Nexa Events" class="top-logo" />
     <div class="top-tagline">Good People <span class="dot">•</span> Good Music <span class="dot">•</span> Good Vibes</div>
-    <h1>Afrohouse<span class="door">Door Scan</span></h1>
+    <h1>Beach<span class="door">Door Scan</span></h1>
     <div class="staff-line">Hi, <span class="name" id="staffName">…</span></div>
   </header>
 
