@@ -310,9 +310,10 @@
   }
   .error-state p {
     color: var(--cream);
-    font-family: 'Dancing Script', cursive;
-    font-size: 22px;
-    font-weight: 700;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    font-weight: 400;
+    opacity: 0.75;
   }
 
   footer {
@@ -429,9 +430,7 @@
       document.getElementById('loading').style.display = 'none';
 
       if (!data.ok) {
-        console.error('Ambassador API error:', data.error);
         document.getElementById('error').style.display = 'block';
-        document.querySelector('.error-state p').textContent = 'API error: ' + (data.error || 'unknown');
         return;
       }
 
@@ -441,7 +440,6 @@
       document.getElementById('stat-earned').textContent = rm(data.amount_earned);
       document.getElementById('stat-paid').textContent = rm(data.amount_paid);
       document.getElementById('stat-owing').textContent = rm(data.amount_owing);
-      document.getElementById('commission-label').textContent = 'RM' + (data.commission_per_ticket || 5);
 
       document.getElementById('content').style.display = 'block';
 
@@ -468,10 +466,8 @@
         renderQRFallback(canvas, referralUrl);
       }
     } catch (err) {
-      console.error('Ambassador page fetch error:', err);
       document.getElementById('loading').style.display = 'none';
       document.getElementById('error').style.display = 'block';
-      document.querySelector('.error-state p').textContent = 'Network error: ' + err.message;
     }
   }
 
