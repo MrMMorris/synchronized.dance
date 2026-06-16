@@ -932,7 +932,7 @@ function onAmbassadorSignupHandler(e) {
   const phone           = findCol('phone')    !== -1 ? String(v[findCol('phone')]).trim()    : '';
   const business        = findCol('business') !== -1 ? String(v[findCol('business')]).trim() : '';
   // Collect whichever payment detail field was filled in
-  const bankNameIdx    = findCol('bank name');
+  const bankNameIdx    = findCol('bank name') !== -1 ? findCol('bank name') : findCol('name of bank');
   const accountNumIdx  = findCol('account number');
   const accountOwnerIdx = findCol('account owner');
   const qrIdx          = findCol('payment qr');
