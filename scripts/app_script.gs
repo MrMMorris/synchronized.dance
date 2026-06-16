@@ -880,15 +880,15 @@ function sendTicketEmail(rowNum) {
         <p style="margin: 0 0 18px; font-size: 14px; line-height: 1.5;">
           Your <strong>${qty} ticket${qty === 1 ? '' : 's'}</strong> (${escapeForHtml(ticketType)}) for ${CONFIG.EVENT_NAME} are confirmed.
         </p>
+        ${isCash ? `<div style="background: #fff3cd; border: 2px solid #0a0a0a; padding: 14px 16px; margin: 0 0 18px; font-size: 13px; line-height: 1.5;">
+          💵 <strong>Cash payment:</strong> Please have your cash ready to pay at the door when you present your ticket.
+        </div>` : ''}
         <div style="text-align: center; margin: 24px 0;">
           <a href="${ticketUrl}" style="display: inline-block; background: #0a0a0a; color: #c6ff3a; padding: 14px 24px; text-decoration: none; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; font-size: 14px; border-radius: 4px;">View Your Tickets →</a>
         </div>
         <p style="margin: 0 0 14px; font-size: 13px; line-height: 1.5; color: #555;">
           Save this email. At the door, open the link and show each QR code to staff — one per guest.
         </p>
-        ${isCash ? `<div style="background: #fff3cd; border: 2px solid #0a0a0a; padding: 14px 16px; margin: 0 0 14px; font-size: 13px; line-height: 1.5;">
-          💵 <strong>Cash payment:</strong> Please have your cash ready to pay at the door when you present your ticket.
-        </div>` : ''}
         <hr style="border: 0; border-top: 1px dashed #0a0a0a; margin: 20px 0;" />
         <div style="font-size: 12px; line-height: 1.6; color: #333;">
           <strong>When:</strong> ${CONFIG.EVENT_DATE}, ${CONFIG.EVENT_TIME}<br/>
