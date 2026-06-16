@@ -580,7 +580,8 @@ function onFormSubmitHandler(e) {
   ticketType   = typeIdx          !== -1 ? v[typeIdx]                               : 'General';
   quantity     = qtyIdx           !== -1 ? parseInt(v[qtyIdx], 10) || 1             : 1;
   paymentProof = screenshotIdx    !== -1 ? v[screenshotIdx]                         : '';
-  const paymentType = paymentMethodIdx !== -1 ? String(v[paymentMethodIdx]).toLowerCase().trim() : '';
+  const rawPaymentType = paymentMethodIdx !== -1 ? String(v[paymentMethodIdx]).toLowerCase().trim() : '';
+  const paymentType = rawPaymentType.startsWith('cash') ? 'cash' : rawPaymentType.startsWith('qr') ? 'qr' : rawPaymentType;
 
   // Calculate total cost from ticket type + quantity
   const unitPrice = priceFor(ticketType);
