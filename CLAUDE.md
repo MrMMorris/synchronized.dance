@@ -58,9 +58,9 @@ Apps Script validates + marks ticket as scanned
 
 ---
 
-## config.js (not in git)
+## config.js
 
-This file must exist alongside the HTML files on the hosted server. It is excluded from git to avoid committing the Apps Script URL publicly.
+This file is committed to git. It holds URLs that the HTML pages read at load time.
 
 ```javascript
 window.WEB_APP_URL = 'https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec';
