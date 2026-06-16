@@ -49,7 +49,8 @@ Apps Script validates + marks ticket as scanned
 | `ambassador.html` | Ambassador dashboard — referral QR + live earnings stats |
 | `ambassador-signup.html` | Pitch page the organizer shows to potential ambassadors — QR links to signup form |
 | `scripts/app_script.gs` | Google Apps Script (local copy only — see Deployment below) |
-| `config.js` | **NOT committed to git** — holds `WEB_APP_URL` and form/ambassador URLs |
+| `config.js` | Committed to git — holds `WEB_APP_URL` and form/ambassador URLs |
+| `_redirects` | Cloudflare Pages redirect rules (e.g. `/join` → ambassador signup form) |
 | `assets/poster.webp` | Current event poster (`?v=N` cache-bust param in index.html) |
 | `assets/background.mp4` | Looping background video for index.html |
 | `assets/background.jpg` | Fallback static background for index.html |
@@ -87,7 +88,10 @@ To deploy changes:
 
 Triggers that must be manually set up in the Apps Script editor:
 - `onFormSubmitHandler` — trigger type: **From spreadsheet → On form submit**
+- `onAmbassadorSignupHandler` — trigger type: **From spreadsheet → On form submit**
 - `onEditHandler` — trigger type: **From spreadsheet → On edit**
+
+**Re-authorization after script changes:** If you add new Google service calls (e.g. switching from `MailApp` to `GmailApp`), the script needs new OAuth scopes. After deploying, open the Apps Script editor, select any function in the dropdown, and click **Run** — this triggers the authorization prompt. Click **Review permissions → Allow**.
 
 ---
 
@@ -100,7 +104,10 @@ Triggers that must be manually set up in the Apps Script editor:
 | `Purchases` | One row per form submission / purchase |
 | `Tickets` | One row per individual ticket (multiple per purchase) |
 | `Scanners` | One row per scanner token (for door staff auth) |
-| `Form Responses 1` | Raw Google Form responses (don't modify) |
+| `Ambassadors` | One row per ambassador — keys, stats, payment details |
+| `Summary` | Organizer-facing totals — updated by "Refresh ambassador stats" |
+| `Form Responses 1` | Raw ticket purchase form responses (don't modify) |
+| `Form Responses 2` | Raw ambassador signup form responses (don't modify) |
 
 ### Purchases tab — critical columns
 
@@ -121,9 +128,10 @@ Triggers that must be manually set up in the Apps Script editor:
 | `purchase_id` | Foreign key back to Purchases |
 | `ticket_type` | Full form option text (e.g. "General Admission — RM55 (...)") |
 | `payment_method` | Copied from Purchases at ticket generation — must exist in this tab |
+| `affiliate_code` | Copied from Purchases at ticket generation — must exist for ambassador tracking |
 | `scanned` | Set to `TRUE` when validated at the door |
 
-**Important:** `payment_method` must be a column in the **Tickets** tab, not just Purchases. The API reads from Tickets for `validate` and `get_tickets` responses.
+**Important:** `payment_method` and `affiliate_code` must be columns in the **Tickets** tab, not just Purchases. The API reads from Tickets for validation responses, and ambassador stats only count tickets where `affiliate_code` matches AND `scanned = TRUE`.
 
 ### Scanners tab
 
@@ -166,6 +174,7 @@ const CONFIG = {
   TICKETS_TAB: 'Tickets',
   SCANNERS_TAB: 'Scanners',
   AMBASSADORS_TAB: 'Ambassadors',
+  SUMMARY_TAB: 'Summary',
   FORM_RESPONSES_TAB: 'Form Responses 1',           // ticket purchase form responses tab
   AMBASSADOR_FORM_RESPONSES_TAB: 'Form Responses 2', // ambassador signup form responses tab
   EVENT_NAME: 'Beach Party',
@@ -174,6 +183,9 @@ const CONFIG = {
   EVENT_VENUE: 'Northern Cove, Penang',
   EVENT_ADDRESS: '515 Jalan C M Hashim, Tanjung Tokong, George Town',
   COMMISSION_PER_TICKET: 5, // RM per confirmed (scanned) ticket sold via ambassador
+  TICKETS_PAGE_URL:    'https://synchronized.dance/tickets.html',
+  SCANNER_PAGE_URL:    'https://synchronized.dance/scanner.html',
+  AMBASSADOR_PAGE_URL: 'https://synchronized.dance/ambassador.html',
 };
 ```
 
@@ -388,12 +400,9 @@ Two form-submit triggers must be installed in the Apps Script editor:
 
 Both are "From spreadsheet → On form submit" triggers. Each function checks `e.range.getSheet().getName()` against `CONFIG.FORM_RESPONSES_TAB` / `CONFIG.AMBASSADOR_FORM_RESPONSES_TAB` to guard against cross-firing.
 
-### Script properties required
+### No script properties required
 
-Run **First-time setup** from the Ticket System menu to set:
-- `SCANNER_PAGE_URL`
-- `TICKETS_PAGE_URL`
-- `AMBASSADOR_PAGE_URL` — base URL for `ambassador.html` (without `?k=`)
+All page URLs (`TICKETS_PAGE_URL`, `SCANNER_PAGE_URL`, `AMBASSADOR_PAGE_URL`) live directly in the `CONFIG` object at the top of `app_script.gs`. The **First-time setup** menu item now just shows a confirmation — no manual property setting is needed.
 
 ### Getting the Referral Code pre-fill entry ID
 
@@ -407,11 +416,29 @@ The ambassador QR encodes: `TICKET_FORM_BASE_URL + '?' + TICKET_FORM_PREFILL_ENT
 
 ---
 
+## Email Sending
+
+All emails (ticket confirmation, order confirmation, ambassador welcome) are sent via `GmailApp.sendEmail()` with:
+```javascript
+from: 'nexa.events.marketing@gmail.com',
+name: 'Nexa Events',
+```
+
+**Setup required for the `from:` alias to work:**
+1. In your personal Gmail: Settings → See all settings → **Accounts and Import** → **Send mail as** → add `nexa.events.marketing@gmail.com` and verify it
+2. After deploying a script version that uses `GmailApp`, run any function manually in the Apps Script editor to trigger re-authorization (GmailApp requires the `gmail.send` OAuth scope)
+
+If emails send but arrive from the wrong address, the alias isn't verified or the script hasn't been re-authorized.
+
+---
+
 ## Google Forms Notes
 
 - Conditional logic (show/hide questions based on previous answer) is supported natively via the form editor — useful for showing a QR upload field only if QR payment is selected
 - Forms cannot be version-controlled in git; changes are made directly in the form editor
 - The form must include a "Payment method" field (case-insensitive — `findCol()` in the script handles it)
+- The referral/affiliate code field is matched by searching for "referral" or "ambassador" as a substring — the question can be named e.g. "Referral Code (ignore)" or "Ambassador code (Ignore)"
+- Ambassador signup bank detail fields are matched by: "bank name" or "name of bank", "account number", "account owner" — order of words in the question title doesn't matter
 
 ---
 
@@ -419,7 +446,7 @@ The ambassador QR encodes: `TICKET_FORM_BASE_URL + '?' + TICKET_FORM_PREFILL_ENT
 
 Deployed on **Cloudflare Pages** (see `wrangler.jsonc`). Static files only — no server-side logic. The `_headers` file sets response headers (caching, security).
 
-`config.js` must be manually uploaded or set as an environment secret/file since it is not in git.
+`config.js` is committed to git and deployed automatically with the rest of the site.
 
 ### Redirects (`_redirects`)
 
