@@ -1051,6 +1051,8 @@ function getAmbassadorStats(key) {
   const aBusinessCol = aHeaders.indexOf('business');
   const aPaidCol    = aHeaders.indexOf('amount_paid');
 
+  if (aKeyCol === -1) return { ok: false, error: 'ambassador_key column not found in Ambassadors tab' };
+
   let ambassador = null;
   for (let i = 1; i < aData.length; i++) {
     if (String(aData[i][aKeyCol]).trim() === String(key).trim()) {
