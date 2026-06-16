@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Your Tickets — Beach Party Tickets</title>
+<title>Your Tickets — Nexa Events</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Caveat+Brush&family=Dancing+Script:wght@600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
@@ -25,9 +25,21 @@
     }
     tryNext();
   })();
+
+  // Inject event theme as early as possible to minimize unstyled flash
+  (function injectTheme() {
+    const p = new URLSearchParams(window.location.search);
+    const id = p.get('event');
+    if (!id) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = '/events/' + id + '/theme.css';
+    document.head.appendChild(link);
+  })();
 </script>
 <script src="config.js"></script>
 <style>
+  /* Default theme vars — overridden by per-event theme.css */
   :root {
     --night: #080c1a;
     --ember: #0d1630;
@@ -147,7 +159,7 @@
       0 2px 0 rgba(0,0,0,0.6),
       0 0 25px rgba(252, 209, 22, 0.5);
   }
-  
+
   .subtitle {
     margin-top: 18px;
     font-family: 'Dancing Script', cursive;
@@ -191,7 +203,6 @@
       0 12px 30px -10px rgba(0,0,0,0.8),
       inset 0 1px 0 rgba(255, 255, 255, 0.04);
   }
-  /* Tri-color border drawing from the flag */
   .ticket::before {
     content: '';
     position: absolute;
@@ -357,7 +368,6 @@
       0 20px 40px -10px rgba(0,0,0,0.6);
     transform: rotate(-0.5deg);
   }
-  /* Torn-paper top edge */
   .event-info::before {
     content: '';
     position: absolute;
@@ -443,9 +453,7 @@
     line-height: 1.7;
     color: var(--cream);
   }
-  .instructions li {
-    margin-bottom: 6px;
-  }
+  .instructions li { margin-bottom: 6px; }
 
   /* Error state */
   .error-state {
@@ -580,11 +588,11 @@
   <header>
     <img src="assets/NEXA_white.png" alt="Nexa Events" class="top-logo" />
     <div class="top-tagline">Good People <span class="dot">•</span> Good Music <span class="dot">•</span> Good Vibes</div>
-    <h1>Beach Party<span class="tickets">Tickets</span></h1>
+    <h1><span id="eventTitle">Your</span><span class="tickets">Tickets</span></h1>
     <div class="subtitle" id="subtitle">Loading…</div>
   </header>
   <div id="content"><div class="loading">Fetching your tickets…</div></div>
-  <footer>June 27 <span class="accent">✦</span> Northern Cove, Penang <span class="accent">✦</span> 4PM – 12AM</footer>
+  <footer id="footer">Nexa Events</footer>
 </div>
 <script>
   const WEB_APP_URL = window.WEB_APP_URL;
@@ -592,12 +600,35 @@
   const content = document.getElementById('content');
   const params = new URLSearchParams(window.location.search);
   const key = params.get('k');
+  const eventIdParam = params.get('event');
 
   const debugState = {
     url: null, key: key, webAppUrl: WEB_APP_URL,
     startTime: null, endTime: null, error: null, errorType: null,
     response: null, diagnosticFetch: null,
   };
+
+  function loadEventTheme(eventId) {
+    if (!eventId) return;
+    // Only inject if not already injected by the early inline script
+    if (eventIdParam === eventId) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = '/events/' + eventId + '/theme.css';
+    document.head.appendChild(link);
+  }
+
+  function applyEventMeta(event) {
+    if (!event) return;
+    if (event.name) document.getElementById('eventTitle').textContent = event.name;
+    if (event.date && event.venue && event.time) {
+      document.getElementById('footer').innerHTML =
+        escapeHtml(event.date) + ' <span class="accent">✦</span> ' +
+        escapeHtml(event.venue) + ' <span class="accent">✦</span> ' +
+        escapeHtml(event.time);
+    }
+    if (event.id && event.id !== eventIdParam) loadEventTheme(event.id);
+  }
 
   function fetchJson(url) {
     return new Promise(async (resolve, reject) => {
@@ -735,7 +766,8 @@
         showError('Not Found', resp.error || 'Could not find tickets for this link.', true);
         return;
       }
-      await render(resp.buyer_name, resp.tickets);
+      applyEventMeta(resp.event);
+      await render(resp.buyer_name, resp.tickets, resp.event);
     } catch (err) {
       debugState.error = err.detail || err.message || String(err);
       debugState.errorType = err.type || 'UNKNOWN';
@@ -762,7 +794,7 @@
     if (errMsg) console.error('QR generation failed:', errMsg);
   }
 
-  async function render(buyerName, tickets) {
+  async function render(buyerName, tickets, event) {
     const unused = tickets.filter(t => !t.scanned).length;
     const total = tickets.length;
     subtitle.innerHTML = `Issued to <span class="buyer">${escapeHtml(buyerName)}</span>`;
@@ -795,15 +827,18 @@
       `;
     });
 
+    if (event) {
+      html += `
+        <div class="event-info">
+          <h3>Event Details</h3>
+          <div class="event-info-row"><span class="k">Event</span><span class="v">${escapeHtml(event.date)} — ${escapeHtml(event.name)}</span></div>
+          <div class="event-info-row"><span class="k">Time</span><span class="v">${escapeHtml(event.time)}</span></div>
+          <div class="event-info-row"><span class="k">Venue</span><span class="v">${escapeHtml(event.venue)}</span></div>
+        </div>
+      `;
+    }
+
     html += `
-      <div class="event-info">
-        <h3>Event Details</h3>
-        <div class="event-info-row"><span class="k">Date</span><span class="v">June 27 — Beach Party</span></div>
-        <div class="event-info-row"><span class="k">Time</span><span class="v">4PM – 12AM</span></div>
-        <div class="event-info-row"><span class="k">Venue</span><span class="v">Northern Cove, Penang</span></div>
-        <div class="event-info-row"><span class="k">On Deck</span><span class="v">DJ Shlant · DJ Awie · DJ Vic</span></div>
-        <div class="event-info-row"><span class="k">Vibes</span><span class="v">Afrohouse · Deep House · Amapiano · Sunset Beach</span></div>
-      </div>
       <div class="instructions">
         <h3>How to use</h3>
         <ol>

@@ -29,9 +29,10 @@ const CONFIG = {
   AMBASSADORS_TAB: 'Ambassadors',
   FORM_RESPONSES_TAB: 'Form Responses 1',          // default name Google Forms creates
   AMBASSADOR_FORM_RESPONSES_TAB: 'Form Responses 2', // tab created when ambassador signup form is linked
-  EVENT_NAME: 'Beach Party',
-  EVENT_DATE: 'June 27',
-  EVENT_TIME: '4PM – 12AM',
+  EVENT_ID:    '27_06_2026-beach_party-afrohouse_amapiano_deep_house', // matches events/ folder name
+  EVENT_NAME:  'Beach Party',
+  EVENT_DATE:  'June 27',
+  EVENT_TIME:  '4PM – 12AM',
   EVENT_VENUE: 'Northern Cove, Penang',
   EVENT_ADDRESS: '515 Jalan C M Hashim, Tanjung Tokong, George Town',
   COMMISSION_PER_TICKET: 5, // RM per confirmed (scanned) ticket — update per event
@@ -56,6 +57,7 @@ function onOpen() {
     .addItem('Resend ticket email…', 'resendTicketEmailPrompt')
     .addSeparator()
     .addItem('Refresh ambassador stats', 'refreshAmbassadorStats')
+    .addItem('Refresh event stats', 'refreshEventStats')
     .addSeparator()
     .addItem('First-time setup', 'setupScriptProperties')
     .addToUi();
@@ -293,7 +295,18 @@ function getTicketsForBuyer(key) {
     }
   }
 
-  return { ok: true, buyer_name: buyerName, tickets: tickets };
+  return {
+    ok: true,
+    buyer_name: buyerName,
+    tickets: tickets,
+    event: {
+      id:    CONFIG.EVENT_ID,
+      name:  CONFIG.EVENT_NAME,
+      date:  CONFIG.EVENT_DATE,
+      time:  CONFIG.EVENT_TIME,
+      venue: CONFIG.EVENT_VENUE,
+    },
+  };
 }
 
 // ============================================================================
@@ -309,6 +322,7 @@ function generateTickets() {
   const ticketsSheet = ss.getSheetByName(CONFIG.TICKETS_TAB);
 
   // Ensure required columns exist on Purchases
+  ensureColumn(purchasesSheet, 'event_id');
   ensureColumn(purchasesSheet, 'purchase_id');
   ensureColumn(purchasesSheet, 'purchase_key');
   ensureColumn(purchasesSheet, 'buyer_ticket_url');
@@ -377,7 +391,7 @@ function generateTickets() {
     const rowNum = i + 1;
     purchasesSheet.getRange(rowNum, pCols.purchase_id + 1).setValue(purchaseId);
     purchasesSheet.getRange(rowNum, pCols.purchase_key + 1).setValue(purchaseKey);
-    purchasesSheet.getRange(rowNum, pCols.buyer_ticket_url + 1).setValue(`${ticketsBaseUrl}?k=${purchaseKey}`);
+    purchasesSheet.getRange(rowNum, pCols.buyer_ticket_url + 1).setValue(`${ticketsBaseUrl}?event=${CONFIG.EVENT_ID}&k=${purchaseKey}`);
     purchasesSheet.getRange(rowNum, pCols.tickets_generated + 1).setValue(true);
 
     generated += qty;
@@ -583,6 +597,7 @@ function onFormSubmitHandler(e) {
   const purchaseHeaders = purchasesSheet.getRange(1, 1, 1, purchasesSheet.getLastColumn()).getValues()[0];
   const newRow = new Array(purchaseHeaders.length).fill('');
   const valueMap = {
+    'event_id': CONFIG.EVENT_ID,
     'buyer_name': buyerName,
     'buyer_email': buyerEmail,
     'buyer_phone': '',         // not collected; left blank
@@ -749,6 +764,7 @@ function generateTicketsForRow(rowNum) {
   const purchasesSheet = ss.getSheetByName(CONFIG.PURCHASES_TAB);
   const ticketsSheet = ss.getSheetByName(CONFIG.TICKETS_TAB);
 
+  ensureColumn(purchasesSheet, 'event_id');
   ensureColumn(purchasesSheet, 'purchase_id');
   ensureColumn(purchasesSheet, 'purchase_key');
   ensureColumn(purchasesSheet, 'buyer_ticket_url');
@@ -795,6 +811,7 @@ function generateTicketsForRow(rowNum) {
     newRows.push(buildTicketRow({
       ticket_id: randomKey(16),
       purchase_id: purchaseId,
+      event_id: CONFIG.EVENT_ID,
       buyer_name: rowData[pCols.name],
       ticket_type: rowData[pCols.ticket_type],
       payment_method: pCols.payment_method !== -1 ? rowData[pCols.payment_method] : '',
@@ -806,10 +823,12 @@ function generateTicketsForRow(rowNum) {
   }
   ticketsSheet.getRange(ticketsSheet.getLastRow() + 1, 1, newRows.length, tHeaders.length).setValues(newRows);
 
+  const eventIdCol = headers.indexOf('event_id');
   purchasesSheet.getRange(rowNum, pCols.purchase_id + 1).setValue(purchaseId);
   purchasesSheet.getRange(rowNum, pCols.purchase_key + 1).setValue(purchaseKey);
-  purchasesSheet.getRange(rowNum, pCols.buyer_ticket_url + 1).setValue(`${ticketsBaseUrl}?k=${purchaseKey}`);
+  purchasesSheet.getRange(rowNum, pCols.buyer_ticket_url + 1).setValue(`${ticketsBaseUrl}?event=${CONFIG.EVENT_ID}&k=${purchaseKey}`);
   purchasesSheet.getRange(rowNum, pCols.tickets_generated + 1).setValue(true);
+  if (eventIdCol !== -1) purchasesSheet.getRange(rowNum, eventIdCol + 1).setValue(CONFIG.EVENT_ID);
 
   return { ok: true, generated: qty };
 }
@@ -1158,6 +1177,41 @@ function refreshAmbassadorStats() {
   updateSummaryRow(ss, 'Ambassador payouts — owing',  totalOwing);
 
   SpreadsheetApp.getUi().alert('Ambassador stats updated.');
+}
+
+/**
+ * Menu action: writes per-event ticket totals to the Summary tab.
+ * Groups Tickets by event_id and counts total and scanned.
+ */
+function refreshEventStats() {
+  const ss = SpreadsheetApp.getActive();
+  const ticketsSheet = ss.getSheetByName(CONFIG.TICKETS_TAB);
+  if (!ticketsSheet) { SpreadsheetApp.getUi().alert('No Tickets tab found.'); return; }
+
+  const tData = ticketsSheet.getDataRange().getValues();
+  const tHeaders = tData[0];
+  const tEventCol   = tHeaders.indexOf('event_id');
+  const tScannedCol = tHeaders.indexOf('scanned');
+
+  // Build map: event_id → { total, scanned }
+  const eventMap = {};
+  for (let i = 1; i < tData.length; i++) {
+    const eventId = tEventCol !== -1 ? String(tData[i][tEventCol]).trim() : CONFIG.EVENT_ID;
+    if (!eventId) continue;
+    if (!eventMap[eventId]) eventMap[eventId] = { total: 0, scanned: 0 };
+    eventMap[eventId].total++;
+    if (tData[i][tScannedCol] === true || String(tData[i][tScannedCol]).toUpperCase() === 'TRUE') {
+      eventMap[eventId].scanned++;
+    }
+  }
+
+  for (const eventId in eventMap) {
+    const { total, scanned } = eventMap[eventId];
+    updateSummaryRow(ss, `${eventId} — tickets_total`, total);
+    updateSummaryRow(ss, `${eventId} — tickets_scanned`, scanned);
+  }
+
+  SpreadsheetApp.getUi().alert('Event stats updated.');
 }
 
 /**

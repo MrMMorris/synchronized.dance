@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Door Scanner — Beach Party Tickets</title>
+<title>Door Scanner — Nexa Events</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Caveat+Brush&family=Dancing+Script:wght@600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
@@ -11,17 +11,17 @@
 <script src="config.js"></script>
 <style>
   :root {
-    --night: #080c1a;
-    --ember: #0d1630;
-    --amber: #ff7035;
-    --amber-deep: #c84a00;
-    --gold: #ffc547;
-    --gold-soft: #ffad3b;
-    --flame: #ff4c00;
+    --night: #080808;
+    --ember: #111111;
+    --amber: #c9a227;
+    --amber-deep: #8b6d14;
+    --gold: #f0c040;
+    --gold-soft: #d4af37;
+    --flame: #c9a227;
     --teal: #0d9488;
     --teal-deep: #065f46;
     --red: #ce1126;
-    --cream: #f4e8d4;
+    --cream: #f0f0f0;
     --valid: #0d9488;
     --invalid: #dc2626;
     --warn: #f59e0b;
@@ -37,10 +37,8 @@
   }
   body {
     background:
-      radial-gradient(ellipse 90% 60% at 50% 0%, rgba(255, 120, 50, 0.4) 0%, transparent 55%),
-      radial-gradient(ellipse 100% 70% at 50% 35%, rgba(200, 70, 0, 0.2) 0%, transparent 60%),
-      radial-gradient(ellipse 60% 40% at 80% 80%, rgba(13, 148, 136, 0.18) 0%, transparent 60%),
-      linear-gradient(180deg, var(--ember) 0%, var(--night) 60%, var(--ember) 100%);
+      radial-gradient(ellipse 80% 40% at 50% 0%, rgba(212, 175, 55, 0.08) 0%, transparent 60%),
+      linear-gradient(180deg, var(--ember) 0%, var(--night) 70%, var(--ember) 100%);
     padding: 16px 12px;
     padding-top: max(16px, env(safe-area-inset-top));
     padding-bottom: max(16px, env(safe-area-inset-bottom));
@@ -51,7 +49,7 @@
     content: '';
     position: fixed;
     inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 0.7 0 0 0 0 0.3 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.9 0 0 0 0 0.82 0 0 0 0 0.5 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     pointer-events: none;
     z-index: 0;
     opacity: 0.6;
@@ -71,10 +69,9 @@
   }
   .top-logo {
      display: block;
-     margin: 0 auto 18px;
-     height: 150px;
+     margin: 0 auto 14px;
+     height: 80px;
      width: auto;
-     transform: rotate(-2deg);
   }
   .top-tagline {
     font-family: 'Inter', sans-serif;
@@ -96,7 +93,7 @@
     text-transform: uppercase;
     text-shadow:
       0 2px 0 rgba(0,0,0,0.5),
-      0 0 25px rgba(255, 107, 26, 0.4);
+      0 0 25px rgba(212, 175, 55, 0.25);
     transform: rotate(-1deg);
   }
   h1 .door {
@@ -110,7 +107,7 @@
     margin-top: -4px;
     text-shadow:
       0 2px 0 rgba(0,0,0,0.6),
-      0 0 20px rgba(255, 181, 71, 0.5);
+      0 0 20px rgba(240, 192, 64, 0.4);
   }
   .staff-line {
     margin-top: 12px;
@@ -129,7 +126,7 @@
     text-align: center;
     padding: 40px 24px;
     background: rgba(0, 0, 0, 0.5);
-    border: 1px solid rgba(255, 181, 71, 0.3);
+    border: 1px solid rgba(212, 175, 55, 0.25);
     border-radius: 14px;
     backdrop-filter: blur(8px);
   }
@@ -137,7 +134,7 @@
     font-family: 'Bagel Fat One', cursive;
     font-size: 44px;
     color: var(--flame);
-    text-shadow: 0 0 25px rgba(255, 60, 0, 0.5);
+    text-shadow: 0 0 25px rgba(212, 175, 55, 0.4);
     margin-bottom: 14px;
     letter-spacing: 1px;
   }
@@ -156,11 +153,11 @@
     overflow: hidden;
     margin-bottom: 18px;
     position: relative;
-    border: 1px solid rgba(255, 181, 71, 0.3);
+    border: 1px solid rgba(212, 175, 55, 0.25);
     box-shadow:
       0 0 0 1px rgba(0,0,0,0.5),
       0 12px 30px -10px rgba(0,0,0,0.8),
-      0 0 40px rgba(255, 107, 26, 0.15);
+      0 0 40px rgba(212, 175, 55, 0.08);
   }
   .scanner-card::before {
     content: '';
@@ -187,7 +184,7 @@
     letter-spacing: 2px;
     text-transform: uppercase;
     color: var(--gold);
-    border-bottom: 1px dashed rgba(255, 181, 71, 0.2);
+    border-bottom: 1px dashed rgba(212, 175, 55, 0.2);
     position: relative;
     z-index: 1;
   }
@@ -219,7 +216,7 @@
   #reader__scan_region { background: #000 !important; }
   #reader__scan_region img { display: none !important; }
 
-  /* RESULT — high contrast for fast reading at the door */
+  /* RESULT */
   .result {
     padding: 22px;
     min-height: 150px;
@@ -228,7 +225,7 @@
     transition: transform 0.12s ease;
     position: relative;
     overflow: hidden;
-    border: 1px solid rgba(255, 181, 71, 0.25);
+    border: 1px solid rgba(212, 175, 55, 0.2);
     box-shadow: 0 8px 24px rgba(0,0,0,0.5);
   }
   .result.idle {
@@ -281,7 +278,7 @@
     color: #fff8e7;
     border-color: var(--gold);
     animation: stamp 0.4s ease;
-    box-shadow: 0 0 50px rgba(255, 181, 71, 0.5);
+    box-shadow: 0 0 50px rgba(212, 175, 55, 0.4);
   }
   .swipe-track {
     position: relative;
@@ -421,7 +418,7 @@
     text-transform: uppercase;
     letter-spacing: 2px;
     padding: 14px;
-    border: 1px solid rgba(255, 181, 71, 0.3);
+    border: 1px solid rgba(212, 175, 55, 0.25);
     background: rgba(0, 0, 0, 0.5);
     color: var(--cream);
     cursor: pointer;
@@ -429,20 +426,18 @@
     border-radius: 10px;
     backdrop-filter: blur(8px);
   }
-  button:active {
-    transform: scale(0.97);
-  }
+  button:active { transform: scale(0.97); }
   button.primary {
     background: linear-gradient(135deg, var(--amber) 0%, var(--amber-deep) 100%);
     color: var(--ember);
     border-color: var(--amber);
-    box-shadow: 0 0 20px rgba(255, 107, 26, 0.3);
+    box-shadow: 0 0 20px rgba(201, 162, 39, 0.3);
   }
 
   /* Log */
   .log {
     background: rgba(0, 0, 0, 0.4);
-    border: 1px solid rgba(255, 181, 71, 0.25);
+    border: 1px solid rgba(212, 175, 55, 0.2);
     border-radius: 12px;
     padding: 18px;
     backdrop-filter: blur(8px);
@@ -459,14 +454,14 @@
     font-family: 'JetBrains Mono', monospace;
     font-size: 12px;
     padding: 7px 0;
-    border-bottom: 1px dashed rgba(255, 181, 71, 0.15);
+    border-bottom: 1px dashed rgba(212, 175, 55, 0.15);
     display: flex;
     justify-content: space-between;
     gap: 10px;
   }
   .log-entry:last-child { border-bottom: 0; }
   .log-entry .time {
-    color: rgba(244, 232, 212, 0.5);
+    color: rgba(240, 240, 240, 0.5);
     flex-shrink: 0;
     font-size: 11px;
   }
@@ -478,7 +473,7 @@
   .stub {
     margin-top: 18px;
     padding-top: 14px;
-    border-top: 1px dashed rgba(255, 181, 71, 0.2);
+    border-top: 1px dashed rgba(212, 175, 55, 0.2);
     display: flex;
     justify-content: space-between;
     font-family: 'JetBrains Mono', monospace;
@@ -488,10 +483,7 @@
     color: var(--cream);
     opacity: 0.6;
   }
-  .stub b {
-    color: var(--gold);
-    font-weight: 700;
-  }
+  .stub b { color: var(--gold); font-weight: 700; }
 
   .error-box {
     background: rgba(206, 17, 38, 0.15);
@@ -511,7 +503,7 @@
     display: block;
     margin-bottom: 8px;
     letter-spacing: 1px;
-    text-shadow: 0 0 15px rgba(255, 60, 0, 0.5);
+    text-shadow: 0 0 15px rgba(212, 175, 55, 0.4);
   }
 </style>
 </head>
@@ -519,8 +511,8 @@
 <div class="app">
   <header>
     <img src="assets/NEXA_white.png" alt="Nexa Events" class="top-logo" />
-    <div class="top-tagline">Good People <span class="dot">•</span> Good Music <span class="dot">•</span> Good Vibes</div>
-    <h1>Beach Party<span class="door">Door Scan</span></h1>
+    <div class="top-tagline">★<span class="dot">•</span>Nexa Events<span class="dot">•</span>★</div>
+    <h1>Nexa Events<span class="door">Door Scan</span></h1>
     <div class="staff-line">Hi, <span class="name" id="staffName">…</span></div>
   </header>
 

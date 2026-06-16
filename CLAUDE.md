@@ -14,7 +14,7 @@ onFormSubmitHandler: writes row to Purchases with payment_confirmed = TRUE
         ↓
 Immediately generates tickets + sends ticket email
         ↓
-Attendee visits tickets.html?k=<purchase_key>
+Attendee visits tickets.html?event=<event_id>&k=<purchase_key>
         ↓
 Door staff scans QR → cash modal → swipe to confirm + mark scanned
 ```
@@ -42,20 +42,105 @@ Apps Script validates + marks ticket as scanned
 
 | File | Role |
 |---|---|
-| `index.html` | Landing page — poster, map link, Google Form link |
-| `signup.html` | Email list signup (Brevo form only, same styles as index.html) |
-| `tickets.html` | Buyer-facing ticket viewer — shows QR codes per ticket |
-| `scanner.html` | Door staff scanner — uses camera to scan QR codes |
-| `ambassador.html` | Ambassador dashboard — referral QR + live earnings stats |
-| `ambassador-signup.html` | Pitch page the organizer shows to potential ambassadors — QR links to signup form |
+| `index.html` | Landing page — lists active event buttons + email signup form |
+| `signup.html` | Email list signup (standalone page, same Brevo form as index.html) |
+| `tickets.html` | Buyer-facing ticket viewer — loads per-event theme, shows QR codes |
+| `scanner.html` | Door staff scanner — validates tickets across all active events |
+| `ambassador.html` | Ambassador dashboard — per-event referral QRs + live earnings stats |
+| `ambassador-signup.html` | Pitch page the organizer shows to potential ambassadors |
+| `events.json` | Registry of all events — read by index.html and ambassador.html at runtime |
+| `events/<event_id>/` | Per-event folder (see Event Folder Structure below) |
 | `scripts/app_script.gs` | Google Apps Script (local copy only — see Deployment below) |
-| `config.js` | Committed to git — holds `WEB_APP_URL` and form/ambassador URLs |
+| `config.js` | Committed to git — holds `WEB_APP_URL` and `AMBASSADOR_SIGNUP_FORM_URL` |
 | `_redirects` | Cloudflare Pages redirect rules (e.g. `/join` → ambassador signup form) |
-| `assets/poster.webp` | Current event poster (`?v=N` cache-bust param in index.html) |
-| `assets/background.mp4` | Looping background video for index.html |
-| `assets/background.jpg` | Fallback static background for index.html |
+| `assets/` | Shared assets: NEXA logo, background video/image, Google Maps icon |
 | `_headers` | Cloudflare Pages response headers |
 | `wrangler.jsonc` | Cloudflare Pages config |
+
+### Event Folder Structure
+
+Each event lives in `events/<event_id>/` where `event_id` follows the convention:
+`<dd_mm_yyyy>-<event_name>-<genre_genre_genre>`
+
+Example: `events/27_06_2026-beach_party-afrohouse_amapiano_deep_house/`
+
+| File | Role |
+|---|---|
+| `poster.webp` | Event poster image (provided by organizer) |
+| `theme.css` | CSS variable overrides + body background for this event's palette |
+| `index.html` | Event landing page — poster, map link, ticket purchase button |
+
+Cloudflare Pages serves `events/<event_id>/index.html` at the URL `/events/<event_id>/`.
+
+`tickets.html` loads the theme via `<link rel="stylesheet" href="/events/<event_id>/theme.css">` — injected early (before API call) from the `?event=` URL param, and also after the API returns the event object.
+
+---
+
+## New Event Setup Procedure
+
+When the user says "set up a new event" and points to an event folder (or creates one), follow these steps in order. This is the authoritative checklist for Claude to use in future sessions.
+
+### Step 1 — Parse the folder name
+Folder: `events/<dd_mm_yyyy>-<event_name>-<genre_genre_genre>/`
+Extract: date, event name (spaces from underscores), genres list.
+
+### Step 2 — Analyze the poster
+Read `events/<event_id>/poster.webp` visually. Identify dominant colors. Generate `events/<event_id>/theme.css` with matching CSS vars and body background. See **CSS Theming Guide** below for the exact variables to set.
+
+### Step 3 — Ask the user for these details
+- Google Maps URL for the venue
+- Ticket form URL (the `viewform` URL of the new Google Form for this event)
+- Ticket form prefill entry ID (see "Getting the Referral Code pre-fill entry ID" in Ambassador Program section)
+- Event time (e.g. `4PM – 12AM`)
+- Venue name (display name)
+- Venue address (full address for emails)
+- Artists/headliners (for the event-info section on tickets)
+- Confirm genres match the folder name
+
+### Step 4 — Create `events/<event_id>/index.html`
+Event landing page. Use the same structure as `events/27_06_2026-beach_party-afrohouse_amapiano_deep_house/index.html` as a template. Update: title, meta description, date, event name, venue info, form URL, maps URL.
+
+### Step 5 — Update `events.json`
+Add a new entry to the array. Required fields:
+```json
+{
+  "id": "<event_id>",
+  "date_iso": "YYYY-MM-DD",
+  "date_display": "Month DD",
+  "name": "Event Name",
+  "genres": ["Genre1", "Genre2"],
+  "time": "Xpm – Yam",
+  "venue": "Venue Name",
+  "address": "Full address",
+  "maps_url": "https://maps.app.goo.gl/...",
+  "ticket_form_url": "https://docs.google.com/forms/d/.../viewform",
+  "ticket_form_prefill_entry": "entry.XXXXXXXXXX",
+  "accent_color": "#rrggbb"
+}
+```
+Pick `accent_color` from the poster's dominant warm hue.
+
+### Step 6 — Update `scripts/app_script.gs` CONFIG
+Change these fields to match the new event:
+- `EVENT_ID`: new event folder name
+- `EVENT_NAME`, `EVENT_DATE`, `EVENT_TIME`, `EVENT_VENUE`, `EVENT_ADDRESS`
+- `FORM_RESPONSES_TAB`: name of the new form's response tab in the spreadsheet (usually "Form Responses 3" etc.)
+- `COMMISSION_PER_TICKET`: confirm with user
+
+### Step 7 — Output the manual checklist
+Print this for the user:
+```
+Manual steps remaining:
+[ ] Copy updated app_script.gs to Google Apps Script editor → Deploy new version
+[ ] Create new Google Form for this event (ticket types, prices, payment method, referral code field)
+[ ] Link the new form to the spreadsheet (Form editor → Responses → Link to spreadsheet)
+[ ] Add event_id column to Purchases tab (if not already there)
+[ ] Add event_id column to Tickets tab (if not already there)
+[ ] Update FORM_RESPONSES_TAB in CONFIG to match the new form responses tab name
+[ ] Install onFormSubmitHandler trigger for the new responses tab
+[ ] Get the referral code prefill entry ID and confirm it matches events.json
+[ ] Copy poster.webp into events/<event_id>/ if not already there
+```
 
 ---
 
@@ -65,14 +150,12 @@ This file is committed to git. It holds URLs that the HTML pages read at load ti
 
 ```javascript
 window.WEB_APP_URL = 'https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec';
-
-// Ambassador feature — get these from your Google Forms
-window.TICKET_FORM_BASE_URL      = 'https://docs.google.com/forms/d/YOUR_TICKET_FORM_ID/viewform';
-window.TICKET_FORM_PREFILL_ENTRY = 'entry.1234567890'; // get from Form → ⋮ → Get pre-filled link
-window.AMBASSADOR_SIGNUP_FORM_URL = 'https://docs.google.com/forms/d/YOUR_SIGNUP_FORM_ID/viewform';
+window.AMBASSADOR_SIGNUP_FORM_URL = 'https://synchronized.dance/join';
 ```
 
 `tickets.html`, `scanner.html`, `ambassador.html`, and `ambassador-signup.html` all load `config.js` via `<script src="config.js">`.
+
+Per-event ticket form URLs and prefill entry IDs now live in `events.json`, not `config.js`. `ambassador.html` fetches `events.json` at runtime to build per-event referral QRs.
 
 ---
 
@@ -113,17 +196,19 @@ Triggers that must be manually set up in the Apps Script editor:
 
 | Column | Notes |
 |---|---|
+| `event_id` | Matches the event folder name — written from `CONFIG.EVENT_ID` |
 | `purchase_id` | Unique ID for the purchase |
-| `purchase_key` | Secret key used in the buyer's ticket URL (`?k=`) |
+| `purchase_key` | Secret key used in the buyer's ticket URL (`?event=...&k=`) |
 | `payment_method` | `qr` or `cash` — normalized in `onFormSubmitHandler` |
 | `payment_confirmed` | Set to `TRUE` by organizer to trigger ticket generation + email |
 | `tickets_generated` | Set to `TRUE` by script after `generateTicketsForRow` runs |
-| `buyer_ticket_url` | Full URL sent in the email |
+| `buyer_ticket_url` | Full URL sent in the email — includes `?event=<EVENT_ID>&k=<key>` |
 
 ### Tickets tab — critical columns
 
 | Column | Notes |
 |---|---|
+| `event_id` | Copied from Purchases at ticket generation — matches event folder name |
 | `ticket_id` | The string encoded in the QR code |
 | `purchase_id` | Foreign key back to Purchases |
 | `ticket_type` | Full form option text (e.g. "General Admission — RM55 (...)") |
@@ -177,9 +262,10 @@ const CONFIG = {
   SUMMARY_TAB: 'Summary',
   FORM_RESPONSES_TAB: 'Form Responses 1',           // ticket purchase form responses tab
   AMBASSADOR_FORM_RESPONSES_TAB: 'Form Responses 2', // ambassador signup form responses tab
-  EVENT_NAME: 'Beach Party',
-  EVENT_DATE: 'June 27',
-  EVENT_TIME: '4PM – 12AM',
+  EVENT_ID:    '27_06_2026-beach_party-afrohouse_amapiano_deep_house', // matches events/ folder name
+  EVENT_NAME:  'Beach Party',
+  EVENT_DATE:  'June 27',
+  EVENT_TIME:  '4PM – 12AM',
   EVENT_VENUE: 'Northern Cove, Penang',
   EVENT_ADDRESS: '515 Jalan C M Hashim, Tanjung Tokong, George Town',
   COMMISSION_PER_TICKET: 5, // RM per confirmed (scanned) ticket sold via ambassador
@@ -189,7 +275,9 @@ const CONFIG = {
 };
 ```
 
-`EVENT_*` values are used in the ticket and ambassador welcome emails. The hardcoded event details in the `event-info` section and footer of `tickets.html` must also be updated manually per event.
+`EVENT_*` values are used in ticket emails and the `get_tickets` API response. The `tickets.html` event-info section and footer are now populated from `resp.event` (returned by the API), so they update automatically when CONFIG is updated.
+
+`EVENT_ID` must match the event folder name exactly — it's included in `buyer_ticket_url` (`?event=<EVENT_ID>&k=<key>`) and written to the `event_id` column in both Purchases and Tickets tabs.
 
 ---
 

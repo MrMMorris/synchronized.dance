@@ -234,6 +234,19 @@
     margin-bottom: 20px;
     opacity: 0.9;
   }
+  .qr-event-card {
+    margin-bottom: 24px;
+  }
+  .qr-event-card:last-child { margin-bottom: 0; }
+  .qr-event-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold-soft);
+    margin-bottom: 14px;
+    opacity: 0.85;
+  }
   .qr-wrap {
     background: var(--cream);
     padding: 12px;
@@ -261,8 +274,13 @@
     opacity: 0.8;
   }
   .qr-note strong { color: var(--gold); opacity: 1; }
+  .qr-divider {
+    border: none;
+    border-top: 1px dashed rgba(212, 175, 55, 0.2);
+    margin: 20px 0;
+  }
 
-  /* Instructions */
+  /* Info block */
   .info-block {
     background: rgba(0, 0, 0, 0.4);
     backdrop-filter: blur(8px);
@@ -369,16 +387,14 @@
     </div>
 
     <div class="qr-section">
-      <div class="qr-heading">Your Referral QR</div>
-      <div class="qr-wrap">
-        <canvas id="qr-canvas"></canvas>
-      </div>
+      <div class="qr-heading">Your Referral QRs</div>
+      <div id="qr-cards"></div>
     </div>
 
     <div class="info-block">
       <h3>How it works</h3>
       <ol>
-        <li>Show or share your QR — buyers scan it to open the ticket purchase form with your code pre-filled.</li>
+        <li>Show or share the QR for an event — buyers scan it to open the ticket form with your code pre-filled.</li>
         <li>Once a ticket is scanned and confirmed at the door, it counts toward your total.</li>
         <li>After the event, payouts are sent based on your confirmed count.</li>
       </ol>
@@ -393,8 +409,6 @@
 <script>
   const key = new URLSearchParams(window.location.search).get('k');
   const WEB_APP_URL = window.WEB_APP_URL || '';
-  const TICKET_FORM_BASE_URL = window.TICKET_FORM_BASE_URL || '';
-  const TICKET_FORM_PREFILL_ENTRY = window.TICKET_FORM_PREFILL_ENTRY || '';
 
   function escapeHtml(s) {
     if (s == null) return '';
@@ -412,8 +426,62 @@
     });
   }
 
-  function rm(n) {
-    return 'RM ' + Number(n).toFixed(0);
+  function rm(n) { return 'RM ' + Number(n).toFixed(0); }
+
+  function renderQRFallback(canvas, url) {
+    const fallbackUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=' + encodeURIComponent(url);
+    const wrap = canvas.parentElement;
+    wrap.innerHTML = `<img src="${fallbackUrl}" alt="QR" width="220" height="220" style="display:block;" />`;
+  }
+
+  async function buildEventQRs(ambassadorKey) {
+    const container = document.getElementById('qr-cards');
+    let events;
+    try {
+      events = await fetch('/events.json').then(r => r.json());
+    } catch (_) {
+      container.innerHTML = '<p class="qr-note">Could not load event list.</p>';
+      return;
+    }
+
+    const now = Date.now();
+    const active = events.filter(e => now <= new Date(e.date_iso).getTime() + 24 * 60 * 60 * 1000);
+
+    if (active.length === 0) {
+      container.innerHTML = '<p class="qr-note">No upcoming events at this time.</p>';
+      return;
+    }
+
+    await waitForQR();
+
+    for (let i = 0; i < active.length; i++) {
+      const ev = active[i];
+      const referralUrl = ev.ticket_form_url && ev.ticket_form_prefill_entry
+        ? `${ev.ticket_form_url}?${ev.ticket_form_prefill_entry}=${encodeURIComponent(ambassadorKey)}`
+        : ev.ticket_form_url || '';
+
+      const canvasId = `qr-canvas-${i}`;
+      const card = document.createElement('div');
+      card.className = 'qr-event-card';
+      card.innerHTML = `
+        ${i > 0 ? '<hr class="qr-divider">' : ''}
+        <div class="qr-event-label">${escapeHtml(ev.name)} — ${escapeHtml(ev.date_display)}</div>
+        <div class="qr-wrap"><canvas id="${canvasId}"></canvas></div>
+        <p class="qr-note"><strong>Share this QR</strong> — buyers scan it to open the ${escapeHtml(ev.name)} ticket form with your referral code pre-filled.</p>
+      `;
+      container.appendChild(card);
+
+      const canvas = document.getElementById(canvasId);
+      if (!referralUrl) { canvas.parentElement.innerHTML = '<p class="qr-note">No form URL configured for this event.</p>'; continue; }
+      if (typeof QRCode !== 'undefined') {
+        QRCode.toCanvas(canvas, referralUrl, {
+          width: 220, margin: 1,
+          color: { dark: '#0a0a0a', light: '#f4e8d4' },
+        }, err => { if (err) renderQRFallback(canvas, referralUrl); });
+      } else {
+        renderQRFallback(canvas, referralUrl);
+      }
+    }
   }
 
   async function boot() {
@@ -440,41 +508,13 @@
       document.getElementById('stat-earned').textContent = rm(data.amount_earned);
       document.getElementById('stat-paid').textContent = rm(data.amount_paid);
       document.getElementById('stat-owing').textContent = rm(data.amount_owing);
-
       document.getElementById('content').style.display = 'block';
 
-      // Build the referral URL: ticket form pre-filled with this ambassador's key
-      let referralUrl = '';
-      if (TICKET_FORM_BASE_URL && TICKET_FORM_PREFILL_ENTRY) {
-        referralUrl = `${TICKET_FORM_BASE_URL}?${TICKET_FORM_PREFILL_ENTRY}=${encodeURIComponent(key)}`;
-      } else {
-        // Fallback: just link to the ambassador page itself if form URL not configured
-        referralUrl = window.location.href;
-      }
-
-      await waitForQR();
-      const canvas = document.getElementById('qr-canvas');
-      if (typeof QRCode !== 'undefined') {
-        QRCode.toCanvas(canvas, referralUrl, {
-          width: 220,
-          margin: 1,
-          color: { dark: '#0a0a0a', light: '#f4e8d4' },
-        }, err => {
-          if (err) renderQRFallback(canvas, referralUrl);
-        });
-      } else {
-        renderQRFallback(canvas, referralUrl);
-      }
+      await buildEventQRs(key);
     } catch (err) {
       document.getElementById('loading').style.display = 'none';
       document.getElementById('error').style.display = 'block';
     }
-  }
-
-  function renderQRFallback(canvas, url) {
-    const fallbackUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=' + encodeURIComponent(url);
-    const wrap = canvas.parentElement;
-    wrap.innerHTML = `<img src="${fallbackUrl}" alt="QR" width="220" height="220" style="display:block;" />`;
   }
 
   boot();

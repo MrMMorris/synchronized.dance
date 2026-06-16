@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Beach Party — Nexa Events</title>
+<meta name="description" content="Beach Party by Nexa Events — June 27, Northern Cove, Penang. Afrohouse · Amapiano · Deep House. 4PM – 12AM.">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RE0PHC72VJ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-RE0PHC72VJ');
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="theme.css">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    min-height: 100vh;
+    font-family: 'Inter', sans-serif;
+    color: var(--cream);
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    padding: 24px 16px 60px;
+    overflow-x: hidden;
+    position: relative;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 0.7 0 0 0 0 0.3 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.6;
+    mix-blend-mode: screen;
+  }
+  .container {
+    max-width: 400px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+  }
+  .back-link {
+    align-self: flex-start;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    text-decoration: none;
+    opacity: 0.7;
+    transition: opacity 0.15s;
+  }
+  .back-link:hover { opacity: 1; }
+  .logo {
+    height: 70px;
+    width: auto;
+  }
+  .event-header {
+    text-align: center;
+  }
+  .event-date {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 4px;
+    color: var(--gold);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .event-name {
+    font-family: 'Bagel Fat One', cursive;
+    font-size: 52px;
+    line-height: 0.9;
+    letter-spacing: -1px;
+    color: var(--cream);
+    text-transform: uppercase;
+    text-shadow: 0 2px 0 rgba(0,0,0,0.5), 0 0 30px rgba(255, 107, 26, 0.4);
+    transform: rotate(-1deg);
+    display: inline-block;
+  }
+  .poster {
+    width: 100%;
+    max-width: 340px;
+    border-radius: 14px;
+    border: 2px solid rgba(255, 181, 71, 0.35);
+    box-shadow: 0 12px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,181,71,0.15);
+    cursor: pointer;
+    transition: transform 0.2s;
+    display: block;
+  }
+  .poster:hover { transform: scale(1.015); }
+  .meta-strip {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--cream);
+    opacity: 0.6;
+    text-align: center;
+  }
+  .meta-strip .sep { color: var(--gold); margin: 0 8px; }
+  .action-btns {
+    display: flex;
+    gap: 12px;
+    width: 100%;
+    max-width: 340px;
+  }
+  .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 14px 20px;
+    border-radius: 12px;
+    text-decoration: none;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    transition: all 0.15s ease;
+    flex: 1;
+    border: 1px solid transparent;
+  }
+  .btn-ticket {
+    background: linear-gradient(135deg, var(--amber) 0%, var(--amber-deep) 100%);
+    color: var(--ember);
+    border-color: var(--amber);
+    box-shadow: 0 0 20px rgba(255, 107, 26, 0.35);
+  }
+  .btn-ticket:hover { box-shadow: 0 0 32px rgba(255, 107, 26, 0.55); transform: translateY(-1px); }
+  .btn-map {
+    background: rgba(0,0,0,0.45);
+    color: var(--cream);
+    border-color: rgba(255, 181, 71, 0.3);
+    backdrop-filter: blur(8px);
+  }
+  .btn-map:hover { border-color: var(--gold); transform: translateY(-1px); }
+  .modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    inset: 0;
+    background: rgba(0,0,0,0.92);
+    align-items: center;
+    justify-content: center;
+  }
+  .modal.open { display: flex; }
+  .modal img { max-width: 90vw; max-height: 90vh; border-radius: 12px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <a href="/" class="back-link">← All Events</a>
+  <img src="/assets/NEXA_white.png" alt="Nexa Events" class="logo">
+  <div class="event-header">
+    <div class="event-date">June 27, 2026</div>
+    <div class="event-name">Beach Party</div>
+  </div>
+  <img src="poster.webp" alt="Beach Party Poster" class="poster" id="posterImg" fetchpriority="high">
+  <div class="meta-strip">
+    4PM – 12AM <span class="sep">✦</span> Northern Cove, Penang
+  </div>
+  <div class="action-btns">
+    <a href="https://docs.google.com/forms/d/1il7Xf6GXyt2RfDfWaCnIcvjNxx2Zh9-B7klLnv8Iw5g/viewform" target="_blank" class="btn btn-ticket" onclick="trackTicketClick()">🎟 Get Tickets</a>
+    <a href="https://maps.app.goo.gl/zzpVh7ByuNHCBdg48" target="_blank" class="btn btn-map" onclick="trackMapClick()">📍 Map</a>
+  </div>
+</div>
+
+<div class="modal" id="posterModal">
+  <img src="poster.webp" alt="Beach Party Poster">
+</div>
+
+<script>
+  function trackTicketClick() { gtag('event', 'ticket_click', { event_category: 'engagement', event_label: 'ticket_link' }); }
+  function trackMapClick() { gtag('event', 'map_click', { event_category: 'engagement', event_label: 'location_link' }); }
+  document.getElementById('posterImg').addEventListener('click', () => document.getElementById('posterModal').classList.add('open'));
+  document.getElementById('posterModal').addEventListener('click', () => document.getElementById('posterModal').classList.remove('open'));
+</script>
+</body>
+</html>

@@ -1,0 +1,23 @@
+:root {
+  --night: #080c1a;
+  --ember: #0d1630;
+  --amber: #ff7035;
+  --amber-deep: #c84a00;
+  --gold: #ffc547;
+  --gold-soft: #ffad3b;
+  --flame: #ff4c00;
+  --teal: #0d9488;
+  --teal-deep: #065f46;
+  --red: #ce1126;
+  --cream: #f4e8d4;
+  --paper: #faf0dd;
+  --smoke: rgba(100, 160, 255, 0.06);
+}
+
+body {
+  background:
+    radial-gradient(ellipse 90% 60% at 50% 0%, rgba(255, 120, 50, 0.4) 0%, transparent 55%),
+    radial-gradient(ellipse 100% 70% at 50% 35%, rgba(200, 70, 0, 0.2) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 50% at 80% 80%, rgba(13, 148, 136, 0.18) 0%, transparent 60%),
+    linear-gradient(180deg, var(--ember) 0%, var(--night) 60%, var(--ember) 100%);
+}

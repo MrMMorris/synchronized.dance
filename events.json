@@ -1,0 +1,16 @@
+[
+  {
+    "id": "27_06_2026-beach_party-afrohouse_amapiano_deep_house",
+    "date_iso": "2026-06-27",
+    "date_display": "June 27",
+    "name": "Beach Party",
+    "genres": ["Afrohouse", "Amapiano", "Deep House"],
+    "time": "4PM – 12AM",
+    "venue": "Northern Cove, Penang",
+    "address": "515 Jalan C M Hashim, Tanjung Tokong, George Town",
+    "maps_url": "https://maps.app.goo.gl/zzpVh7ByuNHCBdg48",
+    "ticket_form_url": "https://docs.google.com/forms/d/1il7Xf6GXyt2RfDfWaCnIcvjNxx2Zh9-B7klLnv8Iw5g/viewform",
+    "ticket_form_prefill_entry": "entry.799019575",
+    "accent_color": "#ff7035"
+  }
+]
