@@ -323,6 +323,38 @@
     pointer-events: none;
     padding-left: 58px;
   }
+  .modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay .result {
+    width: 100%;
+    max-width: 420px;
+    border-radius: 14px;
+  }
+  .modal-ok-btn {
+    width: 100%;
+    margin-top: 18px;
+    padding: 14px;
+    background: rgba(0, 0, 0, 0.35);
+    color: white;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+  .modal-ok-btn:active { transform: scale(0.97); }
   @keyframes stamp {
     0% { transform: scale(0.94) rotate(-1deg); }
     60% { transform: scale(1.02) rotate(0.5deg); }
@@ -710,8 +742,12 @@
   }
 
   function showResult(state, status, detail, ticketType, extra, ticketPos) {
-    const el = document.getElementById('result');
-    el.className = 'result ' + state;
+    if (state === 'loading') {
+      const el = document.getElementById('result');
+      el.className = 'result loading';
+      el.innerHTML = `<div style="font-family:'JetBrains Mono',monospace;font-size:13px;letter-spacing:2px;text-transform:uppercase;">${escapeHtml(detail)}</div>`;
+      return;
+    }
     let html = `<div class="result-status">${escapeHtml(status)}</div>`;
     if (detail) {
       html += `<div class="result-detail">`;
@@ -725,7 +761,25 @@
       if (extra) html += `<span class="label">Note</span><span class="value">${escapeHtml(extra)}</span>`;
       html += `</div>`;
     }
-    el.innerHTML = html;
+    showModal(state, html);
+  }
+
+  function showModal(state, html) {
+    const existing = document.getElementById('resultModal');
+    if (existing) existing.remove();
+    const overlay = document.createElement('div');
+    overlay.id = 'resultModal';
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
+      <div class="result ${state}">
+        ${html}
+        <button class="modal-ok-btn" id="modalOkBtn">OK</button>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+    const resultEl = document.getElementById('result');
+    if (resultEl) { resultEl.className = 'result idle'; resultEl.innerHTML = 'Awaiting Scan'; }
+    document.getElementById('modalOkBtn').addEventListener('click', () => overlay.remove());
   }
 
   function addLog(type, ticketId, detail) {
@@ -765,31 +819,36 @@
   }
 
   function showCashResult(buyerName, ticketType, pos, logName, ticketId) {
-    const el = document.getElementById('result');
-    el.className = 'result cash';
-    el.innerHTML = `
-      <div class="result-status">Cash Due</div>
-      <div class="result-detail">
-        <span class="label">Name</span>
-        <div class="name-big">${escapeHtml(buyerName)}</div>
-        <span class="label">Type</span>
-        <span class="value">${escapeHtml(ticketType)}</span>
-        ${pos ? `<span class="label">Ticket</span><span class="value">${escapeHtml(pos)} in group</span>` : ''}
-        <div class="swipe-track" id="swipeTrack">
-          <div class="swipe-handle" id="swipeHandle">→</div>
-          <div class="swipe-label">Swipe right — cash received</div>
+    const existing = document.getElementById('resultModal');
+    if (existing) existing.remove();
+    const overlay = document.createElement('div');
+    overlay.id = 'resultModal';
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
+      <div class="result cash">
+        <div class="result-status">Cash Due</div>
+        <div class="result-detail">
+          <span class="label">Name</span>
+          <div class="name-big">${escapeHtml(buyerName)}</div>
+          <span class="label">Type</span>
+          <span class="value">${escapeHtml(ticketType)}</span>
+          ${pos ? `<span class="label">Ticket</span><span class="value">${escapeHtml(pos)} in group</span>` : ''}
+          <div class="swipe-track" id="swipeTrack">
+            <div class="swipe-handle" id="swipeHandle">→</div>
+            <div class="swipe-label">Swipe right — cash received</div>
+          </div>
         </div>
       </div>
     `;
+    document.body.appendChild(overlay);
+    const resultEl = document.getElementById('result');
+    if (resultEl) { resultEl.className = 'result idle'; resultEl.innerHTML = 'Awaiting Scan'; }
     setupSwipe(() => {
       scanCount++;
       stubCountEl.textContent = `${String(scanCount).padStart(2, '0')} Scan${scanCount === 1 ? '' : 's'}`;
       addLog('valid', ticketId, `${logName} — cash collected`);
+      overlay.remove();
       showResult('valid', 'Collected', buyerName, ticketType, 'Cash payment received', pos);
-      setTimeout(() => {
-        const r = document.getElementById('result');
-        if (r) { r.className = 'result idle'; r.innerHTML = 'Awaiting Scan'; }
-      }, 3000);
     });
   }
 
@@ -802,7 +861,10 @@
     const maxX = track.offsetWidth - handle.offsetWidth - 8;
 
     function getX(e) { return e.touches ? e.touches[0].clientX : e.clientX; }
-
+    function cleanup() {
+      document.removeEventListener('mousemove', onMove);
+      document.removeEventListener('mouseup', onEnd);
+    }
     function onStart(e) {
       dragging = true;
       startX = getX(e);
@@ -823,6 +885,7 @@
       handle.style.transition = 'left 0.2s ease, background 0.2s ease';
       if (currentLeft >= maxX * 0.85) {
         handle.style.left = (4 + maxX) + 'px';
+        cleanup();
         setTimeout(onConfirm, 200);
       } else {
         handle.style.left = '4px';
