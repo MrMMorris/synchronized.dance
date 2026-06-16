@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Ambassador — Nexa Events</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Caveat+Brush&family=Dancing+Script:wght@600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<script>
+  (function loadQR() {
+    const cdns = [
+      'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js',
+      'https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js',
+      'https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js',
+    ];
+    let i = 0;
+    function tryNext() {
+      if (i >= cdns.length) { window.__qrLoadError = 'All CDN sources failed'; return; }
+      const s = document.createElement('script');
+      s.src = cdns[i++];
+      s.onload = () => { window.__qrLoaded = true; };
+      s.onerror = tryNext;
+      document.head.appendChild(s);
+    }
+    tryNext();
+  })();
+</script>
+<script src="config.js"></script>
+<style>
+  :root {
+    --night: #080c1a;
+    --ember: #0d1630;
+    --amber: #ff7035;
+    --amber-deep: #c84a00;
+    --gold: #ffc547;
+    --gold-soft: #ffad3b;
+    --flame: #ff4c00;
+    --teal: #0d9488;
+    --teal-deep: #065f46;
+    --red: #ce1126;
+    --cream: #f4e8d4;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: var(--night);
+    color: var(--cream);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    background:
+      radial-gradient(ellipse 90% 60% at 50% 0%, rgba(255, 120, 50, 0.4) 0%, transparent 55%),
+      radial-gradient(ellipse 100% 70% at 50% 35%, rgba(200, 70, 0, 0.2) 0%, transparent 60%),
+      radial-gradient(ellipse 70% 50% at 80% 80%, rgba(13, 148, 136, 0.18) 0%, transparent 60%),
+      linear-gradient(180deg, var(--ember) 0%, var(--night) 60%, var(--ember) 100%);
+    padding: 20px 14px 60px;
+    overflow-x: hidden;
+    position: relative;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 0.7 0 0 0 0 0.3 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.7;
+    mix-blend-mode: screen;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 50vh;
+    background-image:
+      radial-gradient(circle 2px at 15% 20%, var(--gold), transparent),
+      radial-gradient(circle 1px at 80% 30%, var(--teal), transparent),
+      radial-gradient(circle 1.5px at 45% 60%, var(--gold), transparent),
+      radial-gradient(circle 1px at 70% 80%, var(--flame), transparent),
+      radial-gradient(circle 2px at 25% 75%, var(--amber), transparent),
+      radial-gradient(circle 1px at 90% 55%, var(--gold), transparent),
+      radial-gradient(circle 1.5px at 60% 15%, var(--teal), transparent),
+      radial-gradient(circle 1px at 10% 50%, var(--gold), transparent);
+    opacity: 0.7;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .container {
+    max-width: 480px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Header */
+  header {
+    text-align: center;
+    margin-bottom: 28px;
+    padding: 16px 0 12px;
+  }
+  .top-logo {
+    display: block;
+    margin: 0 auto 18px;
+    height: 150px;
+    width: auto;
+    transform: rotate(-2deg);
+  }
+  .top-tagline {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 4px;
+    color: var(--gold);
+    margin-bottom: 14px;
+    text-transform: uppercase;
+  }
+  .top-tagline .dot { color: var(--amber); margin: 0 6px; }
+  h1 {
+    font-family: 'Bagel Fat One', cursive;
+    font-size: 64px;
+    line-height: 0.9;
+    letter-spacing: -1px;
+    color: var(--cream);
+    text-transform: uppercase;
+    text-shadow: 0 2px 0 rgba(0,0,0,0.5), 0 0 30px rgba(255, 107, 26, 0.4);
+    transform: rotate(-1deg);
+  }
+  h1 .sub {
+    display: block;
+    font-family: 'Caveat Brush', cursive;
+    font-size: 52px;
+    color: var(--gold);
+    letter-spacing: 1px;
+    text-transform: none;
+    transform: rotate(-3deg);
+    margin-top: -6px;
+    text-shadow: 0 2px 0 rgba(0,0,0,0.6), 0 0 25px rgba(252, 209, 22, 0.5);
+  }
+  .subtitle {
+    margin-top: 18px;
+    font-family: 'Dancing Script', cursive;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--cream);
+  }
+  .amb-business {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold-soft);
+    margin-top: 6px;
+    opacity: 0.85;
+  }
+
+  /* Stats grid */
+  .stats-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 28px;
+  }
+  .stat-card {
+    background: linear-gradient(180deg, rgba(26, 10, 5, 0.95) 0%, rgba(13, 6, 4, 0.98) 100%);
+    border: 1px solid rgba(255, 181, 71, 0.2);
+    border-radius: 12px;
+    padding: 18px 14px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    padding: 1px;
+    background: linear-gradient(135deg, var(--teal) 0%, var(--amber) 50%, var(--gold) 100%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    opacity: 0.5;
+  }
+  .stat-value {
+    font-family: 'Bagel Fat One', cursive;
+    font-size: 36px;
+    line-height: 1;
+    color: var(--cream);
+    text-shadow: 0 0 20px rgba(255, 181, 71, 0.3);
+  }
+  .stat-value.highlight { color: var(--gold); }
+  .stat-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--cream);
+    opacity: 0.65;
+    margin-top: 6px;
+  }
+  .stat-card.owing .stat-value { color: var(--amber); }
+  .stat-card.paid .stat-value  { color: var(--teal); }
+
+  /* QR section */
+  .qr-section {
+    background: linear-gradient(180deg, rgba(26, 10, 5, 0.95) 0%, rgba(13, 6, 4, 0.98) 100%);
+    border: 1px solid rgba(255, 181, 71, 0.2);
+    border-radius: 14px;
+    padding: 28px 20px 22px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .qr-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 14px;
+    padding: 1.5px;
+    background: linear-gradient(135deg, var(--teal) 0%, var(--amber) 50%, var(--gold) 100%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    opacity: 0.7;
+  }
+  .qr-heading {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 20px;
+    opacity: 0.9;
+  }
+  .qr-wrap {
+    background: var(--cream);
+    padding: 12px;
+    border-radius: 10px;
+    margin: 0 auto 18px;
+    width: 244px;
+    height: 244px;
+    position: relative;
+    box-shadow:
+      0 0 30px rgba(13, 148, 136, 0.3),
+      0 0 0 2px var(--teal),
+      0 0 0 4px var(--gold),
+      0 0 0 6px var(--ember);
+  }
+  .qr-wrap canvas, .qr-wrap img {
+    display: block;
+    width: 220px !important;
+    height: 220px !important;
+  }
+  .qr-note {
+    font-family: 'Inter', sans-serif;
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--cream);
+    opacity: 0.8;
+  }
+  .qr-note strong { color: var(--gold); opacity: 1; }
+
+  /* Instructions */
+  .info-block {
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255, 181, 71, 0.25);
+    border-radius: 12px;
+    padding: 22px 20px;
+    margin-bottom: 24px;
+  }
+  .info-block h3 {
+    font-family: 'Caveat Brush', cursive;
+    font-size: 28px;
+    color: var(--gold);
+    margin-bottom: 12px;
+    transform: rotate(-1deg);
+    display: inline-block;
+  }
+  .info-block p, .info-block ol {
+    font-size: 13px;
+    line-height: 1.7;
+    color: var(--cream);
+  }
+  .info-block ol { padding-left: 22px; }
+  .info-block li { margin-bottom: 6px; }
+
+  /* Loading / error */
+  .loading {
+    text-align: center;
+    padding: 80px 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+  .error-state {
+    text-align: center;
+    padding: 60px 20px;
+  }
+  .error-state h2 {
+    font-family: 'Bagel Fat One', cursive;
+    font-size: 56px;
+    color: var(--flame);
+    text-shadow: 0 0 30px rgba(255, 60, 0, 0.6);
+    margin-bottom: 14px;
+  }
+  .error-state p {
+    color: var(--cream);
+    font-family: 'Dancing Script', cursive;
+    font-size: 22px;
+    font-weight: 700;
+  }
+
+  footer {
+    margin-top: 40px;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--cream);
+    opacity: 0.6;
+  }
+  footer .accent { color: var(--gold); }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <img class="top-logo" src="assets/poster.webp" alt="Event Poster" />
+    <div class="top-tagline">★<span class="dot">•</span>Nexa Events<span class="dot">•</span>★</div>
+    <h1>NEXA<span class="sub">Ambassador</span></h1>
+  </header>
+
+  <div id="loading" class="loading">Loading…</div>
+  <div id="error" class="error-state" style="display:none">
+    <h2>Hmm</h2>
+    <p>This ambassador link isn't valid.</p>
+  </div>
+
+  <div id="content" style="display:none">
+    <div style="text-align:center; margin-bottom:24px;">
+      <div class="subtitle" id="amb-name"></div>
+      <div class="amb-business" id="amb-business"></div>
+    </div>
+
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-value" id="stat-sold">—</div>
+        <div class="stat-label">Tickets Sold</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value highlight" id="stat-earned">—</div>
+        <div class="stat-label">Total Earned</div>
+      </div>
+      <div class="stat-card paid">
+        <div class="stat-value" id="stat-paid">—</div>
+        <div class="stat-label">Paid Out</div>
+      </div>
+      <div class="stat-card owing">
+        <div class="stat-value" id="stat-owing">—</div>
+        <div class="stat-label">Outstanding</div>
+      </div>
+    </div>
+
+    <div class="qr-section">
+      <div class="qr-heading">Your Referral QR</div>
+      <div class="qr-wrap">
+        <canvas id="qr-canvas"></canvas>
+      </div>
+      <p class="qr-note">
+        Share this QR with anyone interested in tickets.<br/>
+        You earn <strong id="commission-label">RM5</strong> for every ticket confirmed at the door.
+      </p>
+    </div>
+
+    <div class="info-block">
+      <h3>How it works</h3>
+      <ol>
+        <li>Show or share your QR — buyers scan it to open the ticket purchase form with your code pre-filled.</li>
+        <li>Once a ticket is scanned and confirmed at the door, it counts toward your total.</li>
+        <li>After the event, payouts are sent based on your confirmed count.</li>
+      </ol>
+    </div>
+  </div>
+
+  <footer>
+    <span class="accent">★</span> Nexa Events <span class="accent">★</span>
+  </footer>
+</div>
+
+<script>
+  const key = new URLSearchParams(window.location.search).get('k');
+  const WEB_APP_URL = window.WEB_APP_URL || '';
+  const TICKET_FORM_BASE_URL = window.TICKET_FORM_BASE_URL || '';
+  const TICKET_FORM_PREFILL_ENTRY = window.TICKET_FORM_PREFILL_ENTRY || '';
+
+  function escapeHtml(s) {
+    if (s == null) return '';
+    return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  }
+
+  function waitForQR() {
+    return new Promise(resolve => {
+      const start = Date.now();
+      (function check() {
+        if (typeof QRCode !== 'undefined') return resolve();
+        if (window.__qrLoadError || Date.now() - start > 8000) return resolve();
+        setTimeout(check, 100);
+      })();
+    });
+  }
+
+  function rm(n) {
+    return 'RM ' + Number(n).toFixed(0);
+  }
+
+  async function boot() {
+    if (!WEB_APP_URL || !key) {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('error').style.display = 'block';
+      return;
+    }
+
+    try {
+      const resp = await fetch(`${WEB_APP_URL}?action=get_ambassador&key=${encodeURIComponent(key)}`);
+      const data = await resp.json();
+
+      document.getElementById('loading').style.display = 'none';
+
+      if (!data.ok) {
+        document.getElementById('error').style.display = 'block';
+        return;
+      }
+
+      document.getElementById('amb-name').textContent = data.name || '';
+      document.getElementById('amb-business').textContent = data.business || '';
+      document.getElementById('stat-sold').textContent = data.tickets_sold;
+      document.getElementById('stat-earned').textContent = rm(data.amount_earned);
+      document.getElementById('stat-paid').textContent = rm(data.amount_paid);
+      document.getElementById('stat-owing').textContent = rm(data.amount_owing);
+      document.getElementById('commission-label').textContent = 'RM' + (data.commission_per_ticket || 5);
+
+      document.getElementById('content').style.display = 'block';
+
+      // Build the referral URL: ticket form pre-filled with this ambassador's key
+      let referralUrl = '';
+      if (TICKET_FORM_BASE_URL && TICKET_FORM_PREFILL_ENTRY) {
+        referralUrl = `${TICKET_FORM_BASE_URL}?${TICKET_FORM_PREFILL_ENTRY}=${encodeURIComponent(key)}`;
+      } else {
+        // Fallback: just link to the ambassador page itself if form URL not configured
+        referralUrl = window.location.href;
+      }
+
+      await waitForQR();
+      const canvas = document.getElementById('qr-canvas');
+      if (typeof QRCode !== 'undefined') {
+        QRCode.toCanvas(canvas, referralUrl, {
+          width: 220,
+          margin: 1,
+          color: { dark: '#0a0a0a', light: '#f4e8d4' },
+        }, err => {
+          if (err) renderQRFallback(canvas, referralUrl);
+        });
+      } else {
+        renderQRFallback(canvas, referralUrl);
+      }
+    } catch (err) {
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('error').style.display = 'block';
+    }
+  }
+
+  function renderQRFallback(canvas, url) {
+    const fallbackUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=' + encodeURIComponent(url);
+    const wrap = canvas.parentElement;
+    wrap.innerHTML = `<img src="${fallbackUrl}" alt="QR" width="220" height="220" style="display:block;" />`;
+  }
+
+  boot();
+</script>
+</body>
+</html>

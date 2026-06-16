@@ -46,8 +46,10 @@ Apps Script validates + marks ticket as scanned
 | `signup.html` | Email list signup (Brevo form only, same styles as index.html) |
 | `tickets.html` | Buyer-facing ticket viewer — shows QR codes per ticket |
 | `scanner.html` | Door staff scanner — uses camera to scan QR codes |
+| `ambassador.html` | Ambassador dashboard — referral QR + live earnings stats |
+| `ambassador-signup.html` | Pitch page the organizer shows to potential ambassadors — QR links to signup form |
 | `scripts/app_script.gs` | Google Apps Script (local copy only — see Deployment below) |
-| `config.js` | **NOT committed to git** — holds `WEB_APP_URL` |
+| `config.js` | **NOT committed to git** — holds `WEB_APP_URL` and form/ambassador URLs |
 | `assets/poster.webp` | Current event poster (`?v=N` cache-bust param in index.html) |
 | `assets/background.mp4` | Looping background video for index.html |
 | `assets/background.jpg` | Fallback static background for index.html |
@@ -62,9 +64,14 @@ This file must exist alongside the HTML files on the hosted server. It is exclud
 
 ```javascript
 window.WEB_APP_URL = 'https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec';
+
+// Ambassador feature — get these from your Google Forms
+window.TICKET_FORM_BASE_URL      = 'https://docs.google.com/forms/d/YOUR_TICKET_FORM_ID/viewform';
+window.TICKET_FORM_PREFILL_ENTRY = 'entry.1234567890'; // get from Form → ⋮ → Get pre-filled link
+window.AMBASSADOR_SIGNUP_FORM_URL = 'https://docs.google.com/forms/d/YOUR_SIGNUP_FORM_ID/viewform';
 ```
 
-Both `tickets.html` and `scanner.html` load it via `<script src="config.js">` and read `window.WEB_APP_URL`.
+`tickets.html`, `scanner.html`, `ambassador.html`, and `ambassador-signup.html` all load `config.js` via `<script src="config.js">`.
 
 ---
 
@@ -122,6 +129,31 @@ Triggers that must be manually set up in the Apps Script editor:
 
 Each row has a token that door staff use in their URL (`scanner.html?k=<token>`). The `check_scanner` action validates this token.
 
+### Ambassadors tab — critical columns
+
+| Column | Notes |
+|---|---|
+| `ambassador_key` | Secret token — used as both the URL key (`ambassador.html?k=`) and the affiliate code stored in Purchases/Tickets |
+| `name` | From signup form |
+| `email` | From signup form |
+| `phone` | From signup form |
+| `business` | From signup form |
+| `payment_details` | Bank details or QR file link — from signup form |
+| `tickets_sold` | Updated by "Refresh ambassador stats" menu action |
+| `amount_earned` | `tickets_sold × COMMISSION_PER_TICKET` — updated by menu action |
+| `amount_paid` | Organizer fills in manually after payout |
+| `amount_owing` | `amount_earned - amount_paid` — updated by menu action |
+| `ambassador_page_url` | Full URL to `ambassador.html?k=TOKEN` — generated on signup |
+| `created_at` | Signup timestamp |
+
+**Also add to Purchases tab:** `affiliate_code` — populated from the "Referral Code" field in the ticket purchase form (or empty if no referral).
+
+**Also add to Tickets tab:** `affiliate_code` — copied from Purchases at ticket generation time, same as `payment_method`.
+
+### Purchases tab — affiliate tracking
+
+`affiliate_code` stores the `ambassador_key` of the referring ambassador. It comes from the "Referral Code" field in the Google Form, which ambassadors' QR codes pre-fill automatically.
+
 ---
 
 ## Apps Script: CONFIG Object
@@ -133,16 +165,19 @@ const CONFIG = {
   PURCHASES_TAB: 'Purchases',
   TICKETS_TAB: 'Tickets',
   SCANNERS_TAB: 'Scanners',
-  FORM_RESPONSES_TAB: 'Form Responses 1',
+  AMBASSADORS_TAB: 'Ambassadors',
+  FORM_RESPONSES_TAB: 'Form Responses 1',           // ticket purchase form responses tab
+  AMBASSADOR_FORM_RESPONSES_TAB: 'Form Responses 2', // ambassador signup form responses tab
   EVENT_NAME: 'Beach Party',
   EVENT_DATE: 'June 27',
   EVENT_TIME: '4PM – 12AM',
   EVENT_VENUE: 'Northern Cove, Penang',
   EVENT_ADDRESS: '515 Jalan C M Hashim, Tanjung Tokong, George Town',
+  COMMISSION_PER_TICKET: 5, // RM per confirmed (scanned) ticket sold via ambassador
 };
 ```
 
-`EVENT_*` values are used in the ticket confirmation email. The hardcoded event details in the `event-info` section and footer of `tickets.html` must also be updated manually per event.
+`EVENT_*` values are used in the ticket and ambassador welcome emails. The hardcoded event details in the `event-info` section and footer of `tickets.html` must also be updated manually per event.
 
 ---
 
@@ -183,6 +218,21 @@ Validates a scanned ticket. Uses a script lock to prevent double-admit. Returns:
 }
 ```
 Possible `status` values: `valid`, `used`, `invalid`
+
+### `?action=get_ambassador&key=<ambassador_key>`
+Returns live stats for an ambassador. Ticket counts are computed from the Tickets tab at query time.
+```json
+{
+  "ok": true,
+  "name": "Jane",
+  "business": "Zouk KL",
+  "tickets_sold": 5,
+  "amount_earned": 25,
+  "amount_paid": 0,
+  "amount_owing": 25,
+  "commission_per_ticket": 5
+}
+```
 
 **Debugging tip:** The `/exec` URL redirects, so DevTools Network tab shows "no content." To see the raw JSON, copy the full request URL and paste it directly into a browser tab.
 
@@ -313,6 +363,47 @@ The SVG noise texture in `body::before` stays the same regardless of theme — i
 - Replace `assets/background.mp4` / `assets/background.jpg` if there's new atmosphere footage
 - Update the Google Form link (`href` on the ticket button)
 - Update the Google Maps link (`href` on the map icon)
+
+---
+
+## Ambassador Program
+
+Ambassadors are people or businesses who refer ticket buyers and earn a commission per confirmed (scanned) ticket.
+
+### Flow
+
+1. Organizer opens `ambassador-signup.html` and shows it to a potential ambassador — they scan the QR to open the signup form.
+2. Ambassador fills the signup form → `onAmbassadorSignupHandler` fires → creates row in Ambassadors tab → sends welcome email with their unique `ambassador.html?k=TOKEN` URL.
+3. Ambassador opens their page, finds their referral QR, and shares it. The QR encodes the ticket purchase form URL with their key pre-filled in the "Referral Code" field.
+4. Buyers scan the ambassador's QR → land on the ticket purchase form with the Referral Code already filled in. They complete the purchase normally.
+5. `onFormSubmitHandler` reads the Referral Code and stores it as `affiliate_code` in the Purchases row. `generateTicketsForRow` copies it to each Ticket row.
+6. At the door, when a ticket is scanned (and cash is paid for cash orders), it becomes "confirmed." The ambassador's stats update automatically — `get_ambassador` counts scanned Tickets with matching `affiliate_code`.
+7. After the event, organizer runs **Ticket System → Refresh ambassador stats** to update the Ambassadors tab, then pays out based on `amount_owing` using the `payment_details` on file.
+
+### Triggers required
+
+Two form-submit triggers must be installed in the Apps Script editor:
+- `onFormSubmitHandler` — fired by ticket purchase form
+- `onAmbassadorSignupHandler` — fired by ambassador signup form
+
+Both are "From spreadsheet → On form submit" triggers. Each function checks `e.range.getSheet().getName()` against `CONFIG.FORM_RESPONSES_TAB` / `CONFIG.AMBASSADOR_FORM_RESPONSES_TAB` to guard against cross-firing.
+
+### Script properties required
+
+Run **First-time setup** from the Ticket System menu to set:
+- `SCANNER_PAGE_URL`
+- `TICKETS_PAGE_URL`
+- `AMBASSADOR_PAGE_URL` — base URL for `ambassador.html` (without `?k=`)
+
+### Getting the Referral Code pre-fill entry ID
+
+After adding the "Referral Code" field to the ticket purchase form:
+1. Form → ⋮ menu → **Get pre-filled link**
+2. Type any value in Referral Code → **Get link** → copy URL
+3. Extract the `entry.XXXXXXXXXX` part
+4. Add to `config.js`: `window.TICKET_FORM_PREFILL_ENTRY = 'entry.XXXXXXXXXX'`
+
+The ambassador QR encodes: `TICKET_FORM_BASE_URL + '?' + TICKET_FORM_PREFILL_ENTRY + '=' + ambassadorKey`
 
 ---
 

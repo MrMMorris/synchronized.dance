@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Become an Ambassador — Nexa Events</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Caveat+Brush&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<script>
+  (function loadQR() {
+    const cdns = [
+      'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js',
+      'https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js',
+      'https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js',
+    ];
+    let i = 0;
+    function tryNext() {
+      if (i >= cdns.length) { window.__qrLoadError = true; return; }
+      const s = document.createElement('script');
+      s.src = cdns[i++];
+      s.onload = () => { window.__qrLoaded = true; };
+      s.onerror = tryNext;
+      document.head.appendChild(s);
+    }
+    tryNext();
+  })();
+</script>
+<script src="config.js"></script>
+<style>
+  :root {
+    --night: #080c1a;
+    --ember: #0d1630;
+    --amber: #ff7035;
+    --amber-deep: #c84a00;
+    --gold: #ffc547;
+    --gold-soft: #ffad3b;
+    --flame: #ff4c00;
+    --teal: #0d9488;
+    --teal-deep: #065f46;
+    --red: #ce1126;
+    --cream: #f4e8d4;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: var(--night);
+    color: var(--cream);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    background:
+      radial-gradient(ellipse 90% 60% at 50% 0%, rgba(255, 120, 50, 0.4) 0%, transparent 55%),
+      radial-gradient(ellipse 100% 70% at 50% 35%, rgba(200, 70, 0, 0.2) 0%, transparent 60%),
+      radial-gradient(ellipse 70% 50% at 80% 80%, rgba(13, 148, 136, 0.18) 0%, transparent 60%),
+      linear-gradient(180deg, var(--ember) 0%, var(--night) 60%, var(--ember) 100%);
+    padding: 20px 14px 60px;
+    overflow-x: hidden;
+    position: relative;
+  }
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 0.7 0 0 0 0 0.3 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.7;
+    mix-blend-mode: screen;
+  }
+  .container {
+    max-width: 480px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
+
+  header {
+    text-align: center;
+    margin-bottom: 32px;
+    padding: 16px 0 12px;
+  }
+  .top-logo {
+    display: block;
+    margin: 0 auto 18px;
+    height: 150px;
+    width: auto;
+    transform: rotate(-2deg);
+  }
+  .top-tagline {
+    font-family: 'Inter', sans-serif;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 4px;
+    color: var(--gold);
+    margin-bottom: 14px;
+    text-transform: uppercase;
+  }
+  .top-tagline .dot { color: var(--amber); margin: 0 6px; }
+  h1 {
+    font-family: 'Bagel Fat One', cursive;
+    font-size: 52px;
+    line-height: 0.95;
+    letter-spacing: -1px;
+    color: var(--cream);
+    text-transform: uppercase;
+    text-shadow: 0 2px 0 rgba(0,0,0,0.5), 0 0 30px rgba(255, 107, 26, 0.4);
+    transform: rotate(-1deg);
+  }
+  h1 .sub {
+    display: block;
+    font-family: 'Caveat Brush', cursive;
+    font-size: 48px;
+    color: var(--gold);
+    text-transform: none;
+    transform: rotate(-2deg);
+    margin-top: -4px;
+    text-shadow: 0 2px 0 rgba(0,0,0,0.6), 0 0 25px rgba(252, 209, 22, 0.5);
+  }
+
+  /* Pitch card */
+  .pitch-card {
+    background: linear-gradient(180deg, rgba(26, 10, 5, 0.95) 0%, rgba(13, 6, 4, 0.98) 100%);
+    border: 1px solid rgba(255, 181, 71, 0.2);
+    border-radius: 14px;
+    padding: 28px 22px;
+    margin-bottom: 24px;
+    position: relative;
+    overflow: hidden;
+  }
+  .pitch-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 14px;
+    padding: 1.5px;
+    background: linear-gradient(135deg, var(--teal) 0%, var(--amber) 50%, var(--gold) 100%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    opacity: 0.7;
+  }
+
+  .commission-badge {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 4px;
+    background: linear-gradient(135deg, var(--teal) 0%, var(--teal-deep) 100%);
+    border: 1px solid rgba(252, 209, 22, 0.4);
+    border-radius: 8px;
+    padding: 10px 18px;
+    margin-bottom: 20px;
+  }
+  .commission-badge .amount {
+    font-family: 'Bagel Fat One', cursive;
+    font-size: 42px;
+    color: var(--cream);
+    line-height: 1;
+    text-shadow: 0 0 20px rgba(13, 148, 136, 0.6);
+  }
+  .commission-badge .label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--cream);
+    opacity: 0.85;
+  }
+
+  .pitch-text {
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--cream);
+    margin-bottom: 18px;
+  }
+  .pitch-text strong { color: var(--gold); }
+
+  .pitch-steps {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 0;
+  }
+  .pitch-steps li {
+    display: flex;
+    gap: 14px;
+    align-items: flex-start;
+    padding: 10px 0;
+    border-bottom: 1px dashed rgba(255, 181, 71, 0.15);
+    font-size: 13px;
+    line-height: 1.5;
+    color: var(--cream);
+  }
+  .pitch-steps li:last-child { border-bottom: 0; }
+  .step-num {
+    font-family: 'Bagel Fat One', cursive;
+    font-size: 22px;
+    color: var(--amber);
+    line-height: 1;
+    flex-shrink: 0;
+    width: 24px;
+    text-shadow: 0 0 12px rgba(255, 107, 26, 0.5);
+  }
+
+  /* QR section */
+  .qr-section {
+    background: linear-gradient(180deg, rgba(26, 10, 5, 0.95) 0%, rgba(13, 6, 4, 0.98) 100%);
+    border: 1px solid rgba(255, 181, 71, 0.2);
+    border-radius: 14px;
+    padding: 28px 20px 22px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+  .qr-section::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 14px;
+    padding: 1.5px;
+    background: linear-gradient(135deg, var(--teal) 0%, var(--amber) 50%, var(--gold) 100%);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+    opacity: 0.7;
+  }
+  .qr-heading {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 20px;
+  }
+  .qr-wrap {
+    background: var(--cream);
+    padding: 12px;
+    border-radius: 10px;
+    margin: 0 auto 18px;
+    width: 244px;
+    height: 244px;
+    box-shadow:
+      0 0 30px rgba(13, 148, 136, 0.3),
+      0 0 0 2px var(--teal),
+      0 0 0 4px var(--gold),
+      0 0 0 6px var(--ember);
+  }
+  .qr-wrap canvas, .qr-wrap img {
+    display: block;
+    width: 220px !important;
+    height: 220px !important;
+  }
+  .qr-cta {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--gold);
+    margin-bottom: 6px;
+  }
+  .qr-sub {
+    font-family: 'Inter', sans-serif;
+    font-size: 12px;
+    color: var(--cream);
+    opacity: 0.7;
+  }
+
+  /* Fallback button */
+  .signup-btn {
+    display: block;
+    width: 100%;
+    background: linear-gradient(135deg, var(--amber) 0%, var(--amber-deep) 100%);
+    color: var(--cream);
+    text-decoration: none;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 16px 20px;
+    border-radius: 10px;
+    margin-top: 14px;
+    box-shadow: 0 4px 20px rgba(255, 107, 26, 0.4);
+  }
+
+  footer {
+    margin-top: 40px;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--cream);
+    opacity: 0.6;
+  }
+  footer .accent { color: var(--gold); }
+</style>
+</head>
+<body>
+<div class="container">
+  <header>
+    <img class="top-logo" src="assets/poster.webp" alt="Event Poster" />
+    <div class="top-tagline">★<span class="dot">•</span>Nexa Events<span class="dot">•</span>★</div>
+    <h1>BECOME AN<span class="sub">Ambassador</span></h1>
+  </header>
+
+  <div class="pitch-card">
+    <div class="commission-badge">
+      <span class="amount">RM5</span>
+      <span class="label">per confirmed<br/>ticket sold</span>
+    </div>
+    <p class="pitch-text">
+      Help spread the word about <strong>Beach Party</strong> and earn for every ticket
+      that comes through your link.
+    </p>
+    <ul class="pitch-steps">
+      <li>
+        <span class="step-num">1</span>
+        <span>Sign up below — you'll receive your personal referral QR code by email.</span>
+      </li>
+      <li>
+        <span class="step-num">2</span>
+        <span>Share your QR with friends, followers, or customers. They scan it to buy tickets.</span>
+      </li>
+      <li>
+        <span class="step-num">3</span>
+        <span>Earn <strong style="color:var(--gold)">RM5</strong> for every ticket confirmed at the door — tracked automatically.</span>
+      </li>
+      <li>
+        <span class="step-num">4</span>
+        <span>After the event, we pay out via your chosen method based on your confirmed count.</span>
+      </li>
+    </ul>
+  </div>
+
+  <div class="qr-section">
+    <div class="qr-heading">Scan to Sign Up</div>
+    <div class="qr-wrap">
+      <canvas id="signup-qr"></canvas>
+    </div>
+    <div class="qr-cta">Point your camera here</div>
+    <div class="qr-sub">Or tap the button below</div>
+    <a id="signup-link" href="#" class="signup-btn" target="_blank">Open Signup Form →</a>
+  </div>
+
+  <footer>
+    <span class="accent">★</span> Nexa Events <span class="accent">★</span>
+  </footer>
+</div>
+
+<script>
+  const AMBASSADOR_SIGNUP_FORM_URL = window.AMBASSADOR_SIGNUP_FORM_URL || '';
+
+  function waitForQR() {
+    return new Promise(resolve => {
+      const start = Date.now();
+      (function check() {
+        if (typeof QRCode !== 'undefined') return resolve();
+        if (window.__qrLoadError || Date.now() - start > 8000) return resolve();
+        setTimeout(check, 100);
+      })();
+    });
+  }
+
+  async function boot() {
+    const url = AMBASSADOR_SIGNUP_FORM_URL;
+    if (!url) return;
+
+    document.getElementById('signup-link').href = url;
+
+    await waitForQR();
+    const canvas = document.getElementById('signup-qr');
+    if (typeof QRCode !== 'undefined') {
+      QRCode.toCanvas(canvas, url, {
+        width: 220,
+        margin: 1,
+        color: { dark: '#0a0a0a', light: '#f4e8d4' },
+      }, err => {
+        if (err) renderFallback(canvas, url);
+      });
+    } else {
+      renderFallback(canvas, url);
+    }
+  }
+
+  function renderFallback(canvas, url) {
+    const fallbackUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=' + encodeURIComponent(url);
+    canvas.parentElement.innerHTML = `<img src="${fallbackUrl}" alt="Signup QR" width="220" height="220" style="display:block;" />`;
+  }
+
+  boot();
+</script>
+</body>
+</html>
