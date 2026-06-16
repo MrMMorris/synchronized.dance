@@ -38,6 +38,7 @@ const CONFIG = {
   TICKETS_PAGE_URL:    'https://synchronized.dance/tickets.html',
   SCANNER_PAGE_URL:    'https://synchronized.dance/scanner.html',
   AMBASSADOR_PAGE_URL: 'https://synchronized.dance/ambassador.html',
+  SUMMARY_TAB: 'Summary',
 };
 
 // ============================================================================
@@ -1130,6 +1131,8 @@ function refreshAmbassadorStats() {
   const aPaidCol   = aHeaders.indexOf('amount_paid');
   const aOwingCol  = aHeaders.indexOf('amount_owing');
 
+  let totalEarned = 0, totalPaid = 0, totalOwing = 0;
+
   for (let i = 1; i < aData.length; i++) {
     const key  = String(aData[i][aKeyCol]).trim();
     if (!key) continue;
@@ -1141,9 +1144,37 @@ function refreshAmbassadorStats() {
     if (aSoldCol   !== -1) ambassadorsSheet.getRange(i + 1, aSoldCol   + 1).setValue(sold);
     if (aEarnedCol !== -1) ambassadorsSheet.getRange(i + 1, aEarnedCol + 1).setValue(earned);
     if (aOwingCol  !== -1) ambassadorsSheet.getRange(i + 1, aOwingCol  + 1).setValue(owing);
+
+    totalEarned += earned;
+    totalPaid   += paid;
+    totalOwing  += owing;
   }
 
+  // Write totals to Summary tab
+  updateSummaryRow(ss, 'Ambassador payouts — earned', totalEarned);
+  updateSummaryRow(ss, 'Ambassador payouts — paid',   totalPaid);
+  updateSummaryRow(ss, 'Ambassador payouts — owing',  totalOwing);
+
   SpreadsheetApp.getUi().alert('Ambassador stats updated.');
+}
+
+/**
+ * Finds a row in the Summary tab where column A matches `label` and sets
+ * column B to `value`. If no matching row exists, appends a new one.
+ */
+function updateSummaryRow(ss, label, value) {
+  const sheet = ss.getSheetByName(CONFIG.SUMMARY_TAB);
+  if (!sheet) return; // Summary tab doesn't exist yet — silently skip
+
+  const data = sheet.getDataRange().getValues();
+  for (let i = 0; i < data.length; i++) {
+    if (String(data[i][0]).trim() === label) {
+      sheet.getRange(i + 1, 2).setValue(value);
+      return;
+    }
+  }
+  // Label not found — append a new row
+  sheet.appendRow([label, value]);
 }
 
 function shortTicketType(t) {
