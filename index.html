@@ -19,13 +19,11 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+    justify-content: center;
     background: url('assets/background.jpg') center/cover no-repeat fixed;
     font-family: sans-serif;
-    padding: 30px 16px 60px;
-    gap: 24px;
-  }
-  body.no-events {
-    justify-content: center;
+    padding: 30px 16px;
+    gap: 16px;
   }
   .bg-video {
     position: fixed;
@@ -37,17 +35,13 @@
     transition: opacity 0.5s ease-in;
   }
   .bg-video.loaded { opacity: 1; }
-  .logo {
-    height: 70px;
-    width: auto;
-    display: block;
-  }
+
   /* Event buttons */
   .events-section {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 14px;
+    gap: 12px;
     width: 100%;
   }
   .events-heading {
@@ -56,114 +50,108 @@
     font-weight: 600;
     letter-spacing: 4px;
     text-transform: uppercase;
-    color: rgba(255,255,255,0.5);
+    color: rgba(255,255,255,0.8);
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(6px);
+    padding: 5px 12px;
+    border-radius: 6px;
     align-self: flex-start;
     max-width: 360px;
-    width: 100%;
+    width: fit-content;
     margin: 0 auto;
   }
   .event-btn {
     display: block;
     text-decoration: none;
     background: rgba(0, 0, 0, 0.72);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    border-left: 3px solid var(--accent, rgba(255,255,255,0.3));
+    border: 2px solid rgba(255, 255, 255, 0.35);
     border-radius: 14px;
-    padding: 18px 20px;
+    padding: 20px 24px;
     backdrop-filter: blur(12px);
     transition: all 0.18s ease;
     max-width: 360px;
     width: 100%;
     color: white;
     text-align: left;
+    box-shadow: 0 8px 28px rgba(0,0,0,0.45);
   }
   .event-btn:hover {
-    background: rgba(0, 0, 0, 0.85);
-    border-color: rgba(255, 255, 255, 0.28);
-    border-left-color: var(--accent, rgba(255,255,255,0.5));
+    border-color: rgba(255,255,255,0.65);
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+    box-shadow: 0 14px 36px rgba(0,0,0,0.55);
   }
   .event-btn-name {
     font-size: 22px;
     font-weight: 800;
     letter-spacing: -0.5px;
-    margin-bottom: 6px;
+    margin-bottom: 5px;
     line-height: 1.2;
   }
-  .event-btn-date {
-    font-size: 11px;
-    letter-spacing: 2.5px;
-    text-transform: uppercase;
-    opacity: 0.55;
-    font-family: monospace;
-    margin-bottom: 10px;
-  }
-  .event-btn-genres {
-    font-size: 11px;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
+  .event-btn-location {
+    font-size: 12px;
     opacity: 0.6;
+    letter-spacing: 0.5px;
   }
-  .event-btn-arrow {
-    float: right;
-    opacity: 0.4;
-    font-size: 16px;
-    margin-top: 2px;
-  }
-  /* Signup form */
-  .signup-wrap {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-    margin-top: 8px;
-  }
+
+  /* Signup form — same glass style, half width */
   .form {
-    background: rgba(255, 255, 255, 0.82);
+    background: rgba(0, 0, 0, 0.72);
+    border: 2px solid rgba(255, 255, 255, 0.35);
+    border-radius: 14px;
     padding: 18px 16px;
-    border-radius: 16px;
-    text-align: center;
-    max-width: 280px;
+    max-width: 180px;
     width: 100%;
-    backdrop-filter: blur(6px);
+    backdrop-filter: blur(12px);
+    box-shadow: 0 8px 28px rgba(0,0,0,0.45);
+    text-align: center;
+    color: white;
     transition: all 0.6s ease;
   }
   .form.fade-out { opacity: 0; transform: scale(0.95); }
   .form h2 {
-    font-size: 15px;
+    font-size: 12px;
     font-weight: 700;
-    margin-bottom: 4px;
-    color: #111;
+    color: white;
+    margin-bottom: 3px;
+    line-height: 1.4;
   }
   .form h4 {
-    font-size: 10px;
+    font-size: 9px;
     font-weight: normal;
-    color: #444;
+    color: rgba(255,255,255,0.5);
     margin-bottom: 10px;
   }
   .form input[type="email"] {
-    width: 85%;
-    padding: 10px;
-    margin: 0 auto 10px;
+    width: 100%;
+    padding: 9px 10px;
+    margin: 0 auto 8px;
     border-radius: 8px;
-    border: 1px solid #ccc;
-    font-size: 14px;
+    border: 1px solid rgba(255,255,255,0.25);
+    background: rgba(255,255,255,0.1);
+    color: white;
+    font-size: 12px;
     display: block;
     text-align: center;
   }
+  .form input[type="email"]::placeholder { color: rgba(255,255,255,0.4); }
+  .form input[type="email"]:focus { outline: none; border-color: rgba(255,255,255,0.5); }
   .form button {
-    width: 55%;
-    padding: 10px;
-    background: black;
+    width: 100%;
+    padding: 9px;
+    background: rgba(255,255,255,0.15);
     color: white;
-    border: none;
+    border: 1px solid rgba(255,255,255,0.3);
     border-radius: 8px;
     cursor: pointer;
-    font-size: 14px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
     display: block;
     margin: 0 auto;
+    transition: background 0.15s;
   }
-  .form button:hover { opacity: 0.85; }
+  .form button:hover { background: rgba(255,255,255,0.25); }
   .input--hidden { display: none; }
 </style>
 </head>
@@ -172,22 +160,18 @@
   <source src="assets/background.mp4" type="video/mp4">
 </video>
 
-<img src="assets/NEXA_white.png" alt="Nexa Events" class="logo">
-
 <div class="events-section" id="eventsSection" style="display:none"></div>
 
-<div class="signup-wrap">
-  <div class="form" id="signupForm">
-    <h2>Get Notified About Our Next Party</h2>
-    <h4>*we will <b>never</b> share your email with anyone*</h4>
-    <form id="sib-form" method="POST" action="https://d2fdd58e.sibforms.com/serve/MUIFAE8Vrj85rMcXC3sDXfp374lWxst71GzPrGpg7uetefPBvh7zFVGpTSwkDGf1tGCDylqEBiOo9HWVBzZlEQbft4YLel9n9vdJ4QL1ZgSeTTEBNUfCiKIxagoApnr8EnbI3ogO4XW8Hn8F5YMmo_5WTpO52x-RztGL6O9F-W9s00sJEbIjm5iwtB8vLwW_wq9A0Ht3iD5CoeVdNw==">
-      <input type="email" name="EMAIL" placeholder="Enter your email" required>
-      <input type="text" name="email_address_check" value="" class="input--hidden" style="position:absolute;left:-5000px;">
-      <input type="hidden" name="locale" value="en">
-      <input type="hidden" name="html_type" value="simple">
-      <button type="submit" onclick="trackSignupClick()">Sign Up</button>
-    </form>
-  </div>
+<div class="form" id="signupForm">
+  <h2>Get Notified</h2>
+  <h4>no spam, ever</h4>
+  <form id="sib-form" method="POST" action="https://d2fdd58e.sibforms.com/serve/MUIFAE8Vrj85rMcXC3sDXfp374lWxst71GzPrGpg7uetefPBvh7zFVGpTSwkDGf1tGCDylqEBiOo9HWVBzZlEQbft4YLel9n9vdJ4QL1ZgSeTTEBNUfCiKIxagoApnr8EnbI3ogO4XW8Hn8F5YMmo_5WTpO52x-RztGL6O9F-W9s00sJEbIjm5iwtB8vLwW_wq9A0Ht3iD5CoeVdNw==">
+    <input type="email" name="EMAIL" placeholder="your@email.com" required>
+    <input type="text" name="email_address_check" value="" class="input--hidden" style="position:absolute;left:-5000px;">
+    <input type="hidden" name="locale" value="en">
+    <input type="hidden" name="html_type" value="simple">
+    <button type="submit" onclick="trackSignupClick()">Sign Up</button>
+  </form>
 </div>
 
 <script>
@@ -206,7 +190,7 @@
     fetch(this.action, { method: 'POST', body: new FormData(this), mode: 'no-cors' }).finally(() => {
       formDiv.classList.add('fade-out');
       setTimeout(() => {
-        formDiv.innerHTML = '<h2>Success!</h2><h4>*check your inbox or spam for confirmation*</h4>';
+        formDiv.innerHTML = '<h2>You\'re in!</h2><h4>check your inbox</h4>';
         formDiv.classList.remove('fade-out');
       }, 600);
     });
@@ -221,22 +205,15 @@
 
     const now = Date.now();
     const active = events.filter(e => now <= new Date(e.date_iso).getTime() + 24 * 60 * 60 * 1000);
-
-    if (active.length === 0) {
-      document.body.classList.add('no-events');
-      return;
-    }
+    if (active.length === 0) return;
 
     section.style.display = 'flex';
     let html = `<div class="events-heading">Upcoming Events</div>`;
     for (const ev of active) {
-      const genreStr = ev.genres ? ev.genres.join(' · ') : '';
       html += `
-        <a class="event-btn" href="/events/${ev.id}/" style="--accent:${ev.accent_color || 'rgba(255,255,255,0.3)'}" onclick="trackEventClick('${ev.name}')">
-          <span class="event-btn-arrow">→</span>
-          <div class="event-btn-date">${ev.date_display}</div>
+        <a class="event-btn" href="/events/${ev.id}/" onclick="trackEventClick('${ev.name}')">
           <div class="event-btn-name">${ev.name}</div>
-          ${genreStr ? `<div class="event-btn-genres">${genreStr}</div>` : ''}
+          <div class="event-btn-location">@ ${ev.venue}</div>
         </a>
       `;
     }
