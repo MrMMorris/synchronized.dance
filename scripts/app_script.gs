@@ -35,6 +35,9 @@ const CONFIG = {
   EVENT_VENUE: 'Northern Cove, Penang',
   EVENT_ADDRESS: '515 Jalan C M Hashim, Tanjung Tokong, George Town',
   COMMISSION_PER_TICKET: 5, // RM per confirmed (scanned) ticket — update per event
+  TICKETS_PAGE_URL:    'https://synchronized.dance/tickets.html',
+  SCANNER_PAGE_URL:    'https://synchronized.dance/scanner.html',
+  AMBASSADOR_PAGE_URL: 'https://synchronized.dance/ambassador.html',
 };
 
 // ============================================================================
@@ -62,35 +65,7 @@ function onOpen() {
 // ============================================================================
 
 function setupScriptProperties() {
-  const ui = SpreadsheetApp.getUi();
-  const props = PropertiesService.getScriptProperties();
-
-  const scannerUrlResp = ui.prompt(
-    'Scanner page URL',
-    'Paste the full URL where scanner.html is hosted (e.g. https://you.github.io/tickets/scanner.html):',
-    ui.ButtonSet.OK_CANCEL
-  );
-  if (scannerUrlResp.getSelectedButton() !== ui.Button.OK) return;
-
-  const ticketsUrlResp = ui.prompt(
-    'Ticket viewer URL',
-    'Paste the full URL where tickets.html is hosted (e.g. https://you.github.io/tickets/tickets.html):',
-    ui.ButtonSet.OK_CANCEL
-  );
-  if (ticketsUrlResp.getSelectedButton() !== ui.Button.OK) return;
-
-  const ambassadorUrlResp = ui.prompt(
-    'Ambassador page URL',
-    'Paste the full URL where ambassador.html is hosted (e.g. https://you.github.io/tickets/ambassador.html):',
-    ui.ButtonSet.OK_CANCEL
-  );
-  if (ambassadorUrlResp.getSelectedButton() !== ui.Button.OK) return;
-
-  props.setProperty('SCANNER_PAGE_URL', scannerUrlResp.getResponseText().trim());
-  props.setProperty('TICKETS_PAGE_URL', ticketsUrlResp.getResponseText().trim());
-  props.setProperty('AMBASSADOR_PAGE_URL', ambassadorUrlResp.getResponseText().trim());
-
-  ui.alert('Saved. You can now use the menu to generate tickets and links.');
+  SpreadsheetApp.getUi().alert('No setup needed — all URLs are configured in the CONFIG object at the top of the script.');
 }
 
 // ============================================================================
@@ -327,13 +302,7 @@ function getTicketsForBuyer(key) {
 function generateTickets() {
   const ui = SpreadsheetApp.getUi();
   const ss = SpreadsheetApp.getActive();
-  const props = PropertiesService.getScriptProperties();
-  const ticketsBaseUrl = props.getProperty('TICKETS_PAGE_URL');
-
-  if (!ticketsBaseUrl) {
-    ui.alert('Please run "First-time setup" first to set your page URLs.');
-    return;
-  }
+  const ticketsBaseUrl = CONFIG.TICKETS_PAGE_URL;
 
   const purchasesSheet = ss.getSheetByName(CONFIG.PURCHASES_TAB);
   const ticketsSheet = ss.getSheetByName(CONFIG.TICKETS_TAB);
@@ -419,13 +388,7 @@ function generateTickets() {
 function generateScannerLinks() {
   const ui = SpreadsheetApp.getUi();
   const ss = SpreadsheetApp.getActive();
-  const props = PropertiesService.getScriptProperties();
-  const scannerBaseUrl = props.getProperty('SCANNER_PAGE_URL');
-
-  if (!scannerBaseUrl) {
-    ui.alert('Please run "First-time setup" first to set your page URLs.');
-    return;
-  }
+  const scannerBaseUrl = CONFIG.SCANNER_PAGE_URL;
 
   const sheet = ss.getSheetByName(CONFIG.SCANNERS_TAB);
   const data = sheet.getDataRange().getValues();
@@ -782,9 +745,7 @@ function onEditHandler(e) {
  */
 function generateTicketsForRow(rowNum) {
   const ss = SpreadsheetApp.getActive();
-  const props = PropertiesService.getScriptProperties();
-  const ticketsBaseUrl = props.getProperty('TICKETS_PAGE_URL');
-  if (!ticketsBaseUrl) return { ok: false, reason: 'TICKETS_PAGE_URL not set — run First-time setup.' };
+  const ticketsBaseUrl = CONFIG.TICKETS_PAGE_URL;
 
   const purchasesSheet = ss.getSheetByName(CONFIG.PURCHASES_TAB);
   const ticketsSheet = ss.getSheetByName(CONFIG.TICKETS_TAB);
@@ -991,8 +952,7 @@ function onAmbassadorSignupHandler(e) {
 
   if (!name || !email) return;
 
-  const props = PropertiesService.getScriptProperties();
-  const ambassadorPageBase = props.getProperty('AMBASSADOR_PAGE_URL') || '';
+  const ambassadorPageBase = CONFIG.AMBASSADOR_PAGE_URL;
   const ambassadorKey = randomKey(24);
   const pageUrl = ambassadorPageBase ? `${ambassadorPageBase}?k=${ambassadorKey}` : '';
 
