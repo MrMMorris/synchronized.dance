@@ -778,7 +778,7 @@
             <div class="ticket-number">Ticket <span class="num">${num}/${totalStr}</span></div>
             <div class="ticket-type">${escapeHtml(t.ticket_type || 'General')}</div>
           </div>
-          ${t.payment_type === 'cash' ? '<div class="cash-banner">💵 Pay Cash at Door</div>' : ''}
+          ${t.payment_method === 'cash' ? '<div class="cash-banner">💵 Pay Cash at Door</div>' : ''}
           <div class="ticket-body">
             <div class="qr-wrap ${t.scanned ? 'used' : ''}">
               <canvas id="qr-${idx}"></canvas>
@@ -788,7 +788,7 @@
             <div class="ticket-code">${escapeHtml(t.ticket_id)}</div>
           </div>
           <div class="ticket-foot">
-            <span class="status-pill ${!t.scanned && t.payment_type === 'cash' ? 'cash' : ''}">${t.scanned ? 'Scanned' : (t.payment_type === 'cash' ? 'Cash Due' : 'Live')}</span>
+            <span class="status-pill ${!t.scanned && t.payment_method === 'cash' ? 'cash' : ''}">${t.scanned ? 'Scanned' : (t.payment_method === 'cash' ? 'Cash Due' : 'Live')}</span>
             <span class="admits">Admits 1</span>
           </div>
         </div>

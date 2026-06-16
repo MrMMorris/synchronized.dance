@@ -154,7 +154,7 @@ function validateTicket(ticketId, token) {
     const nameCol = headers.indexOf('buyer_name');
     const typeCol = headers.indexOf('ticket_type');
     const purchaseIdCol = headers.indexOf('purchase_id');
-    const paymentTypeCol = headers.indexOf('payment_type');
+    const paymentTypeCol = headers.indexOf('payment_method');
 
     // First pass: find the ticket
     let foundRow = -1;
@@ -213,7 +213,7 @@ function validateTicket(ticketId, token) {
       status: 'valid',
       buyer_name: data[foundRow][nameCol],
       ticket_type: data[foundRow][typeCol],
-      payment_type: paymentTypeCol !== -1 ? data[foundRow][paymentTypeCol] : null,
+      payment_method: paymentTypeCol !== -1 ? data[foundRow][paymentTypeCol] : null,
       ticket_index: ticketIndex,
       ticket_total: ticketTotal,
       scanned_by: scanner.name,
@@ -287,7 +287,7 @@ function getTicketsForBuyer(key) {
   const tPurchaseIdCol = tHeaders.indexOf('purchase_id');
   const tTypeCol = tHeaders.indexOf('ticket_type');
   const tScannedCol = tHeaders.indexOf('scanned');
-  const tPaymentTypeCol = tHeaders.indexOf('payment_type');
+  const tPaymentTypeCol = tHeaders.indexOf('payment_method');
 
   const tickets = [];
   for (let i = 1; i < ticketsData.length; i++) {
@@ -295,7 +295,7 @@ function getTicketsForBuyer(key) {
       tickets.push({
         ticket_id: ticketsData[i][tIdCol],
         ticket_type: ticketsData[i][tTypeCol],
-        payment_type: tPaymentTypeCol !== -1 ? ticketsData[i][tPaymentTypeCol] : null,
+        payment_method: tPaymentTypeCol !== -1 ? ticketsData[i][tPaymentTypeCol] : null,
         scanned: ticketsData[i][tScannedCol] === true || String(ticketsData[i][tScannedCol]).toUpperCase() === 'TRUE',
       });
     }
@@ -336,7 +336,7 @@ function generateTickets() {
     name: pHeaders.indexOf('buyer_name'),
     quantity: pHeaders.indexOf('quantity'),
     ticket_type: pHeaders.indexOf('ticket_type'),
-    payment_type: pHeaders.indexOf('payment_type'),
+    payment_method: pHeaders.indexOf('payment_method'),
     payment_confirmed: pHeaders.indexOf('payment_confirmed'),
     tickets_generated: pHeaders.indexOf('tickets_generated'),
     purchase_id: pHeaders.indexOf('purchase_id'),
@@ -377,7 +377,7 @@ function generateTickets() {
         purchase_id: purchaseId,
         buyer_name: pData[i][pCols.name],
         ticket_type: pData[i][pCols.ticket_type],
-        payment_type: pCols.payment_type !== -1 ? pData[i][pCols.payment_type] : '',
+        payment_method: pCols.payment_method !== -1 ? pData[i][pCols.payment_method] : '',
         scanned: false,
         scanned_at: '',
         scanned_by: '',
@@ -597,7 +597,7 @@ function onFormSubmitHandler(e) {
     'ticket_type': ticketType,
     'quantity': quantity,
     'amount_paid': totalCost,  // calculated — verify against screenshot
-    'payment_type': paymentType,
+    'payment_method': paymentType,
     'payment_confirmed': false,
     'payment_proof': paymentProof,
     'notes': 'Auto-imported from form',
@@ -762,7 +762,7 @@ function generateTicketsForRow(rowNum) {
     name: headers.indexOf('buyer_name'),
     quantity: headers.indexOf('quantity'),
     ticket_type: headers.indexOf('ticket_type'),
-    payment_type: headers.indexOf('payment_type'),
+    payment_method: headers.indexOf('payment_method'),
     payment_confirmed: headers.indexOf('payment_confirmed'),
     tickets_generated: headers.indexOf('tickets_generated'),
     purchase_id: headers.indexOf('purchase_id'),
@@ -797,7 +797,7 @@ function generateTicketsForRow(rowNum) {
       purchase_id: purchaseId,
       buyer_name: rowData[pCols.name],
       ticket_type: rowData[pCols.ticket_type],
-      payment_type: pCols.payment_type !== -1 ? rowData[pCols.payment_type] : '',
+      payment_method: pCols.payment_method !== -1 ? rowData[pCols.payment_method] : '',
       scanned: false,
       scanned_at: '',
       scanned_by: '',

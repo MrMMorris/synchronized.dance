@@ -707,7 +707,7 @@
       const logName = pos ? `${resp.buyer_name} (${pos})` : resp.buyer_name;
 
       if (resp.status === 'valid') {
-        if (resp.payment_type === 'cash') {
+        if (resp.payment_method === 'cash') {
           showCashResult(resp.buyer_name, resp.ticket_type, pos, logName, ticketId);
           addLog('warn', ticketId, `${logName} — CASH DUE`);
           beep(2);
