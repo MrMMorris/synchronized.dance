@@ -429,7 +429,9 @@
       document.getElementById('loading').style.display = 'none';
 
       if (!data.ok) {
+        console.error('Ambassador API error:', data.error);
         document.getElementById('error').style.display = 'block';
+        document.querySelector('.error-state p').textContent = 'API error: ' + (data.error || 'unknown');
         return;
       }
 
@@ -466,8 +468,10 @@
         renderQRFallback(canvas, referralUrl);
       }
     } catch (err) {
+      console.error('Ambassador page fetch error:', err);
       document.getElementById('loading').style.display = 'none';
       document.getElementById('error').style.display = 'block';
+      document.querySelector('.error-state p').textContent = 'Network error: ' + err.message;
     }
   }
 
