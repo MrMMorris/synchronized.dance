@@ -544,6 +544,25 @@
     line-height: 1.5;
   }
 
+  .cash-banner {
+    background: linear-gradient(90deg, var(--amber) 0%, var(--gold) 100%);
+    color: var(--night);
+    padding: 10px 18px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-align: center;
+    border-bottom: 1px dashed rgba(0, 0, 0, 0.2);
+  }
+
+  .status-pill.cash { color: var(--amber); }
+  .status-pill.cash::before {
+    background: var(--amber);
+    box-shadow: 0 0 12px var(--amber);
+  }
+
   @media print {
     body { background: white; padding: 0; color: black; }
     body::before, body::after { display: none; }
@@ -565,7 +584,7 @@
     <div class="subtitle" id="subtitle">Loading…</div>
   </header>
   <div id="content"><div class="loading">Fetching your tickets…</div></div>
-  <footer>June 27 <span class="accent">✦</span> Northern Cove Penang <span class="accent">✦</span> 4PM until 12AM</footer>
+  <footer>June 27 <span class="accent">✦</span> Northern Cove, Penang <span class="accent">✦</span> 4PM – 12AM</footer>
 </div>
 <script>
   const WEB_APP_URL = window.WEB_APP_URL;
@@ -759,6 +778,7 @@
             <div class="ticket-number">Ticket <span class="num">${num}/${totalStr}</span></div>
             <div class="ticket-type">${escapeHtml(t.ticket_type || 'General')}</div>
           </div>
+          ${t.payment_type === 'cash' ? '<div class="cash-banner">💵 Pay Cash at Door</div>' : ''}
           <div class="ticket-body">
             <div class="qr-wrap ${t.scanned ? 'used' : ''}">
               <canvas id="qr-${idx}"></canvas>
@@ -768,7 +788,7 @@
             <div class="ticket-code">${escapeHtml(t.ticket_id)}</div>
           </div>
           <div class="ticket-foot">
-            <span class="status-pill">${t.scanned ? 'Scanned' : 'Live'}</span>
+            <span class="status-pill ${!t.scanned && t.payment_type === 'cash' ? 'cash' : ''}">${t.scanned ? 'Scanned' : (t.payment_type === 'cash' ? 'Cash Due' : 'Live')}</span>
             <span class="admits">Admits 1</span>
           </div>
         </div>

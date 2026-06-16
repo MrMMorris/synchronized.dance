@@ -27,7 +27,11 @@ const CONFIG = {
   TICKETS_TAB: 'Tickets',
   SCANNERS_TAB: 'Scanners',
   FORM_RESPONSES_TAB: 'Form Responses 1', // default name Google Forms creates
-  EVENT_NAME: 'Labour Day Beach Party',   // used in email subject/body
+  EVENT_NAME: 'Beach Party',
+  EVENT_DATE: 'June 27',
+  EVENT_TIME: '4PM – 12AM',
+  EVENT_VENUE: 'Northern Cove, Penang',
+  EVENT_ADDRESS: '515 Jalan C M Hashim, Tanjung Tokong, George Town',
 };
 
 // ============================================================================
@@ -150,6 +154,7 @@ function validateTicket(ticketId, token) {
     const nameCol = headers.indexOf('buyer_name');
     const typeCol = headers.indexOf('ticket_type');
     const purchaseIdCol = headers.indexOf('purchase_id');
+    const paymentTypeCol = headers.indexOf('payment_type');
 
     // First pass: find the ticket
     let foundRow = -1;
@@ -208,6 +213,7 @@ function validateTicket(ticketId, token) {
       status: 'valid',
       buyer_name: data[foundRow][nameCol],
       ticket_type: data[foundRow][typeCol],
+      payment_type: paymentTypeCol !== -1 ? data[foundRow][paymentTypeCol] : null,
       ticket_index: ticketIndex,
       ticket_total: ticketTotal,
       scanned_by: scanner.name,
@@ -281,6 +287,7 @@ function getTicketsForBuyer(key) {
   const tPurchaseIdCol = tHeaders.indexOf('purchase_id');
   const tTypeCol = tHeaders.indexOf('ticket_type');
   const tScannedCol = tHeaders.indexOf('scanned');
+  const tPaymentTypeCol = tHeaders.indexOf('payment_type');
 
   const tickets = [];
   for (let i = 1; i < ticketsData.length; i++) {
@@ -288,6 +295,7 @@ function getTicketsForBuyer(key) {
       tickets.push({
         ticket_id: ticketsData[i][tIdCol],
         ticket_type: ticketsData[i][tTypeCol],
+        payment_type: tPaymentTypeCol !== -1 ? ticketsData[i][tPaymentTypeCol] : null,
         scanned: ticketsData[i][tScannedCol] === true || String(ticketsData[i][tScannedCol]).toUpperCase() === 'TRUE',
       });
     }
@@ -328,6 +336,7 @@ function generateTickets() {
     name: pHeaders.indexOf('buyer_name'),
     quantity: pHeaders.indexOf('quantity'),
     ticket_type: pHeaders.indexOf('ticket_type'),
+    payment_type: pHeaders.indexOf('payment_type'),
     payment_confirmed: pHeaders.indexOf('payment_confirmed'),
     tickets_generated: pHeaders.indexOf('tickets_generated'),
     purchase_id: pHeaders.indexOf('purchase_id'),
@@ -368,6 +377,7 @@ function generateTickets() {
         purchase_id: purchaseId,
         buyer_name: pData[i][pCols.name],
         ticket_type: pData[i][pCols.ticket_type],
+        payment_type: pCols.payment_type !== -1 ? pData[i][pCols.payment_type] : '',
         scanned: false,
         scanned_at: '',
         scanned_by: '',
@@ -558,17 +568,19 @@ function onFormSubmitHandler(e) {
     return -1;
   }
 
-  const nameIdx     = findCol('name');
-  const emailIdx    = findCol('email');
-  const typeIdx     = findCol('ticket type');
-  const qtyIdx      = findCol('quantity');
-  const screenshotIdx = findCol('screenshot') !== -1 ? findCol('screenshot') : findCol('payment');
+  const nameIdx          = findCol('name');
+  const emailIdx         = findCol('email');
+  const typeIdx          = findCol('ticket type');
+  const qtyIdx           = findCol('quantity');
+  const screenshotIdx    = findCol('screenshot') !== -1 ? findCol('screenshot') : findCol('proof');
+  const paymentMethodIdx = findCol('payment method');
 
-  buyerName    = nameIdx     !== -1 ? v[nameIdx]     : '';
-  buyerEmail   = emailIdx    !== -1 ? v[emailIdx]    : '';
-  ticketType   = typeIdx     !== -1 ? v[typeIdx]     : 'General';
-  quantity     = qtyIdx      !== -1 ? parseInt(v[qtyIdx], 10) || 1 : 1;
-  paymentProof = screenshotIdx !== -1 ? v[screenshotIdx] : '';
+  buyerName    = nameIdx          !== -1 ? v[nameIdx]                               : '';
+  buyerEmail   = emailIdx         !== -1 ? v[emailIdx]                              : '';
+  ticketType   = typeIdx          !== -1 ? v[typeIdx]                               : 'General';
+  quantity     = qtyIdx           !== -1 ? parseInt(v[qtyIdx], 10) || 1             : 1;
+  paymentProof = screenshotIdx    !== -1 ? v[screenshotIdx]                         : '';
+  const paymentType = paymentMethodIdx !== -1 ? String(v[paymentMethodIdx]).toLowerCase().trim() : '';
 
   // Calculate total cost from ticket type + quantity
   const unitPrice = priceFor(ticketType);
@@ -584,6 +596,7 @@ function onFormSubmitHandler(e) {
     'ticket_type': ticketType,
     'quantity': quantity,
     'amount_paid': totalCost,  // calculated — verify against screenshot
+    'payment_type': paymentType,
     'payment_confirmed': false,
     'payment_proof': paymentProof,
     'notes': 'Auto-imported from form',
@@ -748,6 +761,7 @@ function generateTicketsForRow(rowNum) {
     name: headers.indexOf('buyer_name'),
     quantity: headers.indexOf('quantity'),
     ticket_type: headers.indexOf('ticket_type'),
+    payment_type: headers.indexOf('payment_type'),
     payment_confirmed: headers.indexOf('payment_confirmed'),
     tickets_generated: headers.indexOf('tickets_generated'),
     purchase_id: headers.indexOf('purchase_id'),
@@ -782,6 +796,7 @@ function generateTicketsForRow(rowNum) {
       purchase_id: purchaseId,
       buyer_name: rowData[pCols.name],
       ticket_type: rowData[pCols.ticket_type],
+      payment_type: pCols.payment_type !== -1 ? rowData[pCols.payment_type] : '',
       scanned: false,
       scanned_at: '',
       scanned_by: '',
@@ -833,7 +848,7 @@ function sendTicketEmail(rowNum) {
     `Your ${qty} ticket${qty === 1 ? '' : 's'} (${ticketType}) for ${CONFIG.EVENT_NAME} are ready.\n\n` +
     `View your tickets:\n${ticketUrl}\n\n` +
     `Save the link — you'll need to show each QR code at the door (one per guest).\n\n` +
-    `See you May 1 at Northern Cove Penang, 4PM.\n\n` +
+    `See you ${CONFIG.EVENT_DATE} at ${CONFIG.EVENT_VENUE}, ${CONFIG.EVENT_TIME}.\n\n` +
     `— Nexa Events`;
 
   const htmlBody = `
@@ -855,10 +870,9 @@ function sendTicketEmail(rowNum) {
         </p>
         <hr style="border: 0; border-top: 1px dashed #0a0a0a; margin: 20px 0;" />
         <div style="font-size: 12px; line-height: 1.6; color: #333;">
-          <strong>When:</strong> May 1, 4PM – 12AM<br/>
-          <strong>Where:</strong> Northern Cove Penang<br/>
-          515 Jalan C M Hashim, Tanjung Tokong, George Town<br/>
-          <strong>After:</strong> Prime Reloaded · 12AM – 3AM
+          <strong>When:</strong> ${CONFIG.EVENT_DATE}, ${CONFIG.EVENT_TIME}<br/>
+          <strong>Where:</strong> ${CONFIG.EVENT_VENUE}<br/>
+          ${CONFIG.EVENT_ADDRESS}
         </div>
       </div>
     </div>

@@ -276,6 +276,53 @@
     animation: stamp 0.4s ease;
     box-shadow: 0 0 40px rgba(245, 158, 11, 0.5);
   }
+  .result.cash {
+    background: linear-gradient(135deg, #b45309 0%, #92400e 100%);
+    color: #fff8e7;
+    border-color: var(--gold);
+    animation: stamp 0.4s ease;
+    box-shadow: 0 0 50px rgba(255, 181, 71, 0.5);
+  }
+  .swipe-track {
+    position: relative;
+    height: 54px;
+    background: rgba(0, 0, 0, 0.35);
+    border-radius: 27px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    margin-top: 18px;
+    overflow: hidden;
+    touch-action: none;
+  }
+  .swipe-handle {
+    position: absolute;
+    left: 4px;
+    top: 4px;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: var(--night);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    cursor: grab;
+    user-select: none;
+    touch-action: none;
+  }
+  .swipe-label {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.55);
+    pointer-events: none;
+    padding-left: 58px;
+  }
   @keyframes stamp {
     0% { transform: scale(0.94) rotate(-1deg); }
     60% { transform: scale(1.02) rotate(0.5deg); }
@@ -628,11 +675,17 @@
       const logName = pos ? `${resp.buyer_name} (${pos})` : resp.buyer_name;
 
       if (resp.status === 'valid') {
-        showResult('valid', 'Valid', resp.buyer_name, resp.ticket_type, null, pos);
-        addLog('valid', ticketId, `${logName} — ${resp.ticket_type}`);
-        scanCount++;
-        stubCountEl.textContent = `${String(scanCount).padStart(2, '0')} Scan${scanCount === 1 ? '' : 's'}`;
-        beep(1);
+        if (resp.payment_type === 'cash') {
+          showCashResult(resp.buyer_name, resp.ticket_type, pos, logName, ticketId);
+          addLog('warn', ticketId, `${logName} — CASH DUE`);
+          beep(2);
+        } else {
+          showResult('valid', 'Valid', resp.buyer_name, resp.ticket_type, null, pos);
+          addLog('valid', ticketId, `${logName} — ${resp.ticket_type}`);
+          scanCount++;
+          stubCountEl.textContent = `${String(scanCount).padStart(2, '0')} Scan${scanCount === 1 ? '' : 's'}`;
+          beep(1);
+        }
       } else if (resp.status === 'already_scanned') {
         const when = resp.scanned_at ? new Date(resp.scanned_at).toLocaleTimeString() : '';
         showResult('warn', 'Already In', resp.buyer_name, resp.ticket_type, `Previously scanned${when ? ' at ' + when : ''}${resp.scanned_by ? ' by ' + resp.scanned_by : ''}`, pos);
@@ -709,6 +762,80 @@
         osc.start(); osc.stop(ctx.currentTime + 0.5);
       }
     } catch (e) {}
+  }
+
+  function showCashResult(buyerName, ticketType, pos, logName, ticketId) {
+    const el = document.getElementById('result');
+    el.className = 'result cash';
+    el.innerHTML = `
+      <div class="result-status">Cash Due</div>
+      <div class="result-detail">
+        <span class="label">Name</span>
+        <div class="name-big">${escapeHtml(buyerName)}</div>
+        <span class="label">Type</span>
+        <span class="value">${escapeHtml(ticketType)}</span>
+        ${pos ? `<span class="label">Ticket</span><span class="value">${escapeHtml(pos)} in group</span>` : ''}
+        <div class="swipe-track" id="swipeTrack">
+          <div class="swipe-handle" id="swipeHandle">→</div>
+          <div class="swipe-label">Swipe right — cash received</div>
+        </div>
+      </div>
+    `;
+    setupSwipe(() => {
+      scanCount++;
+      stubCountEl.textContent = `${String(scanCount).padStart(2, '0')} Scan${scanCount === 1 ? '' : 's'}`;
+      addLog('valid', ticketId, `${logName} — cash collected`);
+      showResult('valid', 'Collected', buyerName, ticketType, 'Cash payment received', pos);
+      setTimeout(() => {
+        const r = document.getElementById('result');
+        if (r) { r.className = 'result idle'; r.innerHTML = 'Awaiting Scan'; }
+      }, 3000);
+    });
+  }
+
+  function setupSwipe(onConfirm) {
+    const handle = document.getElementById('swipeHandle');
+    const track = document.getElementById('swipeTrack');
+    if (!handle || !track) return;
+    let dragging = false;
+    let startX = 0;
+    const maxX = track.offsetWidth - handle.offsetWidth - 8;
+
+    function getX(e) { return e.touches ? e.touches[0].clientX : e.clientX; }
+
+    function onStart(e) {
+      dragging = true;
+      startX = getX(e);
+      handle.style.transition = 'none';
+      e.preventDefault();
+    }
+    function onMove(e) {
+      if (!dragging) return;
+      const delta = Math.max(0, Math.min(getX(e) - startX, maxX));
+      handle.style.left = (4 + delta) + 'px';
+      handle.style.background = delta >= maxX * 0.8 ? 'var(--teal)' : 'var(--night)';
+      e.preventDefault();
+    }
+    function onEnd() {
+      if (!dragging) return;
+      dragging = false;
+      const currentLeft = parseFloat(handle.style.left || '4') - 4;
+      handle.style.transition = 'left 0.2s ease, background 0.2s ease';
+      if (currentLeft >= maxX * 0.85) {
+        handle.style.left = (4 + maxX) + 'px';
+        setTimeout(onConfirm, 200);
+      } else {
+        handle.style.left = '4px';
+        handle.style.background = 'var(--night)';
+      }
+    }
+
+    handle.addEventListener('touchstart', onStart, { passive: false });
+    handle.addEventListener('touchmove', onMove, { passive: false });
+    handle.addEventListener('touchend', onEnd);
+    handle.addEventListener('mousedown', onStart);
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onEnd);
   }
 
   boot();
