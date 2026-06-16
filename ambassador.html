@@ -29,17 +29,17 @@
 <script src="config.js"></script>
 <style>
   :root {
-    --night: #080c1a;
-    --ember: #0d1630;
-    --amber: #ff7035;
-    --amber-deep: #c84a00;
-    --gold: #ffc547;
-    --gold-soft: #ffad3b;
-    --flame: #ff4c00;
-    --teal: #0d9488;
-    --teal-deep: #065f46;
+    --night: #080808;
+    --ember: #111111;
+    --amber: #c9a227;
+    --amber-deep: #8b6d14;
+    --gold: #f0c040;
+    --gold-soft: #d4af37;
+    --flame: #c9a227;
+    --teal: #d4af37;
+    --teal-deep: #a07d20;
     --red: #ce1126;
-    --cream: #f4e8d4;
+    --cream: #f0f0f0;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   html, body {
@@ -51,10 +51,8 @@
   }
   body {
     background:
-      radial-gradient(ellipse 90% 60% at 50% 0%, rgba(255, 120, 50, 0.4) 0%, transparent 55%),
-      radial-gradient(ellipse 100% 70% at 50% 35%, rgba(200, 70, 0, 0.2) 0%, transparent 60%),
-      radial-gradient(ellipse 70% 50% at 80% 80%, rgba(13, 148, 136, 0.18) 0%, transparent 60%),
-      linear-gradient(180deg, var(--ember) 0%, var(--night) 60%, var(--ember) 100%);
+      radial-gradient(ellipse 80% 40% at 50% 0%, rgba(212, 175, 55, 0.08) 0%, transparent 60%),
+      linear-gradient(180deg, var(--ember) 0%, var(--night) 70%, var(--ember) 100%);
     padding: 20px 14px 60px;
     overflow-x: hidden;
     position: relative;
@@ -63,7 +61,7 @@
     content: '';
     position: fixed;
     inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 0.7 0 0 0 0 0.3 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 400 400' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.9 0 0 0 0 0.82 0 0 0 0 0.5 0 0 0 0.04 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     pointer-events: none;
     z-index: 0;
     opacity: 0.7;
@@ -103,9 +101,8 @@
   .top-logo {
     display: block;
     margin: 0 auto 18px;
-    height: 150px;
+    height: 80px;
     width: auto;
-    transform: rotate(-2deg);
   }
   .top-tagline {
     font-family: 'Inter', sans-serif;
@@ -124,7 +121,7 @@
     letter-spacing: -1px;
     color: var(--cream);
     text-transform: uppercase;
-    text-shadow: 0 2px 0 rgba(0,0,0,0.5), 0 0 30px rgba(255, 107, 26, 0.4);
+    text-shadow: 0 2px 0 rgba(0,0,0,0.5), 0 0 30px rgba(212, 175, 55, 0.25);
     transform: rotate(-1deg);
   }
   h1 .sub {
@@ -136,7 +133,7 @@
     text-transform: none;
     transform: rotate(-3deg);
     margin-top: -6px;
-    text-shadow: 0 2px 0 rgba(0,0,0,0.6), 0 0 25px rgba(252, 209, 22, 0.5);
+    text-shadow: 0 2px 0 rgba(0,0,0,0.6), 0 0 25px rgba(212, 175, 55, 0.4);
   }
   .subtitle {
     margin-top: 18px;
@@ -163,8 +160,8 @@
     margin-bottom: 28px;
   }
   .stat-card {
-    background: linear-gradient(180deg, rgba(26, 10, 5, 0.95) 0%, rgba(13, 6, 4, 0.98) 100%);
-    border: 1px solid rgba(255, 181, 71, 0.2);
+    background: linear-gradient(180deg, rgba(20, 20, 20, 0.95) 0%, rgba(8, 8, 8, 0.98) 100%);
+    border: 1px solid rgba(212, 175, 55, 0.2);
     border-radius: 12px;
     padding: 18px 14px;
     text-align: center;
@@ -206,8 +203,8 @@
 
   /* QR section */
   .qr-section {
-    background: linear-gradient(180deg, rgba(26, 10, 5, 0.95) 0%, rgba(13, 6, 4, 0.98) 100%);
-    border: 1px solid rgba(255, 181, 71, 0.2);
+    background: linear-gradient(180deg, rgba(20, 20, 20, 0.95) 0%, rgba(8, 8, 8, 0.98) 100%);
+    border: 1px solid rgba(212, 175, 55, 0.2);
     border-radius: 14px;
     padding: 28px 20px 22px;
     text-align: center;
@@ -246,8 +243,8 @@
     height: 244px;
     position: relative;
     box-shadow:
-      0 0 30px rgba(13, 148, 136, 0.3),
-      0 0 0 2px var(--teal),
+      0 0 30px rgba(212, 175, 55, 0.2),
+      0 0 0 2px var(--gold-soft),
       0 0 0 4px var(--gold),
       0 0 0 6px var(--ember);
   }
@@ -269,7 +266,7 @@
   .info-block {
     background: rgba(0, 0, 0, 0.4);
     backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 181, 71, 0.25);
+    border: 1px solid rgba(212, 175, 55, 0.25);
     border-radius: 12px;
     padding: 22px 20px;
     margin-bottom: 24px;
@@ -308,7 +305,7 @@
     font-family: 'Bagel Fat One', cursive;
     font-size: 56px;
     color: var(--flame);
-    text-shadow: 0 0 30px rgba(255, 60, 0, 0.6);
+    text-shadow: 0 0 30px rgba(212, 175, 55, 0.5);
     margin-bottom: 14px;
   }
   .error-state p {
@@ -334,7 +331,7 @@
 <body>
 <div class="container">
   <header>
-    <img class="top-logo" src="assets/poster.webp" alt="Event Poster" />
+    <img class="top-logo" src="assets/NEXA_white.png" alt="Nexa Events" />
     <div class="top-tagline">★<span class="dot">•</span>Nexa Events<span class="dot">•</span>★</div>
     <h1>NEXA<span class="sub">Ambassador</span></h1>
   </header>
