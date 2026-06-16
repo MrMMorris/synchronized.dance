@@ -141,14 +141,16 @@
   }
 
   .commission-badge {
-    display: inline-flex;
-    align-items: baseline;
-    gap: 4px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
     background: linear-gradient(135deg, var(--teal) 0%, var(--teal-deep) 100%);
     border: 1px solid rgba(212, 175, 55, 0.4);
     border-radius: 8px;
-    padding: 10px 18px;
-    margin-bottom: 20px;
+    padding: 14px 24px;
+    margin: 0 auto 20px;
+    width: fit-content;
   }
   .commission-badge .amount {
     font-family: 'Bagel Fat One', cursive;
@@ -162,6 +164,7 @@
     font-size: 11px;
     letter-spacing: 1.5px;
     text-transform: uppercase;
+    text-align: center;
     color: var(--cream);
     opacity: 0.85;
   }
@@ -307,7 +310,7 @@
   <div class="pitch-card">
     <div class="commission-badge">
       <span class="amount">RM5</span>
-      <span class="label">per confirmed<br/>ticket sold</span>
+      <span class="label">per confirmed ticket sold</span>
     </div>
     <p class="pitch-text">
       Help spread the word about <strong>Beach Party</strong> and earn for every ticket
