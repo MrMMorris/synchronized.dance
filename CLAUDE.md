@@ -420,3 +420,13 @@ The ambassador QR encodes: `TICKET_FORM_BASE_URL + '?' + TICKET_FORM_PREFILL_ENT
 Deployed on **Cloudflare Pages** (see `wrangler.jsonc`). Static files only — no server-side logic. The `_headers` file sets response headers (caching, security).
 
 `config.js` must be manually uploaded or set as an environment secret/file since it is not in git.
+
+### Redirects (`_redirects`)
+
+Cloudflare Pages processes `_redirects` at the repo root. Current rules:
+
+| From | To | Notes |
+|---|---|---|
+| `/join` | Google ambassador signup form | QR codes and `ambassador-signup.html` point here — update this line if the form URL ever changes, then push |
+
+Set `window.AMBASSADOR_SIGNUP_FORM_URL = 'https://synchronized.dance/join'` in `config.js` so the QR on `ambassador-signup.html` encodes the short URL, not the raw Google Form link.
