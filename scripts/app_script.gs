@@ -191,7 +191,7 @@ function validateTicket(ticketId, token) {
         ok: true,
         status: 'already_scanned',
         buyer_name: data[foundRow][nameCol],
-        ticket_type: data[foundRow][typeCol],
+        ticket_type: shortTicketType(data[foundRow][typeCol]),
         ticket_index: ticketIndex,
         ticket_total: ticketTotal,
         scanned_at: data[foundRow][scannedAtCol],
@@ -212,7 +212,7 @@ function validateTicket(ticketId, token) {
       ok: true,
       status: 'valid',
       buyer_name: data[foundRow][nameCol],
-      ticket_type: data[foundRow][typeCol],
+      ticket_type: shortTicketType(data[foundRow][typeCol]),
       payment_method: paymentTypeCol !== -1 ? data[foundRow][paymentTypeCol] : null,
       ticket_index: ticketIndex,
       ticket_total: ticketTotal,
@@ -294,7 +294,7 @@ function getTicketsForBuyer(key) {
     if (String(ticketsData[i][tPurchaseIdCol]).trim() === purchaseId) {
       tickets.push({
         ticket_id: ticketsData[i][tIdCol],
-        ticket_type: ticketsData[i][tTypeCol],
+        ticket_type: shortTicketType(ticketsData[i][tTypeCol]),
         payment_method: tPaymentTypeCol !== -1 ? ticketsData[i][tPaymentTypeCol] : null,
         scanned: ticketsData[i][tScannedCol] === true || String(ticketsData[i][tScannedCol]).toUpperCase() === 'TRUE',
       });
@@ -838,7 +838,7 @@ function sendTicketEmail(rowNum) {
   const ticketUrl = String(rowData[urlCol]).trim();
   const buyerName = rowData[nameCol] || '';
   const qty = rowData[qtyCol] || 1;
-  const ticketType = rowData[typeCol] || 'General';
+  const ticketType = shortTicketType(rowData[typeCol] || 'General');
 
   if (!email) return { ok: false, reason: 'No email on this row' };
   if (!ticketUrl) return { ok: false, reason: 'No buyer_ticket_url — generate tickets first' };
@@ -887,6 +887,10 @@ function sendTicketEmail(rowNum) {
     name: 'Nexa Events',
   });
   return { ok: true };
+}
+
+function shortTicketType(t) {
+  return String(t).split('—')[0].split(' - ')[0].trim();
 }
 
 function escapeForHtml(s) {
