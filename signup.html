@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-RE0PHC72VJ"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-RE0PHC72VJ');
+    </script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Nexa Events</title>
+    <meta name="description" content="Sign up for exclusive updates about our dance music parties and events. Join our community for early access to lineups and ticket drops.">
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: url('assets/background.jpg') center/cover no-repeat fixed;
+        font-family: sans-serif;
+      }
+
+      .bg-video {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        z-index: -1;
+        opacity: 0;
+        transition: opacity 0.5s ease-in;
+      }
+
+      .bg-video.loaded {
+        opacity: 1;
+      }
+
+      h2 {
+        margin: 0;
+      }
+
+      h3 {
+        margin: 0px;
+        font-size: 12px;
+        font-weight: normal;
+      }
+
+      h4 {
+        font-size: 10px;
+        margin-top: 10px;
+        font-weight: normal;
+      }
+
+      .form {
+        background: rgba(255, 255, 255, 0.8);
+        padding: 10px;
+        border-radius: 16px;
+        text-align: center;
+        max-width: 250px;
+        width: 90%;
+        backdrop-filter: blur(6px);
+        margin: 0px;
+        transition: all 0.6s ease;
+      }
+
+      .form.fade-out {
+        opacity: 0;
+        transform: scale(0.95);
+      }
+
+      .form h2 {
+        transition: all 0.6s ease;
+      }
+
+      form input[type="email"] {
+        width: 80%;
+        padding: 12px;
+        margin: 10px auto;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+        font-size: 1rem;
+        box-sizing: border-box;
+        display: block;
+        text-align: center;
+      }
+
+      form button {
+        width: 50%;
+        padding: 12px;
+        background: black;
+        color: white;
+        border: none;
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 1rem;
+        display: block;
+        margin: 0 auto;
+      }
+
+      form button:hover {
+        opacity: 0.85;
+      }
+
+      .input--hidden {
+        display: none;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- background.mp4 -->
+    <video autoplay loop muted playsinline class="bg-video">
+      <source src="assets/background.mp4" type="video/mp4">
+    </video>
+
+    <div class="form">
+      <h2>Get Notified About Our Next Party</h2>
+      <h4>*we will <b>never</b> share your email with anyone*</h4>
+
+      <form id="sib-form" method="POST" action="https://d2fdd58e.sibforms.com/serve/MUIFAE8Vrj85rMcXC3sDXfp374lWxst71GzPrGpg7uetefPBvh7zFVGpTSwkDGf1tGCDylqEBiOo9HWVBzZlEQbft4YLel9n9vdJ4QL1ZgSeTTEBNUfCiKIxagoApnr8EnbI3ogO4XW8Hn8F5YMmo_5WTpO52x-RztGL6O9F-W9s00sJEbIjm5iwtB8vLwW_wq9A0Ht3iD5CoeVdNw==">
+        <input type="email" name="EMAIL" placeholder="Enter your email" required />
+
+        <input type="text" name="email_address_check" value="" class="input--hidden" style="position: absolute; left: -5000px;">
+        <input type="hidden" name="locale" value="en">
+        <input type="hidden" name="html_type" value="simple">
+
+        <button type="submit" onClick="trackSignupClick()">Sign Up</button>
+      </form>
+
+      <!-- Hidden iframe to catch the response -->
+      <iframe name="hidden-iframe" style="display:none;"></iframe>
+    </div>
+  </body>
+
+  <!-- GA tracking for signup click -->
+  <script>
+    function trackSignupClick() {
+      gtag('event', 'signup_click', {
+        'event_category': 'engagement',
+        'event_label': 'email_link'
+      });
+    }
+  </script>
+
+  <!-- Brevo form script -->
+  <script>
+    document.getElementById('sib-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const formDiv = document.querySelector('.form');
+      const emailInput = document.querySelector('input[name="EMAIL"]');
+      const form = e.target;
+
+      if (emailInput.validity.valid) {
+        // Submit via fetch to prevent redirect
+        const formData = new FormData(form);
+
+        fetch(form.action, {
+          method: 'POST',
+          body: formData,
+          mode: 'no-cors' // Brevo doesn't support CORS, so we can't read response
+        }).then(() => {
+          // Fade out and show success
+          formDiv.classList.add('fade-out');
+
+          setTimeout(() => {
+            formDiv.innerHTML = '<h2>Success!</h2><h3>*check your inbox or spam for confirmation*</h3>';
+            formDiv.classList.remove('fade-out');
+          }, 600);
+        }).catch(() => {
+          // Even on error, assume it worked (no-cors prevents seeing real response)
+          formDiv.classList.add('fade-out');
+
+          setTimeout(() => {
+            formDiv.innerHTML = '<h2>Success!</h2><h3>*check your inbox or spam for confirmation*</h3>';
+            formDiv.classList.remove('fade-out');
+          }, 600);
+        });
+      } else {
+        emailInput.reportValidity();
+      }
+    });
+  </script>
+
+  <!-- Video fade-in script -->
+  <script>
+    const video = document.querySelector('.bg-video');
+
+    video.addEventListener('loadeddata', function() {
+      video.classList.add('loaded');
+    });
+  </script>
+</html>
