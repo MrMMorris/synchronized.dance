@@ -832,6 +832,7 @@ function sendTicketEmail(rowNum) {
   const urlCol = headers.indexOf('buyer_ticket_url');
   const qtyCol = headers.indexOf('quantity');
   const typeCol = headers.indexOf('ticket_type');
+  const paymentMethodCol = headers.indexOf('payment_method');
 
   if (emailCol === -1) return { ok: false, reason: 'No buyer_email column on Purchases tab' };
   const email = String(rowData[emailCol]).trim();
@@ -839,6 +840,7 @@ function sendTicketEmail(rowNum) {
   const buyerName = rowData[nameCol] || '';
   const qty = rowData[qtyCol] || 1;
   const ticketType = shortTicketType(rowData[typeCol] || 'General');
+  const isCash = paymentMethodCol !== -1 && String(rowData[paymentMethodCol]).toLowerCase().trim() === 'cash';
 
   if (!email) return { ok: false, reason: 'No email on this row' };
   if (!ticketUrl) return { ok: false, reason: 'No buyer_ticket_url — generate tickets first' };
@@ -849,6 +851,7 @@ function sendTicketEmail(rowNum) {
     `Your ${qty} ticket${qty === 1 ? '' : 's'} (${ticketType}) for ${CONFIG.EVENT_NAME} are ready.\n\n` +
     `View your tickets:\n${ticketUrl}\n\n` +
     `Save the link — you'll need to show each QR code at the door (one per guest).\n\n` +
+    (isCash ? `PAYMENT: Please have cash ready to pay at the door when you present your ticket.\n\n` : '') +
     `See you ${CONFIG.EVENT_DATE} at ${CONFIG.EVENT_VENUE}, ${CONFIG.EVENT_TIME}.\n\n` +
     `— Nexa Events`;
 
@@ -869,6 +872,9 @@ function sendTicketEmail(rowNum) {
         <p style="margin: 0 0 14px; font-size: 13px; line-height: 1.5; color: #555;">
           Save this email. At the door, open the link and show each QR code to staff — one per guest.
         </p>
+        ${isCash ? `<div style="background: #fff3cd; border: 2px solid #0a0a0a; padding: 14px 16px; margin: 0 0 14px; font-size: 13px; line-height: 1.5;">
+          💵 <strong>Cash payment:</strong> Please have your cash ready to pay at the door when you present your ticket.
+        </div>` : ''}
         <hr style="border: 0; border-top: 1px dashed #0a0a0a; margin: 20px 0;" />
         <div style="font-size: 12px; line-height: 1.6; color: #333;">
           <strong>When:</strong> ${CONFIG.EVENT_DATE}, ${CONFIG.EVENT_TIME}<br/>
