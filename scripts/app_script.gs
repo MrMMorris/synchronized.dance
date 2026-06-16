@@ -505,9 +505,10 @@ function showStats() {
 
 /**
  * Runs automatically when a new Google Form response lands in the linked
- * "Form Responses 1" tab. Copies the response into the Purchases tab with
- * the right column mapping, and leaves payment_confirmed FALSE so you can
- * verify the screenshot before tickets are generated.
+ * "Form Responses 1" tab. Copies the response into the Purchases tab.
+ * Cash orders: auto-confirmed — sets payment_confirmed TRUE and sends tickets
+ * immediately. QR orders: leaves payment_confirmed FALSE and sends an order
+ * confirmation email; organizer must manually flip the field to send tickets.
  *
  * Install this trigger ONCE manually:
  *   Apps Script editor → Triggers (clock icon) → Add Trigger
@@ -587,6 +588,9 @@ function onFormSubmitHandler(e) {
   const unitPrice = priceFor(ticketType);
   const totalCost = unitPrice * quantity;
 
+  // Cash orders are auto-confirmed — no payment screenshot to verify
+  const isCashOrder = paymentType === 'cash';
+
   // Build the row to insert, respecting current Purchases column order
   const purchaseHeaders = purchasesSheet.getRange(1, 1, 1, purchasesSheet.getLastColumn()).getValues()[0];
   const newRow = new Array(purchaseHeaders.length).fill('');
@@ -598,7 +602,7 @@ function onFormSubmitHandler(e) {
     'quantity': quantity,
     'amount_paid': totalCost,  // calculated — verify against screenshot
     'payment_method': paymentType,
-    'payment_confirmed': false,
+    'payment_confirmed': isCashOrder,
     'payment_proof': paymentProof,
     'notes': 'Auto-imported from form',
     'purchase_time': new Date(),
@@ -611,12 +615,22 @@ function onFormSubmitHandler(e) {
 
   purchasesSheet.appendRow(newRow);
 
-  // Send buyer a confirmation email with the calculated total
-  if (buyerEmail) {
+  if (isCashOrder) {
+    // Generate tickets immediately and send the ticket email — no manual verification needed
+    try {
+      const newRowNum = purchasesSheet.getLastRow();
+      const result = generateTicketsForRow(newRowNum);
+      if (result && result.ok) {
+        sendTicketEmail(newRowNum);
+      }
+    } catch (err) {
+      Logger.log('Failed to auto-generate cash tickets: ' + err);
+    }
+  } else if (buyerEmail) {
+    // QR orders: send order confirmation; organizer verifies screenshot before tickets are sent
     try {
       sendOrderConfirmationEmail(buyerEmail, buyerName, ticketType, quantity, unitPrice, totalCost);
     } catch (err) {
-      // Don't let email failure block the form submission flow
       Logger.log('Failed to send confirmation email: ' + err);
     }
   }
