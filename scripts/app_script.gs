@@ -680,10 +680,8 @@ function sendOrderConfirmationEmail(email, name, ticketType, quantity, unitPrice
     </div>
   `;
 
-  MailApp.sendEmail({
-    to: email,
-    subject: subject,
-    body: textBody,
+  GmailApp.sendEmail(email, subject, textBody, {
+    from: 'nexa.events.marketing@gmail.com',
     htmlBody: htmlBody,
     name: 'Nexa Events',
   });
@@ -888,10 +886,8 @@ function sendTicketEmail(rowNum) {
     </div>
   `;
 
-  MailApp.sendEmail({
-    to: email,
-    subject: subject,
-    body: textBody,
+  GmailApp.sendEmail(email, subject, textBody, {
+    from: 'nexa.events.marketing@gmail.com',
     htmlBody: htmlBody,
     name: 'Nexa Events',
   });
@@ -1026,7 +1022,11 @@ function sendAmbassadorWelcomeEmail(email, name, pageUrl) {
     </div>
   `;
 
-  MailApp.sendEmail({ to: email, subject: subject, body: textBody, htmlBody: htmlBody, name: 'Nexa Events' });
+  GmailApp.sendEmail(email, subject, textBody, {
+    from: 'nexa.events.marketing@gmail.com',
+    htmlBody: htmlBody,
+    name: 'Nexa Events',
+  });
 }
 
 // ============================================================================
