@@ -974,11 +974,20 @@ function onAmbassadorSignupHandler(e) {
   const phone           = findCol('phone')    !== -1 ? String(v[findCol('phone')]).trim()    : '';
   const business        = findCol('business') !== -1 ? String(v[findCol('business')]).trim() : '';
   // Collect whichever payment detail field was filled in
-  const bankIdx         = findCol('bank account');
-  const qrIdx           = findCol('payment qr');
-  const paymentDetails  = bankIdx !== -1 && v[bankIdx] ? String(v[bankIdx]).trim()
-                        : qrIdx  !== -1 && v[qrIdx]  ? String(v[qrIdx]).trim()
-                        : '';
+  const bankNameIdx    = findCol('bank name');
+  const accountNumIdx  = findCol('account number');
+  const accountOwnerIdx = findCol('account owner');
+  const qrIdx          = findCol('payment qr');
+
+  let paymentDetails = '';
+  const bankName    = bankNameIdx    !== -1 ? String(v[bankNameIdx]).trim()    : '';
+  const accountNum  = accountNumIdx  !== -1 ? String(v[accountNumIdx]).trim()  : '';
+  const accountOwner = accountOwnerIdx !== -1 ? String(v[accountOwnerIdx]).trim() : '';
+  if (bankName || accountNum || accountOwner) {
+    paymentDetails = `${bankName} | ${accountNum} | ${accountOwner}`;
+  } else if (qrIdx !== -1 && v[qrIdx]) {
+    paymentDetails = String(v[qrIdx]).trim();
+  }
 
   if (!name || !email) return;
 
