@@ -117,14 +117,15 @@
   }
   .btn {
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    gap: 8px;
-    padding: 28px 20px;
+    gap: 4px;
+    padding: 6px 20px;
     border-radius: 12px;
     text-decoration: none;
     font-family: 'JetBrains Mono', monospace;
-    font-size: 14px;
+    font-size: 20px;
     font-weight: 700;
     letter-spacing: 2px;
     text-transform: uppercase;
@@ -172,8 +173,8 @@
     4PM – 12AM <span class="sep">✦</span> Northern Cove, Penang
   </div>
   <div class="action-btns">
-    <a href="https://docs.google.com/forms/d/1il7Xf6GXyt2RfDfWaCnIcvjNxx2Zh9-B7klLnv8Iw5g/viewform" target="_blank" class="btn btn-ticket" onclick="trackTicketClick()">🎟 Get Tickets</a>
-    <a href="https://maps.app.goo.gl/zzpVh7ByuNHCBdg48" target="_blank" class="btn btn-map" onclick="trackMapClick()">📍 Map</a>
+    <a href="https://docs.google.com/forms/d/1il7Xf6GXyt2RfDfWaCnIcvjNxx2Zh9-B7klLnv8Iw5g/viewform" target="_blank" class="btn btn-ticket" onclick="trackTicketClick()"><span>🎟</span><span>Tickets</span></a>
+    <a href="https://maps.app.goo.gl/zzpVh7ByuNHCBdg48" target="_blank" class="btn btn-map" onclick="trackMapClick()"><span>📍</span><span>Map</span></a>
   </div>
 </div>
 
