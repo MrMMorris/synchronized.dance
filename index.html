@@ -46,7 +46,7 @@
   }
   .events-heading {
     font-family: sans-serif;
-    font-size: 10px;
+    font-size: 14px;
     font-weight: 600;
     letter-spacing: 4px;
     text-transform: uppercase;
@@ -176,8 +176,8 @@
 <div class="events-section" id="eventsSection" style="display:none"></div>
 
 <div class="form" id="signupForm">
-  <h2>Get Notified</h2>
-  <h4>no spam, ever</h4>
+  <h2>Get Notified About Our Next Party</h2>
+  <h4>*we will <b>never</b> share your email with anyone*</h4>
   <form id="sib-form" method="POST" action="https://d2fdd58e.sibforms.com/serve/MUIFAE8Vrj85rMcXC3sDXfp374lWxst71GzPrGpg7uetefPBvh7zFVGpTSwkDGf1tGCDylqEBiOo9HWVBzZlEQbft4YLel9n9vdJ4QL1ZgSeTTEBNUfCiKIxagoApnr8EnbI3ogO4XW8Hn8F5YMmo_5WTpO52x-RztGL6O9F-W9s00sJEbIjm5iwtB8vLwW_wq9A0Ht3iD5CoeVdNw==">
     <input type="email" name="EMAIL" placeholder="your@email.com" required>
     <input type="text" name="email_address_check" value="" class="input--hidden" style="position:absolute;left:-5000px;">
@@ -203,7 +203,7 @@
     fetch(this.action, { method: 'POST', body: new FormData(this), mode: 'no-cors' }).finally(() => {
       formDiv.classList.add('fade-out');
       setTimeout(() => {
-        formDiv.innerHTML = '<h2>You\'re in!</h2><h4>check your inbox</h4>';
+        formDiv.innerHTML = '<h2>Success!</h2><h4>*check your inbox or spam for confirmation*</h4>';
         formDiv.classList.remove('fade-out');
       }, 600);
     });
