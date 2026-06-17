@@ -80,17 +80,30 @@
     transform: translateY(-2px);
     box-shadow: 0 14px 36px rgba(0,0,0,0.55);
   }
+  .event-btn-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
   .event-btn-name {
     font-size: 22px;
     font-weight: 800;
     letter-spacing: -0.5px;
-    margin-bottom: 5px;
     line-height: 1.2;
   }
-  .event-btn-location {
-    font-size: 12px;
-    opacity: 0.6;
-    letter-spacing: 0.5px;
+  .event-btn-arrow {
+    opacity: 0.4;
+    font-size: 16px;
+    flex-shrink: 0;
+    margin-top: 3px;
+  }
+  .event-btn-genres {
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    opacity: 0.55;
   }
 
   /* Signup form — same glass style, half width */
@@ -99,7 +112,7 @@
     border: 2px solid rgba(255, 255, 255, 0.35);
     border-radius: 14px;
     padding: 18px 16px;
-    max-width: 180px;
+    max-width: 240px;
     width: 100%;
     backdrop-filter: blur(12px);
     box-shadow: 0 8px 28px rgba(0,0,0,0.45);
@@ -210,10 +223,14 @@
     section.style.display = 'flex';
     let html = `<div class="events-heading">Upcoming Events</div>`;
     for (const ev of active) {
+      const genreStr = ev.genres ? ev.genres.join(' · ') : '';
       html += `
         <a class="event-btn" href="/events/${ev.id}/" onclick="trackEventClick('${ev.name}')">
-          <div class="event-btn-name">${ev.name}</div>
-          <div class="event-btn-location">@ ${ev.venue}</div>
+          <div class="event-btn-header">
+            <div class="event-btn-name">${ev.name} @ ${ev.venue}</div>
+            <span class="event-btn-arrow">→</span>
+          </div>
+          ${genreStr ? `<div class="event-btn-genres">${genreStr}</div>` : ''}
         </a>
       `;
     }
