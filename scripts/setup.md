@@ -18,7 +18,7 @@ The buyer sees pricing in the form itself — the ticket type options show the u
 
 When the form is submitted, the script auto-calculates `amount_paid` and writes it into the new Purchases row, so you have a target to verify against the screenshot at a glance. The buyer also receives the calculated total in their confirmation email.
 
-Pricing logic lives in the `priceFor()` function in Code.gs. If you ever change prices, update it there. Current prices: General Admission = RM50, Admission + Food Tasting = RM100.
+Pricing logic lives in the `priceFor()` function in `app_script.gs`. It now reads the price straight out of the ticket-type label (e.g. `General Admission — RM55` → 55), so as long as each option includes `RMxx` you don't need to touch the code when prices change. It only falls back to hardcoded keyword values (general = RM50, food = RM100) if a label has no `RMxx` in it.
 
 ## Step 1 — Add a `buyer_email` column to Purchases
 
@@ -75,7 +75,7 @@ Above question 5, you might want to add a section header or description telling 
 
 In the form editor, click the **Responses** tab → click the green Sheets icon → **Select existing spreadsheet** → pick your ticket system spreadsheet.
 
-This creates a new tab in your sheet called **Form Responses 1**. Don't rename it — the script looks for that exact name.
+This creates a new tab in your sheet (e.g. **Form Responses 1**). **Rename this tab to the event ID** (e.g. `27_06_2026-beach_party`). The current multi-event script matches the tab name against the `EVENTS` map in `app_script.gs` — that lookup is how a submission is tied to an event, so the tab name must equal the event ID exactly. (The older single-event version looked for the literal name "Form Responses 1"; that's no longer the case.)
 
 Submit a test response to make sure the new tab works.
 

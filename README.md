@@ -1,5 +1,11 @@
 # Event Ticket System — Setup Guide
 
+> ⚠️ **Outdated.** This README describes the original single-event, manual flow
+> (`Code.gs`, CSV tab templates, "Generate tickets" by hand). The live system is
+> now multi-event and Google-Forms-driven. **`CLAUDE.md` is the authoritative
+> reference** — use it for architecture, the new-event procedure, and deployment.
+> The steps below are kept only as historical context.
+
 A QR-code ticket system backed by a Google Sheet. The frontend is fully static, so it can be hosted free on GitHub Pages, Netlify, Cloudflare Pages, or any static host.
 
 ## What's in this folder

@@ -698,18 +698,18 @@
         : null;
       const logName = pos ? `${resp.buyer_name} (${pos})` : resp.buyer_name;
 
-      if (resp.status === 'valid') {
-        if (resp.payment_method === 'cash') {
-          showCashResult(resp.buyer_name, resp.ticket_type, pos, logName, ticketId);
-          addLog('warn', ticketId, `${logName} — CASH DUE`);
-          beep(2);
-        } else {
-          showResult('valid', 'Valid', resp.buyer_name, resp.ticket_type, null, pos);
-          addLog('valid', ticketId, `${logName} — ${resp.ticket_type}`);
-          scanCount++;
-          stubCountEl.textContent = `${String(scanCount).padStart(2, '0')} Scan${scanCount === 1 ? '' : 's'}`;
-          beep(1);
-        }
+      if (resp.status === 'cash_due') {
+        // Cash order: the server has NOT marked this scanned yet. Door staff
+        // collect cash and swipe to confirm, which calls confirm_cash.
+        showCashResult(resp.buyer_name, resp.ticket_type, pos, logName, ticketId);
+        addLog('warn', ticketId, `${logName} — CASH DUE`);
+        beep(2);
+      } else if (resp.status === 'valid') {
+        showResult('valid', 'Valid', resp.buyer_name, resp.ticket_type, null, pos);
+        addLog('valid', ticketId, `${logName} — ${resp.ticket_type}`);
+        scanCount++;
+        stubCountEl.textContent = `${String(scanCount).padStart(2, '0')} Scan${scanCount === 1 ? '' : 's'}`;
+        beep(1);
       } else if (resp.status === 'already_scanned') {
         const when = resp.scanned_at ? new Date(resp.scanned_at).toLocaleTimeString() : '';
         showResult('warn', 'Already In', resp.buyer_name, resp.ticket_type, `Previously scanned${when ? ' at ' + when : ''}${resp.scanned_by ? ' by ' + resp.scanned_by : ''}`, pos);
@@ -835,12 +835,37 @@
     document.body.appendChild(overlay);
     const resultEl = document.getElementById('result');
     if (resultEl) { resultEl.className = 'result idle'; resultEl.innerHTML = 'Awaiting Scan'; }
-    setupSwipe(() => {
-      scanCount++;
-      stubCountEl.textContent = `${String(scanCount).padStart(2, '0')} Scan${scanCount === 1 ? '' : 's'}`;
-      addLog('valid', ticketId, `${logName} — cash collected`);
-      overlay.remove();
-      showResult('valid', 'Collected', buyerName, ticketType, 'Cash payment received', pos);
+    setupSwipe(async () => {
+      // Confirm with the server — THIS is what actually marks the ticket scanned
+      // for cash orders. Until this succeeds, the ticket stays unused, so a guest
+      // who can't pay can simply be re-scanned later.
+      const label = overlay.querySelector('.swipe-label');
+      if (label) label.textContent = 'Confirming…';
+      try {
+        const url = `${WEB_APP_URL}?action=confirm_cash&ticket_id=${encodeURIComponent(ticketId)}&token=${encodeURIComponent(token)}`;
+        const resp = await fetchJson(url);
+        overlay.remove();
+        if (resp.ok && resp.status === 'valid') {
+          scanCount++;
+          stubCountEl.textContent = `${String(scanCount).padStart(2, '0')} Scan${scanCount === 1 ? '' : 's'}`;
+          addLog('valid', ticketId, `${logName} — cash collected`);
+          showResult('valid', 'Collected', buyerName, ticketType, 'Cash payment received', pos);
+          beep(1);
+        } else if (resp.ok && resp.status === 'already_scanned') {
+          addLog('warn', ticketId, `${logName} — already scanned`);
+          showResult('warn', 'Already In', buyerName, ticketType, 'Already scanned', pos);
+          beep(2);
+        } else {
+          addLog('invalid', ticketId, 'cash confirm failed');
+          showResult('invalid', 'Not Confirmed', resp.reason || 'Could not confirm — scan again');
+          beep(150);
+        }
+      } catch (err) {
+        overlay.remove();
+        addLog('invalid', ticketId, 'cash confirm network error');
+        showResult('invalid', 'No Signal', 'Could not confirm cash — scan again');
+        beep(150);
+      }
     });
   }
 
