@@ -266,19 +266,27 @@
     width: 220px !important;
     height: 220px !important;
   }
-  .qr-note {
-    font-family: 'Inter', sans-serif;
-    font-size: 13px;
-    line-height: 1.6;
-    color: var(--cream);
-    opacity: 0.8;
+  .qr-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    margin-top: 18px;
   }
-  .qr-note strong { color: var(--gold); opacity: 1; }
-  .qr-divider {
-    border: none;
-    border-top: 1px dashed rgba(212, 175, 55, 0.2);
-    margin: 20px 0;
+  .qr-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    font-weight: 700;
+    padding: 10px 18px;
+    border-radius: 8px;
+    border: 1px solid rgba(212, 175, 55, 0.4);
+    background: rgba(212, 175, 55, 0.1);
+    color: var(--gold);
+    cursor: pointer;
+    transition: all 0.15s ease;
   }
+  .qr-btn:hover { background: rgba(212, 175, 55, 0.2); border-color: var(--gold); }
 
   /* Info block */
   .info-block {
@@ -387,14 +395,14 @@
     </div>
 
     <div class="qr-section">
-      <div class="qr-heading">Your Referral QRs</div>
+      <div class="qr-heading">Your Referral QR</div>
       <div id="qr-cards"></div>
     </div>
 
     <div class="info-block">
       <h3>How it works</h3>
       <ol>
-        <li>Show or share the QR for an event — buyers scan it to open the ticket form with your code pre-filled.</li>
+        <li>Show or share your referral QR — buyers scan it to see upcoming events with your referral code tracked.</li>
         <li>Once a ticket is scanned and confirmed at the door, it counts toward your total.</li>
         <li>After the event, payouts are sent based on your confirmed count.</li>
       </ol>
@@ -428,60 +436,55 @@
 
   function rm(n) { return 'RM ' + Number(n).toFixed(0); }
 
-  function renderQRFallback(canvas, url) {
-    const fallbackUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=' + encodeURIComponent(url);
-    const wrap = canvas.parentElement;
-    wrap.innerHTML = `<img src="${fallbackUrl}" alt="QR" width="220" height="220" style="display:block;" />`;
-  }
-
-  async function buildEventQRs(ambassadorKey) {
+  async function buildReferralQR(ambassadorKey) {
     const container = document.getElementById('qr-cards');
-    let events;
-    try {
-      events = await fetch('/events.json').then(r => r.json());
-    } catch (_) {
-      container.innerHTML = '<p class="qr-note">Could not load event list.</p>';
-      return;
-    }
-
-    const now = Date.now();
-    const active = events.filter(e => now <= new Date(e.date_iso).getTime() + 24 * 60 * 60 * 1000);
-
-    if (active.length === 0) {
-      container.innerHTML = '<p class="qr-note">No upcoming events at this time.</p>';
-      return;
-    }
+    const referralUrl = `https://synchronized.dance/?ref=${encodeURIComponent(ambassadorKey)}`;
 
     await waitForQR();
 
-    for (let i = 0; i < active.length; i++) {
-      const ev = active[i];
-      const referralUrl = ev.ticket_form_url && ev.ticket_form_prefill_entry
-        ? `${ev.ticket_form_url}?${ev.ticket_form_prefill_entry}=${encodeURIComponent(ambassadorKey)}`
-        : ev.ticket_form_url || '';
+    container.innerHTML = `<div class="qr-wrap" id="qr-wrap-inner"></div>
+      <div class="qr-actions">
+        <button class="qr-btn" id="btn-download">⬇ Download</button>
+        <button class="qr-btn" id="btn-copy">🔗 Copy Link</button>
+      </div>`;
 
-      const canvasId = `qr-canvas-${i}`;
-      const card = document.createElement('div');
-      card.className = 'qr-event-card';
-      card.innerHTML = `
-        ${i > 0 ? '<hr class="qr-divider">' : ''}
-        <div class="qr-event-label">${escapeHtml(ev.name)} — ${escapeHtml(ev.date_display)}</div>
-        <div class="qr-wrap"><canvas id="${canvasId}"></canvas></div>
-        <p class="qr-note"><strong>Share this QR</strong> — buyers scan it to open the ${escapeHtml(ev.name)} ticket form with your referral code pre-filled.</p>
-      `;
-      container.appendChild(card);
+    const wrap = document.getElementById('qr-wrap-inner');
+    let qrDataUrl = null;
 
-      const canvas = document.getElementById(canvasId);
-      if (!referralUrl) { canvas.parentElement.innerHTML = '<p class="qr-note">No form URL configured for this event.</p>'; continue; }
-      if (typeof QRCode !== 'undefined') {
-        QRCode.toCanvas(canvas, referralUrl, {
-          width: 220, margin: 1,
-          color: { dark: '#0a0a0a', light: '#f4e8d4' },
-        }, err => { if (err) renderQRFallback(canvas, referralUrl); });
-      } else {
-        renderQRFallback(canvas, referralUrl);
-      }
+    if (typeof QRCode !== 'undefined') {
+      try {
+        qrDataUrl = await new Promise((resolve, reject) => {
+          QRCode.toDataURL(referralUrl, { width: 220, margin: 1, color: { dark: '#0a0a0a', light: '#f4e8d4' } },
+            (err, url) => err ? reject(err) : resolve(url));
+        });
+        const img = document.createElement('img');
+        img.src = qrDataUrl;
+        img.width = img.height = 220;
+        img.style.display = 'block';
+        wrap.appendChild(img);
+      } catch (_) { qrDataUrl = null; }
     }
+
+    if (!qrDataUrl) {
+      wrap.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(referralUrl)}" width="220" height="220" style="display:block;" />`;
+    }
+
+    document.getElementById('btn-download').addEventListener('click', () => {
+      if (qrDataUrl) {
+        const a = document.createElement('a');
+        a.download = 'nexa-referral-qr.png';
+        a.href = qrDataUrl;
+        a.click();
+      } else {
+        window.open(`https://api.qrserver.com/v1/create-qr-code/?size=512x512&data=${encodeURIComponent(referralUrl)}`, '_blank');
+      }
+    });
+
+    document.getElementById('btn-copy').addEventListener('click', () => {
+      const btn = document.getElementById('btn-copy');
+      const finish = () => { btn.textContent = '✓ Copied!'; setTimeout(() => { btn.textContent = '🔗 Copy Link'; }, 2000); };
+      navigator.clipboard ? navigator.clipboard.writeText(referralUrl).then(finish).catch(finish) : finish();
+    });
   }
 
   async function boot() {
@@ -510,7 +513,7 @@
       document.getElementById('stat-owing').textContent = rm(data.amount_owing);
       document.getElementById('content').style.display = 'block';
 
-      await buildEventQRs(key);
+      await buildReferralQR(key);
     } catch (err) {
       document.getElementById('loading').style.display = 'none';
       document.getElementById('error').style.display = 'block';

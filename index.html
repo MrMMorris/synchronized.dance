@@ -220,12 +220,17 @@
     const active = events.filter(e => now <= new Date(e.date_iso).getTime() + 24 * 60 * 60 * 1000);
     if (active.length === 0) return;
 
+    const ref = new URLSearchParams(window.location.search).get('ref');
+
     section.style.display = 'flex';
     let html = `<div class="events-heading">Upcoming Events</div>`;
     for (const ev of active) {
       const genreStr = ev.genres ? ev.genres.join(' · ') : '';
+      const href = ref && ev.ticket_form_url && ev.ticket_form_prefill_entry
+        ? `${ev.ticket_form_url}?${ev.ticket_form_prefill_entry}=${encodeURIComponent(ref)}`
+        : `/events/${ev.id}/`;
       html += `
-        <a class="event-btn" href="/events/${ev.id}/" onclick="trackEventClick('${ev.name}')">
+        <a class="event-btn" href="${href}" onclick="trackEventClick('${ev.name}')">
           <div class="event-btn-header">
             <div class="event-btn-name">${ev.name} @ ${ev.venue}</div>
             <span class="event-btn-arrow">→</span>
