@@ -120,12 +120,19 @@ Add a new entry to the array. Required fields:
 ```
 Pick `accent_color` from the poster's dominant warm hue.
 
-### Step 6 — Update `scripts/app_script.gs` CONFIG
-Change these fields to match the new event:
-- `EVENT_ID`: new event folder name
-- `EVENT_NAME`, `EVENT_DATE`, `EVENT_TIME`, `EVENT_VENUE`, `EVENT_ADDRESS`
-- `FORM_RESPONSES_TAB`: name of the new form's response tab in the spreadsheet (usually "Form Responses 3" etc.)
-- `COMMISSION_PER_TICKET`: confirm with user
+### Step 6 — Add event to `scripts/app_script.gs` EVENTS map
+Add a new entry to the `EVENTS` object using the event ID as the key:
+```javascript
+'<event_id>': {
+  EVENT_NAME:    'Event Name',
+  EVENT_DATE:    'Month DD',
+  EVENT_TIME:    'Xpm – Yam',
+  EVENT_VENUE:   'Venue Name',
+  EVENT_ADDRESS: 'Full address',
+  COMMISSION_PER_TICKET: 5,
+},
+```
+The key must exactly match the event folder name / form responses tab name.
 
 ### Step 7 — Output the manual checklist
 Print this for the user:
@@ -134,9 +141,9 @@ Manual steps remaining:
 [ ] Copy updated app_script.gs to Google Apps Script editor → Deploy new version
 [ ] Create new Google Form for this event (ticket types, prices, payment method, referral code field)
 [ ] Link the new form to the spreadsheet (Form editor → Responses → Link to spreadsheet)
+[ ] In Google Sheets, rename the new "Form Responses X" tab to the event ID (e.g. 27_06_2026-beach_party)
 [ ] Add event_id column to Purchases tab (if not already there)
 [ ] Add event_id column to Tickets tab (if not already there)
-[ ] Update FORM_RESPONSES_TAB in CONFIG to match the new form responses tab name
 [ ] Install onFormSubmitHandler trigger for the new responses tab
 [ ] Get the referral code prefill entry ID and confirm it matches events.json
 [ ] Copy poster.webp into events/<event_id>/ if not already there
@@ -249,35 +256,40 @@ Each row has a token that door staff use in their URL (`scanner.html?k=<token>`)
 
 ---
 
-## Apps Script: CONFIG Object
+## Apps Script: CONFIG and EVENTS
 
-At the top of `app_script.gs`, update this object for each new event:
+`app_script.gs` has two top-level objects:
 
+**`CONFIG`** — shared settings that don't change per event:
 ```javascript
 const CONFIG = {
   PURCHASES_TAB: 'Purchases',
   TICKETS_TAB: 'Tickets',
   SCANNERS_TAB: 'Scanners',
   AMBASSADORS_TAB: 'Ambassadors',
+  AMBASSADOR_FORM_RESPONSES_TAB: 'Ambassador Signups',
   SUMMARY_TAB: 'Summary',
-  FORM_RESPONSES_TAB: 'Form Responses 1',           // ticket purchase form responses tab
-  AMBASSADOR_FORM_RESPONSES_TAB: 'Form Responses 2', // ambassador signup form responses tab
-  EVENT_ID:    '27_06_2026-beach_party', // matches events/ folder name
-  EVENT_NAME:  'Beach Party',
-  EVENT_DATE:  'June 27',
-  EVENT_TIME:  '4PM – 12AM',
-  EVENT_VENUE: 'Northern Cove, Penang',
-  EVENT_ADDRESS: '515 Jalan C M Hashim, Tanjung Tokong, George Town',
-  COMMISSION_PER_TICKET: 5, // RM per confirmed (scanned) ticket sold via ambassador
   TICKETS_PAGE_URL:    'https://synchronized.dance/tickets.html',
   SCANNER_PAGE_URL:    'https://synchronized.dance/scanner.html',
   AMBASSADOR_PAGE_URL: 'https://synchronized.dance/ambassador.html',
 };
 ```
 
-`EVENT_*` values are used in ticket emails and the `get_tickets` API response. The `tickets.html` event-info section and footer are now populated from `resp.event` (returned by the API), so they update automatically when CONFIG is updated.
+**`EVENTS`** — one entry per event, keyed by event ID. The key must exactly match the event folder name AND the form responses tab name in the sheet (rename the tab after linking the form):
+```javascript
+const EVENTS = {
+  '27_06_2026-beach_party': {
+    EVENT_NAME:    'Beach Party',
+    EVENT_DATE:    'June 27',
+    EVENT_TIME:    '4PM – 12AM',
+    EVENT_VENUE:   'Northern Cove, Penang',
+    EVENT_ADDRESS: '515 Jalan C M Hashim, Tanjung Tokong, George Town',
+    COMMISSION_PER_TICKET: 5,
+  },
+};
+```
 
-`EVENT_ID` must match the event folder name exactly — it's included in `buyer_ticket_url` (`?event=<EVENT_ID>&k=<key>`) and written to the `event_id` column in both Purchases and Tickets tabs.
+`onFormSubmitHandler` identifies which event a form submission belongs to by reading the sheet tab name (`e.range.getSheet().getName()`) and looking it up in `EVENTS`. This is why renaming the tab to the event ID is required. The ambassador signup form tab stays fixed as `'Ambassador Signups'` — `onAmbassadorSignupHandler` guards against that tab name specifically.
 
 ---
 
@@ -486,7 +498,7 @@ Two form-submit triggers must be installed in the Apps Script editor:
 - `onFormSubmitHandler` — fired by ticket purchase form
 - `onAmbassadorSignupHandler` — fired by ambassador signup form
 
-Both are "From spreadsheet → On form submit" triggers. Each function checks `e.range.getSheet().getName()` against `CONFIG.FORM_RESPONSES_TAB` / `CONFIG.AMBASSADOR_FORM_RESPONSES_TAB` to guard against cross-firing.
+Both are "From spreadsheet → On form submit" triggers. `onFormSubmitHandler` looks up the tab name in `EVENTS` — if not found, it exits immediately. `onAmbassadorSignupHandler` checks the tab name against `CONFIG.AMBASSADOR_FORM_RESPONSES_TAB` (`'Ambassador Signups'`). Neither function needs updating when adding a new event — just rename the tab and add to `EVENTS`.
 
 ### No script properties required
 
