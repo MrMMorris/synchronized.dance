@@ -60,9 +60,9 @@ Apps Script validates + marks ticket as scanned
 ### Event Folder Structure
 
 Each event lives in `events/<event_id>/` where `event_id` follows the convention:
-`<dd_mm_yyyy>-<event_name>-<genre_genre_genre>`
+`<dd_mm_yyyy>-<event_name>`
 
-Example: `events/27_06_2026-beach_party-afrohouse_amapiano_deep_house/`
+Example: `events/27_06_2026-beach_party/`
 
 | File | Role |
 |---|---|
@@ -81,8 +81,8 @@ Cloudflare Pages serves `events/<event_id>/index.html` at the URL `/events/<even
 When the user says "set up a new event" and points to an event folder (or creates one), follow these steps in order. This is the authoritative checklist for Claude to use in future sessions.
 
 ### Step 1 — Parse the folder name
-Folder: `events/<dd_mm_yyyy>-<event_name>-<genre_genre_genre>/`
-Extract: date, event name (spaces from underscores), genres list.
+Folder: `events/<dd_mm_yyyy>-<event_name>/`
+Extract: date, event name (spaces from underscores).
 
 ### Step 2 — Analyze the poster
 Read `events/<event_id>/poster.webp` visually. Identify dominant colors. Generate `events/<event_id>/theme.css` with matching CSS vars and body background. See **CSS Theming Guide** below for the exact variables to set.
@@ -95,10 +95,10 @@ Read `events/<event_id>/poster.webp` visually. Identify dominant colors. Generat
 - Venue name (display name)
 - Venue address (full address for emails)
 - Artists/headliners (for the event-info section on tickets)
-- Confirm genres match the folder name
+- Genres (listed in `events.json` but not part of the folder name)
 
 ### Step 4 — Create `events/<event_id>/index.html`
-Event landing page. Use the same structure as `events/27_06_2026-beach_party-afrohouse_amapiano_deep_house/index.html` as a template. Update: title, meta description, date, event name, venue info, form URL, maps URL.
+Event landing page. Use the same structure as `events/27_06_2026-beach_party/index.html` as a template. Update: title, meta description, date, event name, venue info, form URL, maps URL.
 
 ### Step 5 — Update `events.json`
 Add a new entry to the array. Required fields:
@@ -262,7 +262,7 @@ const CONFIG = {
   SUMMARY_TAB: 'Summary',
   FORM_RESPONSES_TAB: 'Form Responses 1',           // ticket purchase form responses tab
   AMBASSADOR_FORM_RESPONSES_TAB: 'Form Responses 2', // ambassador signup form responses tab
-  EVENT_ID:    '27_06_2026-beach_party-afrohouse_amapiano_deep_house', // matches events/ folder name
+  EVENT_ID:    '27_06_2026-beach_party', // matches events/ folder name
   EVENT_NAME:  'Beach Party',
   EVENT_DATE:  'June 27',
   EVENT_TIME:  '4PM – 12AM',

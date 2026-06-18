@@ -29,7 +29,7 @@ const CONFIG = {
   AMBASSADORS_TAB: 'Ambassadors',
   FORM_RESPONSES_TAB: 'Form Responses 1',          // default name Google Forms creates
   AMBASSADOR_FORM_RESPONSES_TAB: 'Form Responses 2', // tab created when ambassador signup form is linked
-  EVENT_ID:    '27_06_2026-beach_party-afrohouse_amapiano_deep_house', // matches events/ folder name
+  EVENT_ID:    '27_06_2026-beach_party', // matches events/ folder name
   EVENT_NAME:  'Beach Party',
   EVENT_DATE:  'June 27',
   EVENT_TIME:  '4PM – 12AM',
