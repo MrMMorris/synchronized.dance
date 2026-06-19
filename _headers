@@ -4,6 +4,14 @@
 /
   Cache-Control: public, no-cache, must-revalidate
 
+# Runtime config + event registry must never serve stale — the site reads these
+# live (Apps Script URL, active events) and a stale copy breaks tickets / hides events.
+/config.js
+  Cache-Control: public, no-cache, must-revalidate
+
+/events.json
+  Cache-Control: public, no-cache, must-revalidate
+
 /assets/*
   Cache-Control: public, max-age=86400
 

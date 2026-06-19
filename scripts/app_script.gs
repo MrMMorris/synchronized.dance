@@ -83,6 +83,7 @@ function doGet(e) {
     let result;
     switch (action) {
       case 'validate':      result = validateTicket(params.ticket_id, params.token); break;
+      case 'confirm_cash':  result = confirmCashScan(params.ticket_id, params.token); break;
       case 'check_scanner': result = checkScanner(params.token); break;
       case 'get_tickets':   result = getTicketsForBuyer(params.key); break;
       case 'get_ambassador':result = getAmbassadorStats(params.key); break;
@@ -107,6 +108,26 @@ function jsonResponse(obj, callback) {
 // ============================================================================
 
 function validateTicket(ticketId, token) {
+  return admitTicket(ticketId, token, false);
+}
+
+// Called when door staff swipe to confirm cash was collected for a cash order.
+function confirmCashScan(ticketId, token) {
+  return admitTicket(ticketId, token, true);
+}
+
+/**
+ * Shared admit logic for both the initial scan and the cash-confirm swipe.
+ *
+ * Cash orders are NOT marked scanned on the first scan — we return status
+ * 'cash_due' and leave the ticket unused until door staff confirm payment via
+ * the swipe (which hits confirm_cash → confirmCash = true). This means a guest
+ * who can't pay hasn't burned their ticket, and ambassador/attendance counts
+ * only include cash that was actually collected.
+ *
+ * Non-cash orders are admitted immediately on the first scan, as before.
+ */
+function admitTicket(ticketId, token, confirmCash) {
   if (!ticketId) return { ok: false, status: 'invalid', reason: 'No ticket ID provided' };
   if (!token) return { ok: false, status: 'unauthorized', reason: 'Missing scanner token' };
 
@@ -149,15 +170,30 @@ function validateTicket(ticketId, token) {
       }
     }
 
+    const paymentMethod = paymentTypeCol !== -1 ? data[foundRow][paymentTypeCol] : null;
+    const isCash = String(paymentMethod).toLowerCase().trim() === 'cash';
+
     const alreadyScanned = data[foundRow][scannedCol] === true || String(data[foundRow][scannedCol]).toUpperCase() === 'TRUE';
     if (alreadyScanned) {
       return {
         ok: true, status: 'already_scanned',
         buyer_name: data[foundRow][nameCol],
         ticket_type: shortTicketType(data[foundRow][typeCol]),
+        payment_method: paymentMethod,
         ticket_index: ticketIndex, ticket_total: ticketTotal,
         scanned_at: data[foundRow][scannedAtCol],
         scanned_by: data[foundRow][scannedByCol],
+      };
+    }
+
+    // Cash order, first scan: hold for the cash-confirm swipe — do not admit yet.
+    if (isCash && !confirmCash) {
+      return {
+        ok: true, status: 'cash_due',
+        buyer_name: data[foundRow][nameCol],
+        ticket_type: shortTicketType(data[foundRow][typeCol]),
+        payment_method: paymentMethod,
+        ticket_index: ticketIndex, ticket_total: ticketTotal,
       };
     }
 
@@ -173,7 +209,7 @@ function validateTicket(ticketId, token) {
       ok: true, status: 'valid',
       buyer_name: data[foundRow][nameCol],
       ticket_type: shortTicketType(data[foundRow][typeCol]),
-      payment_method: paymentTypeCol !== -1 ? data[foundRow][paymentTypeCol] : null,
+      payment_method: paymentMethod,
       ticket_index: ticketIndex, ticket_total: ticketTotal,
       scanned_by: scanner.name,
     };
@@ -279,10 +315,7 @@ function getTicketsForBuyer(key) {
 
 function generateTickets() {
   const ui = SpreadsheetApp.getUi();
-  const ss = SpreadsheetApp.getActive();
-
-  const purchasesSheet = ss.getSheetByName(CONFIG.PURCHASES_TAB);
-  const ticketsSheet   = ss.getSheetByName(CONFIG.TICKETS_TAB);
+  const purchasesSheet = SpreadsheetApp.getActive().getSheetByName(CONFIG.PURCHASES_TAB);
 
   ensureColumn(purchasesSheet, 'event_id');
   ensureColumn(purchasesSheet, 'purchase_id');
@@ -291,67 +324,23 @@ function generateTickets() {
 
   const pData    = purchasesSheet.getDataRange().getValues();
   const pHeaders = pData[0];
-  const tHeaders = ticketsSheet.getRange(1, 1, 1, ticketsSheet.getLastColumn()).getValues()[0];
+  const paidCol = pHeaders.indexOf('payment_confirmed');
+  const genCol  = pHeaders.indexOf('tickets_generated');
+  const nameCol = pHeaders.indexOf('buyer_name');
 
-  const pCols = {
-    name:              pHeaders.indexOf('buyer_name'),
-    quantity:          pHeaders.indexOf('quantity'),
-    ticket_type:       pHeaders.indexOf('ticket_type'),
-    payment_method:    pHeaders.indexOf('payment_method'),
-    affiliate_code:    pHeaders.indexOf('affiliate_code'),
-    payment_confirmed: pHeaders.indexOf('payment_confirmed'),
-    tickets_generated: pHeaders.indexOf('tickets_generated'),
-    purchase_id:       pHeaders.indexOf('purchase_id'),
-    purchase_key:      pHeaders.indexOf('purchase_key'),
-    buyer_ticket_url:  pHeaders.indexOf('buyer_ticket_url'),
-    event_id:          pHeaders.indexOf('event_id'),
-  };
-
-  function buildTicketRow(values) {
-    const row = new Array(tHeaders.length).fill('');
-    for (const h in values) { const idx = tHeaders.indexOf(h); if (idx !== -1) row[idx] = values[h]; }
-    return row;
-  }
-
-  let generated = 0;
+  let generated = 0, purchases = 0;
   for (let i = 1; i < pData.length; i++) {
-    const paid             = pData[i][pCols.payment_confirmed] === true || String(pData[i][pCols.payment_confirmed]).toUpperCase() === 'TRUE';
-    const alreadyGenerated = pData[i][pCols.tickets_generated] === true || String(pData[i][pCols.tickets_generated]).toUpperCase() === 'TRUE';
-    const name             = pData[i][pCols.name];
-    if (!paid || alreadyGenerated || !name) continue;
+    const paid             = pData[i][paidCol] === true || String(pData[i][paidCol]).toUpperCase() === 'TRUE';
+    const alreadyGenerated = pData[i][genCol]  === true || String(pData[i][genCol]).toUpperCase()  === 'TRUE';
+    if (!paid || alreadyGenerated || !pData[i][nameCol]) continue;
 
-    const qty = parseInt(pData[i][pCols.quantity], 10) || 0;
-    if (qty <= 0) continue;
-
-    const eventId    = pCols.event_id !== -1 ? String(pData[i][pCols.event_id]).trim() : '';
-    const purchaseId = randomKey(12);
-    const purchaseKey= randomKey(24);
-
-    const newRows = [];
-    for (let j = 0; j < qty; j++) {
-      newRows.push(buildTicketRow({
-        ticket_id:      randomKey(16),
-        purchase_id:    purchaseId,
-        event_id:       eventId,
-        buyer_name:     pData[i][pCols.name],
-        ticket_type:    pData[i][pCols.ticket_type],
-        payment_method: pCols.payment_method   !== -1 ? pData[i][pCols.payment_method]   : '',
-        affiliate_code: pCols.affiliate_code   !== -1 ? pData[i][pCols.affiliate_code]   : '',
-        scanned: false, scanned_at: '', scanned_by: '',
-      }));
-    }
-    ticketsSheet.getRange(ticketsSheet.getLastRow() + 1, 1, newRows.length, tHeaders.length).setValues(newRows);
-
-    const rowNum = i + 1;
-    purchasesSheet.getRange(rowNum, pCols.purchase_id      + 1).setValue(purchaseId);
-    purchasesSheet.getRange(rowNum, pCols.purchase_key     + 1).setValue(purchaseKey);
-    purchasesSheet.getRange(rowNum, pCols.buyer_ticket_url + 1).setValue(`${CONFIG.TICKETS_PAGE_URL}?event=${eventId}&k=${purchaseKey}`);
-    purchasesSheet.getRange(rowNum, pCols.tickets_generated+ 1).setValue(true);
-
-    generated += qty;
+    // Reuse the single-row generator so there is one source of truth for how a
+    // purchase becomes tickets (column mapping, IDs, ticket URL, etc.).
+    const res = generateTicketsForRow(i + 1);
+    if (res && res.ok) { generated += res.generated; purchases++; }
   }
 
-  ui.alert(`Done. Generated ${generated} ticket${generated === 1 ? '' : 's'}.`);
+  ui.alert(`Done. Generated ${generated} ticket${generated === 1 ? '' : 's'} across ${purchases} purchase${purchases === 1 ? '' : 's'}.`);
 }
 
 function generateScannerLinks() {
@@ -462,13 +451,7 @@ function onFormSubmitHandler(e) {
   const responsesSheet = triggerSheet;
   const respHeaders = responsesSheet.getRange(1, 1, 1, responsesSheet.getLastColumn()).getValues()[0];
 
-  function findCol(needle) {
-    const n = needle.toLowerCase();
-    for (let i = 0; i < respHeaders.length; i++) {
-      if (String(respHeaders[i]).toLowerCase().indexOf(n) !== -1) return i;
-    }
-    return -1;
-  }
+  const findCol = makeFindCol(respHeaders);
 
   const nameIdx          = findCol('name');
   const emailIdx         = findCol('email');
@@ -512,17 +495,29 @@ function onFormSubmitHandler(e) {
   for (let i = 0; i < purchaseHeaders.length; i++) {
     if (valueMap.hasOwnProperty(purchaseHeaders[i])) newRow[i] = valueMap[purchaseHeaders[i]];
   }
-  purchasesSheet.appendRow(newRow);
 
-  if (isCashOrder) {
-    try {
-      const newRowNum = purchasesSheet.getLastRow();
-      const result = generateTicketsForRow(newRowNum);
-      if (result && result.ok) sendTicketEmail(newRowNum);
-    } catch (err) {
-      Logger.log('Failed to auto-generate cash tickets: ' + err);
+  // Lock around append + getLastRow + cash generation. Form-submit triggers can
+  // run concurrently; without this, a second submission appending between our
+  // append and getLastRow() would make us generate tickets for the wrong row.
+  const lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+  try {
+    purchasesSheet.appendRow(newRow);
+    SpreadsheetApp.flush();
+    if (isCashOrder) {
+      try {
+        const newRowNum = purchasesSheet.getLastRow();
+        const result = generateTicketsForRow(newRowNum);
+        if (result && result.ok) sendTicketEmail(newRowNum);
+      } catch (err) {
+        Logger.log('Failed to auto-generate cash tickets: ' + err);
+      }
     }
-  } else if (buyerEmail) {
+  } finally {
+    lock.releaseLock();
+  }
+
+  if (!isCashOrder && buyerEmail) {
     try {
       sendOrderConfirmationEmail(buyerEmail, buyerName, ticketType, quantity, unitPrice, totalCost, eventConfig);
     } catch (err) {
@@ -532,7 +527,14 @@ function onFormSubmitHandler(e) {
 }
 
 function priceFor(ticketType) {
-  const t = String(ticketType).toLowerCase();
+  // Prefer the explicit price embedded in the ticket-type label, e.g.
+  // "General Admission — RM55 (...)" → 55. This keeps amount_paid correct
+  // per-event without hardcoding. Falls back to keyword matching only if the
+  // label has no RMxx in it.
+  const s = String(ticketType);
+  const m = s.match(/RM\s*(\d+)/i);
+  if (m) return parseInt(m[1], 10);
+  const t = s.toLowerCase();
   if (t.indexOf('food') !== -1) return 100;
   if (t.indexOf('general') !== -1) return 50;
   return 0;
@@ -776,13 +778,7 @@ function onAmbassadorSignupHandler(e) {
   const v = e.values;
   const respHeaders = triggerSheet.getRange(1, 1, 1, triggerSheet.getLastColumn()).getValues()[0];
 
-  function findCol(needle) {
-    const n = needle.toLowerCase();
-    for (let i = 0; i < respHeaders.length; i++) {
-      if (String(respHeaders[i]).toLowerCase().indexOf(n) !== -1) return i;
-    }
-    return -1;
-  }
+  const findCol = makeFindCol(respHeaders);
 
   const name     = findCol('name')     !== -1 ? String(v[findCol('name')]).trim()     : '';
   const email    = findCol('email')    !== -1 ? String(v[findCol('email')]).trim()    : '';
@@ -1058,6 +1054,25 @@ function ensureColumn(sheet, columnName) {
   sheet.getRange(1, sheet.getLastColumn() + 1).setValue(columnName);
 }
 
+/**
+ * Builds a column-finder for a header row that matches by substring but is
+ * order-independent: an exact header match wins, otherwise the SHORTEST header
+ * containing the needle wins. This stops e.g. findCol('name') from grabbing
+ * "Business name" when a plain "Name" column also exists, regardless of order.
+ */
+function makeFindCol(headers) {
+  return function findCol(needle) {
+    const n = needle.toLowerCase();
+    let exact = -1, best = -1, bestLen = Infinity;
+    for (let i = 0; i < headers.length; i++) {
+      const h = String(headers[i]).toLowerCase().trim();
+      if (h === n) { exact = i; break; }
+      if (h.indexOf(n) !== -1 && h.length < bestLen) { best = i; bestLen = h.length; }
+    }
+    return exact !== -1 ? exact : best;
+  };
+}
+
 function shortTicketType(t) {
   return String(t).split('—')[0].split(' - ')[0].trim();
 }
@@ -1068,8 +1083,14 @@ function escapeForHtml(s) {
 }
 
 function randomKey(length) {
+  // Seed from Utilities.getUuid() (Java SecureRandom under the hood) rather than
+  // Math.random(), then map random bytes onto a readable, unambiguous alphabet.
   const chars = 'abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+  let hex = '';
+  while (hex.length < length * 2) hex += Utilities.getUuid().replace(/-/g, '');
   let out = '';
-  for (let i = 0; i < length; i++) out += chars.charAt(Math.floor(Math.random() * chars.length));
+  for (let i = 0; i < length; i++) {
+    out += chars.charAt(parseInt(hex.substr(i * 2, 2), 16) % chars.length);
+  }
   return out;
 }

@@ -98,7 +98,7 @@ Read `events/<event_id>/poster.webp` visually. Identify dominant colors. Generat
 - Genres (listed in `events.json` but not part of the folder name)
 
 ### Step 4 — Create `events/<event_id>/index.html`
-Event landing page. Use the same structure as `events/27_06_2026-beach_party/index.html` as a template. Update: title, meta description, date, event name, venue info, form URL, maps URL.
+Event landing page. Use the same structure as `events/27_06_2026-beach_party/index.html` as a template. Update: title, meta description, date, event name, venue info, form URL, maps URL. Also update the Open Graph tags (`og:title`, `og:description`, `og:image`, `og:url`) — set `og:image` to `https://synchronized.dance/events/<event_id>/poster.webp` so shared links show the poster.
 
 ### Step 5 — Update `events.json`
 Add a new entry to the array. Required fields:
@@ -162,7 +162,7 @@ window.AMBASSADOR_SIGNUP_FORM_URL = 'https://synchronized.dance/join';
 
 `tickets.html`, `scanner.html`, `ambassador.html`, and `ambassador-signup.html` all load `config.js` via `<script src="config.js">`.
 
-Per-event ticket form URLs and prefill entry IDs now live in `events.json`, not `config.js`. `ambassador.html` fetches `events.json` at runtime to build per-event referral QRs.
+Per-event ticket form URLs and prefill entry IDs now live in `events.json`, not `config.js`. `ambassador.html` shows a single referral QR pointing at the homepage (`?ref=<key>`); `index.html` reads that `ref` and appends it to each active event's form prefill from `events.json`.
 
 ---
 
@@ -317,7 +317,7 @@ Returns all tickets for a purchase:
 }
 ```
 
-### `?action=validate&id=<ticket_id>&k=<scanner_token>`
+### `?action=validate&ticket_id=<ticket_id>&token=<scanner_token>`
 Validates a scanned ticket. Uses a script lock to prevent double-admit. Returns:
 ```json
 {
@@ -326,10 +326,16 @@ Validates a scanned ticket. Uses a script lock to prevent double-admit. Returns:
   "buyer_name": "Jane",
   "ticket_type": "General Admission",
   "payment_method": "cash",
-  "pos": "1 of 2"
+  "ticket_index": 1,
+  "ticket_total": 2
 }
 ```
-Possible `status` values: `valid`, `used`, `invalid`
+Possible `status` values: `valid`, `cash_due`, `already_scanned`, `invalid`, `unauthorized`.
+
+**Cash orders are NOT marked scanned by `validate`** — they return `status: "cash_due"` and stay unused until the door staff confirm payment (see `confirm_cash`). Non-cash orders are marked scanned immediately.
+
+### `?action=confirm_cash&ticket_id=<ticket_id>&token=<scanner_token>`
+Called when door staff swipe to confirm cash was collected for a cash order. Marks the ticket scanned and returns the same shape as `validate` with `status: "valid"` (or `already_scanned`). Until this succeeds the ticket stays unused, so a guest who can't pay can simply be re-scanned later.
 
 ### `?action=get_ambassador&key=<ambassador_key>`
 Returns live stats for an ambassador. Ticket counts are computed from the Tickets tab at query time.
@@ -383,9 +389,9 @@ The organizer does **not** need to touch the sheet for cash orders. The buyer re
 - The status pill reads "Cash Due" (styled differently) instead of "Live"
 
 ### scanner.html (door staff)
-- Cash tickets trigger a special modal with a swipe-to-confirm gesture
-- Swiping calls the same `validate` endpoint, marking the ticket as scanned
-- Non-cash tickets show the result in a normal modal requiring an OK tap
+- Scanning a cash ticket returns `cash_due` — the ticket is **not** marked scanned yet — and triggers a special modal with a swipe-to-confirm gesture
+- Swiping calls the `confirm_cash` endpoint, which is what actually marks the ticket scanned. If the buyer can't pay, don't swipe — the ticket stays valid and can be re-scanned
+- Non-cash tickets are admitted on scan and show the result in a normal modal requiring an OK tap
 
 ---
 
@@ -486,10 +492,10 @@ Ambassadors are people or businesses who refer ticket buyers and earn a commissi
 
 1. Organizer opens `ambassador-signup.html` and shows it to a potential ambassador — they scan the QR to open the signup form.
 2. Ambassador fills the signup form → `onAmbassadorSignupHandler` fires → creates row in Ambassadors tab → sends welcome email with their unique `ambassador.html?k=TOKEN` URL.
-3. Ambassador opens their page, finds their referral QR, and shares it. The QR encodes the ticket purchase form URL with their key pre-filled in the "Referral Code" field.
-4. Buyers scan the ambassador's QR → land on the ticket purchase form with the Referral Code already filled in. They complete the purchase normally.
+3. Ambassador opens their page, finds their referral QR, and shares it. The QR encodes the site homepage with their key as `?ref=<ambassador_key>` (`https://synchronized.dance/?ref=KEY`) — one QR that works for every active event.
+4. Buyers scan the ambassador's QR → land on `index.html`, which reads `?ref=` and links each event button straight to that event's Google Form with the referral pre-filled (using `ticket_form_url` + `ticket_form_prefill_entry` from `events.json`). They complete the purchase normally.
 5. `onFormSubmitHandler` reads the Referral Code and stores it as `affiliate_code` in the Purchases row. `generateTicketsForRow` copies it to each Ticket row.
-6. At the door, when a ticket is scanned (and cash is paid for cash orders), it becomes "confirmed." The ambassador's stats update automatically — `get_ambassador` counts scanned Tickets with matching `affiliate_code`.
+6. At the door, when a ticket is scanned (and cash is confirmed for cash orders), it becomes "confirmed." The ambassador's stats update automatically — `get_ambassador` counts scanned Tickets with matching `affiliate_code`.
 7. After the event, organizer runs **Ticket System → Refresh ambassador stats** to update the Ambassadors tab, then pays out based on `amount_owing` using the `payment_details` on file.
 
 ### Triggers required
@@ -510,9 +516,9 @@ After adding the "Referral Code" field to the ticket purchase form:
 1. Form → ⋮ menu → **Get pre-filled link**
 2. Type any value in Referral Code → **Get link** → copy URL
 3. Extract the `entry.XXXXXXXXXX` part
-4. Add to `config.js`: `window.TICKET_FORM_PREFILL_ENTRY = 'entry.XXXXXXXXXX'`
+4. Set it as `ticket_form_prefill_entry` on that event's entry in `events.json` (per-event, not global).
 
-The ambassador QR encodes: `TICKET_FORM_BASE_URL + '?' + TICKET_FORM_PREFILL_ENTRY + '=' + ambassadorKey`
+The ambassador QR encodes the homepage with `?ref=<ambassador_key>`. `index.html` then builds each event's purchase link as `ticket_form_url + '?' + ticket_form_prefill_entry + '=' + ref`.
 
 ---
 
