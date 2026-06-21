@@ -95,6 +95,51 @@ function doGet(e) {
   }
 }
 
+/**
+ * On-site purchase form submits here (POST, JSON body). To stay a CORS "simple
+ * request" the page sends the body as text/plain — do NOT require a JSON
+ * content-type. Mirrors the Google Form path via recordPurchase().
+ */
+function doPost(e) {
+  try {
+    if (!e || !e.postData || !e.postData.contents) {
+      return jsonResponse({ ok: false, error: 'No data received' });
+    }
+
+    let body;
+    try { body = JSON.parse(e.postData.contents); }
+    catch (err) { return jsonResponse({ ok: false, error: 'Malformed request' }); }
+
+    // Honeypot: bots fill hidden fields. Look successful, but record nothing.
+    if (body.company || body._gotcha) return jsonResponse({ ok: true });
+
+    if (!EVENTS[body.event_id]) return jsonResponse({ ok: false, error: 'Unknown event' });
+
+    // Stash the payment screenshot (QR orders) in Drive; store its URL as proof.
+    let proofUrl = '';
+    if (body.screenshot && body.screenshot.data) {
+      try { proofUrl = savePaymentProof(body.screenshot, body.event_id, body.buyer_name); }
+      catch (err) { Logger.log('Failed to save payment proof: ' + err); }
+    }
+
+    const result = recordPurchase({
+      eventId:       body.event_id,
+      buyerName:     body.buyer_name,
+      buyerEmail:    body.buyer_email,
+      buyerPhone:    body.buyer_phone,
+      ticketType:    body.ticket_type,
+      quantity:      body.quantity,
+      paymentType:   body.payment_method,
+      paymentProof:  proofUrl,
+      affiliateCode: body.affiliate_code,
+      source:        'Website form',
+    });
+    return jsonResponse(result);
+  } catch (err) {
+    return jsonResponse({ ok: false, error: String(err) });
+  }
+}
+
 function jsonResponse(obj, callback) {
   const json = JSON.stringify(obj);
   if (callback) {
@@ -443,14 +488,8 @@ function onFormSubmitHandler(e) {
   const eventConfig = EVENTS[eventId];
   if (!eventConfig) return; // not a known ticket form tab
 
-  const ss = SpreadsheetApp.getActive();
-  const purchasesSheet = ss.getSheetByName(CONFIG.PURCHASES_TAB);
-  if (!purchasesSheet) return;
-
   const v = e.values;
-  const responsesSheet = triggerSheet;
-  const respHeaders = responsesSheet.getRange(1, 1, 1, responsesSheet.getLastColumn()).getValues()[0];
-
+  const respHeaders = triggerSheet.getRange(1, 1, 1, triggerSheet.getLastColumn()).getValues()[0];
   const findCol = makeFindCol(respHeaders);
 
   const nameIdx          = findCol('name');
@@ -461,14 +500,49 @@ function onFormSubmitHandler(e) {
   const paymentMethodIdx = findCol('payment method');
   const referralIdx      = findCol('referral') !== -1 ? findCol('referral') : findCol('ambassador');
 
-  const buyerName  = nameIdx  !== -1 ? v[nameIdx]  : '';
-  const buyerEmail = emailIdx !== -1 ? v[emailIdx] : '';
-  const ticketType = typeIdx  !== -1 ? v[typeIdx]  : 'General';
-  const quantity   = qtyIdx   !== -1 ? parseInt(v[qtyIdx], 10) || 1 : 1;
-  const paymentProof = screenshotIdx !== -1 ? v[screenshotIdx] : '';
-  const rawPaymentType = paymentMethodIdx !== -1 ? String(v[paymentMethodIdx]).toLowerCase().trim() : '';
+  recordPurchase({
+    eventId:       eventId,
+    buyerName:     nameIdx  !== -1 ? v[nameIdx]  : '',
+    buyerEmail:    emailIdx !== -1 ? v[emailIdx] : '',
+    buyerPhone:    '',
+    ticketType:    typeIdx  !== -1 ? v[typeIdx]  : 'General',
+    quantity:      qtyIdx   !== -1 ? v[qtyIdx]   : 1,
+    paymentType:   paymentMethodIdx !== -1 ? v[paymentMethodIdx] : '',
+    paymentProof:  screenshotIdx !== -1 ? v[screenshotIdx] : '',
+    affiliateCode: referralIdx !== -1 ? v[referralIdx] : '',
+    source:        'Google Form',
+  });
+}
+
+/**
+ * Core purchase intake — shared by the Google Form trigger (onFormSubmitHandler)
+ * and the on-site form POST (doPost). Writes one Purchases row, then for cash
+ * orders generates tickets + emails immediately; for QR orders sends an order
+ * confirmation. Returns { ok, payment_method, ticket_url } or { ok:false, error }.
+ *
+ * fields: { eventId, buyerName, buyerEmail, buyerPhone, ticketType, quantity,
+ *           paymentType, paymentProof, affiliateCode, source }
+ */
+function recordPurchase(fields) {
+  const eventConfig = EVENTS[fields.eventId];
+  if (!eventConfig) return { ok: false, error: 'Unknown event' };
+
+  const ss = SpreadsheetApp.getActive();
+  const purchasesSheet = ss.getSheetByName(CONFIG.PURCHASES_TAB);
+  if (!purchasesSheet) return { ok: false, error: 'Purchases tab missing' };
+
+  const buyerName  = String(fields.buyerName  || '').trim();
+  const buyerEmail = String(fields.buyerEmail || '').trim();
+  const buyerPhone = String(fields.buyerPhone || '').trim();
+  const ticketType = String(fields.ticketType || 'General').trim();
+  const quantity   = parseInt(fields.quantity, 10) || 1;
+  const rawPaymentType = String(fields.paymentType || '').toLowerCase().trim();
   const paymentType = rawPaymentType.startsWith('cash') ? 'cash' : rawPaymentType.startsWith('qr') ? 'qr' : rawPaymentType;
-  const affiliateCode = referralIdx !== -1 ? String(v[referralIdx]).trim() : '';
+  const paymentProof = String(fields.paymentProof || '');
+  const affiliateCode = String(fields.affiliateCode || '').trim();
+
+  if (!buyerName || !buyerEmail) return { ok: false, error: 'Name and email are required' };
+  if (quantity < 1) return { ok: false, error: 'Quantity must be at least 1' };
 
   const unitPrice = priceFor(ticketType);
   const totalCost = unitPrice * quantity;
@@ -477,10 +551,10 @@ function onFormSubmitHandler(e) {
   const purchaseHeaders = purchasesSheet.getRange(1, 1, 1, purchasesSheet.getLastColumn()).getValues()[0];
   const newRow = new Array(purchaseHeaders.length).fill('');
   const valueMap = {
-    'event_id':          eventId,
+    'event_id':          fields.eventId,
     'buyer_name':        buyerName,
     'buyer_email':       buyerEmail,
-    'buyer_phone':       '',
+    'buyer_phone':       buyerPhone,
     'ticket_type':       ticketType,
     'quantity':          quantity,
     'amount_paid':       totalCost,
@@ -488,7 +562,7 @@ function onFormSubmitHandler(e) {
     'payment_confirmed': isCashOrder,
     'payment_proof':     paymentProof,
     'affiliate_code':    affiliateCode,
-    'notes':             'Auto-imported from form',
+    'notes':             fields.source || 'Auto-imported from form',
     'purchase_time':     new Date(),
     'tickets_generated': false,
   };
@@ -496,11 +570,12 @@ function onFormSubmitHandler(e) {
     if (valueMap.hasOwnProperty(purchaseHeaders[i])) newRow[i] = valueMap[purchaseHeaders[i]];
   }
 
-  // Lock around append + getLastRow + cash generation. Form-submit triggers can
-  // run concurrently; without this, a second submission appending between our
-  // append and getLastRow() would make us generate tickets for the wrong row.
+  // Lock around append + getLastRow + cash generation. Form-submit triggers and
+  // POSTs can run concurrently; without this, a second submission appending
+  // between our append and getLastRow() would generate tickets for the wrong row.
   const lock = LockService.getScriptLock();
   lock.waitLock(30000);
+  let ticketUrl = '';
   try {
     purchasesSheet.appendRow(newRow);
     SpreadsheetApp.flush();
@@ -508,7 +583,11 @@ function onFormSubmitHandler(e) {
       try {
         const newRowNum = purchasesSheet.getLastRow();
         const result = generateTicketsForRow(newRowNum);
-        if (result && result.ok) sendTicketEmail(newRowNum);
+        if (result && result.ok) {
+          sendTicketEmail(newRowNum);
+          const urlCol = purchaseHeaders.indexOf('buyer_ticket_url');
+          if (urlCol !== -1) ticketUrl = String(purchasesSheet.getRange(newRowNum, urlCol + 1).getValue());
+        }
       } catch (err) {
         Logger.log('Failed to auto-generate cash tickets: ' + err);
       }
@@ -524,6 +603,33 @@ function onFormSubmitHandler(e) {
       Logger.log('Failed to send confirmation email: ' + err);
     }
   }
+
+  return { ok: true, payment_method: paymentType, ticket_url: ticketUrl };
+}
+
+/**
+ * Saves a base64 payment screenshot (from the on-site form) to a Drive folder
+ * and returns the file URL to store in the Purchases `payment_proof` column.
+ * `screenshot` = { data: <base64 or data-url>, mimeType, name }.
+ */
+function savePaymentProof(screenshot, eventId, buyerName) {
+  const folderName = 'Nexa Payment Proofs';
+  const it = DriveApp.getFoldersByName(folderName);
+  const folder = it.hasNext() ? it.next() : DriveApp.createFolder(folderName);
+
+  let b64 = String(screenshot.data || '');
+  const marker = b64.indexOf('base64,');
+  if (marker !== -1) b64 = b64.slice(marker + 7); // strip any data-url prefix
+  const mime = screenshot.mimeType || 'image/jpeg';
+  const bytes = Utilities.base64Decode(b64);
+
+  const safeName = String(buyerName || 'buyer').replace(/[^\w\-]+/g, '_').slice(0, 40);
+  const ext = (mime.split('/')[1] || 'jpg').replace('jpeg', 'jpg');
+  const stamp = Utilities.formatDate(new Date(), Session.getScriptTimeZone(), 'yyyyMMdd-HHmmss');
+  const fileName = `${eventId}__${safeName}__${stamp}.${ext}`;
+
+  const file = folder.createFile(Utilities.newBlob(bytes, mime, fileName));
+  return file.getUrl();
 }
 
 function priceFor(ticketType) {

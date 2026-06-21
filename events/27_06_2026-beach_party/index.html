@@ -179,7 +179,7 @@
     4PM – 12AM <span class="sep">✦</span> Northern Cove, Penang
   </div>
   <div class="action-btns">
-    <a href="https://docs.google.com/forms/d/1il7Xf6GXyt2RfDfWaCnIcvjNxx2Zh9-B7klLnv8Iw5g/viewform" target="_blank" class="btn btn-ticket" onclick="trackTicketClick()"><span>🎟</span><span>Tickets</span></a>
+    <a href="/buy.html?event=27_06_2026-beach_party" class="btn btn-ticket" id="ticketBtn" onclick="trackTicketClick()"><span>🎟</span><span>Tickets</span></a>
     <a href="https://maps.app.goo.gl/zzpVh7ByuNHCBdg48" target="_blank" class="btn btn-map" onclick="trackMapClick()"><span>📍</span><span>Map</span></a>
   </div>
 </div>
@@ -191,6 +191,13 @@
 <script>
   function trackTicketClick() { gtag('event', 'ticket_click', { event_category: 'engagement', event_label: 'ticket_link' }); }
   function trackMapClick() { gtag('event', 'map_click', { event_category: 'engagement', event_label: 'location_link' }); }
+  // Carry an ambassador referral code (?ref=) through to the purchase form.
+  (function forwardRef() {
+    const ref = new URLSearchParams(window.location.search).get('ref');
+    if (!ref) return;
+    const btn = document.getElementById('ticketBtn');
+    btn.href += (btn.href.indexOf('?') === -1 ? '?' : '&') + 'ref=' + encodeURIComponent(ref);
+  })();
   document.getElementById('posterImg').addEventListener('click', () => document.getElementById('posterModal').classList.add('open'));
   document.getElementById('posterModal').addEventListener('click', () => document.getElementById('posterModal').classList.remove('open'));
 </script>

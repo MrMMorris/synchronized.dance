@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Buy Tickets — Nexa Events</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Caveat+Brush&family=Dancing+Script:wght@600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<script>
+  // Inject the per-event theme as early as possible to avoid an unstyled flash.
+  (function injectTheme() {
+    const id = new URLSearchParams(window.location.search).get('event');
+    if (!id) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = '/events/' + id + '/theme.css';
+    document.head.appendChild(link);
+  })();
+</script>
+<script src="config.js"></script>
+<style>
+  /* Default theme vars — overridden by per-event theme.css */
+  :root {
+    --night: #080c1a;
+    --ember: #0d1630;
+    --amber: #ff7035;
+    --amber-deep: #c84a00;
+    --gold: #ffc547;
+    --gold-soft: #ffad3b;
+    --flame: #ff4c00;
+    --teal: #0d9488;
+    --teal-deep: #065f46;
+    --red: #ce1126;
+    --cream: #f4e8d4;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: var(--night);
+    color: var(--cream);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    background:
+      radial-gradient(ellipse 90% 60% at 50% 0%, rgba(255, 120, 50, 0.4) 0%, transparent 55%),
+      radial-gradient(ellipse 70% 50% at 80% 80%, rgba(13, 148, 136, 0.18) 0%, transparent 60%),
+      linear-gradient(180deg, var(--ember) 0%, var(--night) 60%, var(--ember) 100%);
+    padding: 20px 14px 60px;
+    overflow-x: hidden;
+  }
+  .container { max-width: 480px; margin: 0 auto; position: relative; z-index: 1; }
+
+  .back-link {
+    display: inline-block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    text-decoration: none;
+    opacity: 0.75;
+    margin-bottom: 18px;
+  }
+  .back-link:hover { opacity: 1; }
+
+  header { text-align: center; margin-bottom: 24px; }
+  .top-logo { display: block; margin: 0 auto 14px; height: 64px; width: auto; }
+  h1 {
+    font-family: 'Bagel Fat One', cursive;
+    font-size: 46px;
+    line-height: 0.9;
+    letter-spacing: -1px;
+    color: var(--cream);
+    text-transform: uppercase;
+    text-shadow: 0 2px 0 rgba(0,0,0,0.5), 0 0 30px rgba(255, 107, 26, 0.4);
+    transform: rotate(-1deg);
+  }
+  h1 .sub {
+    display: block;
+    font-family: 'Caveat Brush', cursive;
+    font-size: 40px;
+    color: var(--gold);
+    text-transform: none;
+    transform: rotate(-2deg);
+    margin-top: -4px;
+    text-shadow: 0 2px 0 rgba(0,0,0,0.6), 0 0 25px rgba(252, 209, 22, 0.5);
+  }
+  .event-meta {
+    margin-top: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--cream);
+    opacity: 0.75;
+    line-height: 1.6;
+  }
+  .event-meta .accent { color: var(--gold); }
+
+  .card {
+    background: linear-gradient(180deg, rgba(20, 14, 10, 0.92) 0%, rgba(10, 8, 6, 0.97) 100%);
+    border: 1px solid rgba(255, 181, 71, 0.25);
+    border-radius: 14px;
+    padding: 24px 20px;
+  }
+
+  .field { margin-bottom: 18px; }
+  label.lbl {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 7px;
+  }
+  label.lbl .req { color: var(--flame); }
+  input, select {
+    width: 100%;
+    padding: 12px 13px;
+    border-radius: 9px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--cream);
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  input:focus, select:focus { outline: none; border-color: var(--gold); }
+  input::placeholder { color: rgba(244, 232, 212, 0.4); }
+  select option { background: var(--ember); color: var(--cream); }
+
+  .pay-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .pay-option {
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 10px;
+    padding: 14px 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.12s ease;
+  }
+  .pay-option input { position: absolute; opacity: 0; pointer-events: none; }
+  .pay-option .po-title { font-weight: 700; font-size: 14px; }
+  .pay-option .po-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    opacity: 0.6;
+    margin-top: 3px;
+  }
+  .pay-option.selected { border-color: var(--gold); background: rgba(255, 181, 71, 0.12); }
+
+  .qr-block {
+    margin-top: 16px;
+    border-top: 1px dashed rgba(255, 181, 71, 0.25);
+    padding-top: 16px;
+  }
+  .qr-block[hidden] { display: none; }
+  .pay-instructions {
+    background: rgba(255, 181, 71, 0.08);
+    border: 1px solid rgba(255, 181, 71, 0.25);
+    border-radius: 9px;
+    padding: 12px 14px;
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 14px;
+    white-space: pre-wrap;
+  }
+  .file-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .file-btn {
+    flex-shrink: 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: 700;
+    padding: 11px 14px;
+    border-radius: 9px;
+    border: 1px solid rgba(255, 181, 71, 0.4);
+    background: rgba(255, 181, 71, 0.1);
+    color: var(--gold);
+    cursor: pointer;
+  }
+  .file-name { font-size: 12px; opacity: 0.8; word-break: break-all; }
+  .file-thumb {
+    margin-top: 12px;
+    max-width: 140px;
+    max-height: 140px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.2);
+    display: none;
+  }
+
+  .total-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 4px 0 20px;
+    padding: 14px 16px;
+    border-radius: 10px;
+    background: rgba(13, 148, 136, 0.12);
+    border: 1px solid rgba(13, 148, 136, 0.4);
+  }
+  .total-row .t-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--cream);
+  }
+  .total-row .t-amount {
+    font-family: 'Bagel Fat One', cursive;
+    font-size: 30px;
+    color: var(--gold);
+  }
+
+  .submit-btn {
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--amber) 0%, var(--amber-deep) 100%);
+    color: #1a0d05;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(255, 107, 26, 0.35);
+    transition: transform 0.1s ease, opacity 0.15s ease;
+  }
+  .submit-btn:active { transform: scale(0.98); }
+  .submit-btn[disabled] { opacity: 0.55; cursor: default; }
+
+  .honeypot { position: absolute; left: -5000px; width: 1px; height: 1px; overflow: hidden; }
+
+  .form-error {
+    background: rgba(206, 17, 38, 0.15);
+    border: 1px solid var(--red);
+    border-radius: 9px;
+    padding: 12px 14px;
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 16px;
+    display: none;
+  }
+
+  .state {
+    text-align: center;
+    padding: 50px 20px;
+  }
+  .state h2 {
+    font-family: 'Bagel Fat One', cursive;
+    font-size: 46px;
+    color: var(--gold);
+    text-shadow: 0 0 30px rgba(255, 107, 26, 0.5);
+    margin-bottom: 14px;
+    letter-spacing: 1px;
+  }
+  .state.error h2 { color: var(--flame); }
+  .state p {
+    font-family: 'Dancing Script', cursive;
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--cream);
+  }
+  .state .view-btn {
+    display: inline-block;
+    margin-top: 24px;
+    padding: 14px 24px;
+    border-radius: 10px;
+    text-decoration: none;
+    background: linear-gradient(135deg, var(--amber) 0%, var(--amber-deep) 100%);
+    color: #1a0d05;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .loading {
+    text-align: center;
+    padding: 80px 20px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold);
+  }
+
+  footer {
+    margin-top: 32px;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: var(--cream);
+    opacity: 0.6;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <div id="root"><div class="loading">Loading…</div></div>
+  <footer>★ Nexa Events ★</footer>
+</div>
+
+<script>
+  const WEB_APP_URL = window.WEB_APP_URL;
+  const root = document.getElementById('root');
+  const params = new URLSearchParams(window.location.search);
+  const eventId = params.get('event');
+  const ref = params.get('ref') || '';
+
+  let event = null;
+  let screenshotPayload = null; // { data, mimeType, name }
+
+  function escapeHtml(s) {
+    if (s == null) return '';
+    return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  function showState(kind, title, msg, viewUrl) {
+    root.innerHTML = `
+      <div class="state ${kind}">
+        <h2>${escapeHtml(title)}</h2>
+        <p>${escapeHtml(msg)}</p>
+        ${viewUrl ? `<a class="view-btn" href="${viewUrl}">View Your Tickets →</a>` : ''}
+      </div>`;
+  }
+
+  async function boot() {
+    if (!WEB_APP_URL || WEB_APP_URL.includes('PASTE_YOUR')) {
+      showState('error', 'Not configured', 'Ticketing is not set up yet. Please check back soon.');
+      return;
+    }
+    if (!eventId) {
+      showState('error', 'No event', 'This link is missing its event. Head back and pick an event.');
+      return;
+    }
+    let events;
+    try {
+      events = await fetch('/events.json', { cache: 'no-store' }).then(r => r.json());
+    } catch (_) {
+      showState('error', 'Offline', 'Could not load event details. Check your connection and try again.');
+      return;
+    }
+    event = events.find(e => e.id === eventId);
+    if (!event) { showState('error', 'Not found', 'We couldn’t find that event.'); return; }
+    if (!event.ticket_types || !event.ticket_types.length) {
+      showState('error', 'Coming soon', 'Tickets for this event aren’t on sale yet.');
+      return;
+    }
+    renderForm();
+  }
+
+  function ticketLabel(t) {
+    return `${t.label} — RM${t.price}${t.note ? ' (' + t.note + ')' : ''}`;
+  }
+
+  function renderForm() {
+    const typeOptions = event.ticket_types
+      .map((t, i) => `<option value="${i}">${escapeHtml(t.label)} — RM${t.price}${t.note ? ' · ' + escapeHtml(t.note) : ''}</option>`)
+      .join('');
+    const qtyOptions = [1,2,3,4,5,6,7,8].map(n => `<option value="${n}">${n}</option>`).join('');
+
+    root.innerHTML = `
+      <a class="back-link" href="/events/${escapeHtml(eventId)}/">← Back to event</a>
+      <header>
+        <img class="top-logo" src="assets/NEXA_white.png" alt="Nexa Events" />
+        <h1>Get<span class="sub">Tickets</span></h1>
+        <div class="event-meta">
+          <span class="accent">${escapeHtml(event.name)}</span><br/>
+          ${escapeHtml(event.date_display || '')} ✦ ${escapeHtml(event.time || '')}<br/>
+          ${escapeHtml(event.venue || '')}
+        </div>
+      </header>
+
+      <form id="buyForm" class="card" novalidate>
+        <div class="form-error" id="formError"></div>
+
+        <div class="field">
+          <label class="lbl" for="f-name">Full name <span class="req">*</span></label>
+          <input id="f-name" name="name" type="text" autocomplete="name" required />
+        </div>
+        <div class="field">
+          <label class="lbl" for="f-email">Email <span class="req">*</span></label>
+          <input id="f-email" name="email" type="email" autocomplete="email" placeholder="your@email.com" required />
+        </div>
+        <div class="field">
+          <label class="lbl" for="f-phone">Phone <span style="opacity:.5">(optional)</span></label>
+          <input id="f-phone" name="phone" type="tel" autocomplete="tel" />
+        </div>
+        <div class="field">
+          <label class="lbl" for="f-type">Ticket type <span class="req">*</span></label>
+          <select id="f-type" name="type">${typeOptions}</select>
+        </div>
+        <div class="field">
+          <label class="lbl" for="f-qty">Quantity <span class="req">*</span></label>
+          <select id="f-qty" name="qty">${qtyOptions}</select>
+        </div>
+
+        <div class="field">
+          <label class="lbl">Payment <span class="req">*</span></label>
+          <div class="pay-options">
+            <label class="pay-option selected" id="po-cash">
+              <input type="radio" name="pay" value="cash" checked />
+              <div class="po-title">Cash</div>
+              <div class="po-sub">Pay at the door</div>
+            </label>
+            <label class="pay-option" id="po-qr">
+              <input type="radio" name="pay" value="qr" />
+              <div class="po-title">Bank / QR</div>
+              <div class="po-sub">Pay now + upload</div>
+            </label>
+          </div>
+
+          <div class="qr-block" id="qrBlock" hidden>
+            <div class="pay-instructions">${escapeHtml(event.payment_instructions || 'Transfer the total, then upload your payment screenshot below.')}</div>
+            <label class="lbl" for="f-shot">Payment screenshot <span class="req">*</span></label>
+            <div class="file-row">
+              <button type="button" class="file-btn" id="fileBtn">Choose image</button>
+              <span class="file-name" id="fileName">No file selected</span>
+            </div>
+            <input id="f-shot" type="file" accept="image/*" capture="environment" style="display:none" />
+            <img id="fileThumb" class="file-thumb" alt="preview" />
+          </div>
+        </div>
+
+        <div class="total-row">
+          <span class="t-label">Total</span>
+          <span class="t-amount" id="totalAmount">RM0</span>
+        </div>
+
+        <!-- Honeypot: real users never see/fill this. -->
+        <div class="honeypot" aria-hidden="true">
+          <label>Company<input type="text" name="company" tabindex="-1" autocomplete="off" /></label>
+        </div>
+
+        <button type="submit" class="submit-btn" id="submitBtn">Get Tickets</button>
+      </form>
+    `;
+
+    wireForm();
+    updateTotal();
+  }
+
+  function wireForm() {
+    const typeSel = document.getElementById('f-type');
+    const qtySel = document.getElementById('f-qty');
+    const poCash = document.getElementById('po-cash');
+    const poQr = document.getElementById('po-qr');
+    const qrBlock = document.getElementById('qrBlock');
+    const fileBtn = document.getElementById('fileBtn');
+    const fileInput = document.getElementById('f-shot');
+    const fileName = document.getElementById('fileName');
+    const fileThumb = document.getElementById('fileThumb');
+
+    typeSel.addEventListener('change', updateTotal);
+    qtySel.addEventListener('change', updateTotal);
+
+    function syncPay() {
+      const qr = document.querySelector('input[name="pay"]:checked').value === 'qr';
+      qrBlock.hidden = !qr;
+      poQr.classList.toggle('selected', qr);
+      poCash.classList.toggle('selected', !qr);
+    }
+    poCash.addEventListener('change', syncPay);
+    poQr.addEventListener('change', syncPay);
+
+    fileBtn.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', async () => {
+      const file = fileInput.files && fileInput.files[0];
+      if (!file) { fileName.textContent = 'No file selected'; screenshotPayload = null; fileThumb.style.display = 'none'; return; }
+      fileName.textContent = file.name;
+      fileBtn.textContent = 'Processing…';
+      try {
+        screenshotPayload = await fileToCompressedImage(file, 1280, 0.7);
+        fileThumb.src = 'data:' + screenshotPayload.mimeType + ';base64,' + screenshotPayload.data;
+        fileThumb.style.display = 'block';
+      } catch (err) {
+        screenshotPayload = null;
+        fileName.textContent = 'Could not read that image — try another';
+      }
+      fileBtn.textContent = 'Choose image';
+    });
+
+    document.getElementById('buyForm').addEventListener('submit', onSubmit);
+  }
+
+  function updateTotal() {
+    const t = event.ticket_types[+document.getElementById('f-type').value] || { price: 0 };
+    const qty = +document.getElementById('f-qty').value || 1;
+    document.getElementById('totalAmount').textContent = 'RM' + (t.price * qty);
+  }
+
+  // Downscale + re-encode to keep the base64 POST small and reliable.
+  function fileToCompressedImage(file, maxDim, quality) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error('read failed'));
+      reader.onload = () => {
+        const img = new Image();
+        const fallback = () => resolve({ data: String(reader.result).split(',')[1], mimeType: file.type || 'image/jpeg', name: file.name });
+        img.onerror = fallback;
+        img.onload = () => {
+          try {
+            let { width, height } = img;
+            if (Math.max(width, height) > maxDim) {
+              const s = maxDim / Math.max(width, height);
+              width = Math.round(width * s); height = Math.round(height * s);
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = width; canvas.height = height;
+            canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+            const dataUrl = canvas.toDataURL('image/jpeg', quality);
+            resolve({ data: dataUrl.split(',')[1], mimeType: 'image/jpeg', name: file.name });
+          } catch (_) { fallback(); }
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function showError(msg) {
+    const box = document.getElementById('formError');
+    box.textContent = msg;
+    box.style.display = 'block';
+    box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  async function onSubmit(e) {
+    e.preventDefault();
+    const name = document.getElementById('f-name').value.trim();
+    const email = document.getElementById('f-email').value.trim();
+    const phone = document.getElementById('f-phone').value.trim();
+    const typeIdx = +document.getElementById('f-type').value;
+    const qty = +document.getElementById('f-qty').value || 1;
+    const pay = document.querySelector('input[name="pay"]:checked').value;
+    const company = document.querySelector('input[name="company"]').value;
+
+    if (!name) return showError('Please enter your name.');
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showError('Please enter a valid email address.');
+    if (pay === 'qr' && !screenshotPayload) return showError('Please upload your payment screenshot, or choose Cash.');
+
+    const t = event.ticket_types[typeIdx];
+    const payload = {
+      event_id: eventId,
+      buyer_name: name,
+      buyer_email: email,
+      buyer_phone: phone,
+      ticket_type: ticketLabel(t),
+      quantity: qty,
+      payment_method: pay,
+      affiliate_code: ref,
+      company: company, // honeypot
+    };
+    if (pay === 'qr' && screenshotPayload) payload.screenshot = screenshotPayload;
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = 'Submitting…';
+
+    try {
+      // Plain-text body keeps this a CORS "simple request" (no preflight) so the
+      // Apps Script /exec endpoint can answer it.
+      const resp = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload), redirect: 'follow' });
+      const data = await resp.json();
+      if (!data.ok) {
+        btn.disabled = false; btn.textContent = 'Get Tickets';
+        return showError(data.error || 'Something went wrong. Please try again.');
+      }
+      if (pay === 'cash') {
+        showState('success', 'You’re in!',
+          `Your tickets have been emailed to ${email}. Bring cash for the door.`,
+          data.ticket_url || '');
+      } else {
+        showState('success', 'Order received!',
+          `Thanks! Once we verify your payment we’ll email your tickets to ${email}.`);
+      }
+    } catch (err) {
+      btn.disabled = false; btn.textContent = 'Get Tickets';
+      showError('Could not reach the server. Check your connection and try again.');
+    }
+  }
+
+  boot();
+</script>
+</body>
+</html>
