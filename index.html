@@ -264,6 +264,16 @@
     const now = Date.now();
     const active = events.filter(e => now <= new Date(e.date_iso).getTime() + 24 * 60 * 60 * 1000);
 
+    const ref = new URLSearchParams(window.location.search).get('ref');
+
+    // Single active event → the homepage IS that event's page.
+    if (active.length === 1) {
+      window.location.replace(ref
+        ? `/events/${active[0].id}/?ref=${encodeURIComponent(ref)}`
+        : `/events/${active[0].id}/`);
+      return;
+    }
+
     section.style.display = 'flex';
 
     if (active.length === 0) {
@@ -277,8 +287,6 @@
         </div>`;
       return;
     }
-
-    const ref = new URLSearchParams(window.location.search).get('ref');
 
     let html = `<div class="events-heading">Upcoming Events</div>`;
     for (const ev of active) {
