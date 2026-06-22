@@ -11,6 +11,11 @@
     "maps_url": "https://maps.app.goo.gl/zzpVh7ByuNHCBdg48",
     "ticket_form_url": "https://docs.google.com/forms/d/1il7Xf6GXyt2RfDfWaCnIcvjNxx2Zh9-B7klLnv8Iw5g/viewform",
     "ticket_form_prefill_entry": "entry.799019575",
-    "accent_color": "#ff7035"
+    "accent_color": "#ff7035",
+    "ticket_types": [
+      { "label": "General Admission", "price": 50, "note": "" },
+      { "label": "Admission + Food Tasting", "price": 100, "note": "" }
+    ],
+    "payment_instructions": "TODO: add your bank-transfer / DuitNow QR details here (account name, number, bank). Buyers pay first, then upload their screenshot below."
   }
 ]

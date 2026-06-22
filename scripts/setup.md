@@ -1,5 +1,11 @@
 # Google Form Setup Guide — Ticket Purchases
 
+> ℹ️ **Optional / legacy.** Purchases now run through the on-site form `buy.html`,
+> which POSTs straight to the Apps Script (`doPost`) — no Google account or login
+> required for buyers, and QR screenshots upload directly. You only need this
+> Google Form guide if you specifically want to keep running a Google Form
+> alongside it. Both paths share the same `recordPurchase` backend.
+
 This guide walks you through setting up a public Google Form so buyers can self-serve, while you only need to verify their payment screenshot.
 
 ## Overview of the new flow

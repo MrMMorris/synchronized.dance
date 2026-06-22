@@ -283,8 +283,10 @@
     let html = `<div class="events-heading">Upcoming Events</div>`;
     for (const ev of active) {
       const genreStr = ev.genres ? ev.genres.join(' · ') : '';
-      const href = ref && ev.ticket_form_url && ev.ticket_form_prefill_entry
-        ? `${ev.ticket_form_url}?${ev.ticket_form_prefill_entry}=${encodeURIComponent(ref)}`
+      // Always route through the event landing page; carry the ambassador
+      // referral code so it flows on to the on-site purchase form (buy.html).
+      const href = ref
+        ? `/events/${ev.id}/?ref=${encodeURIComponent(ref)}`
         : `/events/${ev.id}/`;
       html += `
         <a class="event-btn" href="${href}" onclick="trackEventClick('${ev.name}')">

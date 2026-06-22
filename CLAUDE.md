@@ -1,6 +1,8 @@
 # synchronized.dance — System Reference
 
-This is an event ticketing system for dance parties. It is deliberately minimal: no backend server, no database — just Google Forms, Google Sheets, Google Apps Script, and static HTML pages hosted on Cloudflare Pages.
+This is an event ticketing system for dance parties. It is deliberately minimal: no backend server, no database — just a Google Sheet, Google Apps Script, and static HTML pages hosted on Cloudflare Pages.
+
+Orders come in through the on-site purchase form (`buy.html`), which POSTs to the Apps Script web app (`doPost`). The legacy Google Form path still works (`onFormSubmitHandler`); both funnel into the same `recordPurchase` logic.
 
 ---
 
@@ -8,33 +10,36 @@ This is an event ticketing system for dance parties. It is deliberately minimal:
 
 **Cash orders** (no upfront payment — pay at door):
 ```
-Attendee fills Google Form (chooses Cash)
+Attendee fills buy.html (chooses Cash) → POST to Apps Script doPost
         ↓
-onFormSubmitHandler: writes row to Purchases with payment_confirmed = TRUE
+recordPurchase: writes row to Purchases with payment_confirmed = TRUE
         ↓
 Immediately generates tickets + sends ticket email
         ↓
 Attendee visits tickets.html?event=<event_id>&k=<purchase_key>
         ↓
-Door staff scans QR → cash modal → swipe to confirm + mark scanned
+Door staff scans QR → cash modal → swipe → confirm_cash marks scanned
 ```
 
 **QR orders** (prepay via bank transfer):
 ```
-Attendee fills Google Form (chooses QR, uploads screenshot)
+Attendee fills buy.html (chooses QR, uploads screenshot) → POST to doPost
         ↓
-Google Sheet (Purchases tab) — row written with payment_confirmed = FALSE
+doPost saves screenshot to Drive; recordPurchase writes Purchases row
+  with payment_confirmed = FALSE, payment_proof = Drive URL
         ↓
 Organizer verifies screenshot, manually sets payment_confirmed = TRUE
         ↓
 Apps Script onEdit trigger fires → generates tickets → sends ticket email
         ↓
-Attendee visits tickets.html?k=<purchase_key>
+Attendee visits tickets.html?event=<event_id>&k=<purchase_key>
         ↓
 Door staff scans QR with scanner.html?k=<scanner_token>
         ↓
 Apps Script validates + marks ticket as scanned
 ```
+
+(Legacy: the Google Form writes the same Purchases row via `onFormSubmitHandler` instead of `doPost`. QR screenshots from the form land in Drive as a Forms upload rather than via `savePaymentProof`.)
 
 ---
 
@@ -44,6 +49,7 @@ Apps Script validates + marks ticket as scanned
 |---|---|
 | `index.html` | Landing page — lists active event buttons + email signup form |
 | `signup.html` | Email list signup (standalone page, same Brevo form as index.html) |
+| `buy.html` | On-site purchase form — themed per event, POSTs orders to Apps Script (replaces the Google Form) |
 | `tickets.html` | Buyer-facing ticket viewer — loads per-event theme, shows QR codes |
 | `scanner.html` | Door staff scanner — validates tickets across all active events |
 | `ambassador.html` | Ambassador dashboard — per-event referral QRs + live earnings stats |
@@ -115,10 +121,17 @@ Add a new entry to the array. Required fields:
   "maps_url": "https://maps.app.goo.gl/...",
   "ticket_form_url": "https://docs.google.com/forms/d/.../viewform",
   "ticket_form_prefill_entry": "entry.XXXXXXXXXX",
-  "accent_color": "#rrggbb"
+  "accent_color": "#rrggbb",
+  "ticket_types": [
+    { "label": "General Admission", "price": 50, "note": "" },
+    { "label": "VIP", "price": 120, "note": "includes drink" }
+  ],
+  "payment_instructions": "Bank transfer to ... / DuitNow QR ... Then upload your screenshot."
 }
 ```
 Pick `accent_color` from the poster's dominant warm hue.
+
+`ticket_types` and `payment_instructions` drive the on-site purchase form (`buy.html`). `buy.html` builds each order's `ticket_type` string as `"<label> — RM<price>"`, which `priceFor` then parses server-side — so prices live here, in one place. `payment_instructions` is shown to QR buyers above the screenshot upload (fill in real bank/QR details before going live). `ticket_form_url` / `ticket_form_prefill_entry` are now only needed if you still run the legacy Google Form.
 
 ### Step 6 — Add event to `scripts/app_script.gs` EVENTS map
 Add a new entry to the `EVENTS` object using the event ID as the key:
@@ -162,7 +175,7 @@ window.AMBASSADOR_SIGNUP_FORM_URL = 'https://synchronized.dance/join';
 
 `tickets.html`, `scanner.html`, `ambassador.html`, and `ambassador-signup.html` all load `config.js` via `<script src="config.js">`.
 
-Per-event ticket form URLs and prefill entry IDs now live in `events.json`, not `config.js`. `ambassador.html` shows a single referral QR pointing at the homepage (`?ref=<key>`); `index.html` reads that `ref` and appends it to each active event's form prefill from `events.json`.
+Per-event ticket form URLs and prefill entry IDs now live in `events.json`, not `config.js`. `ambassador.html` shows a single referral QR pointing at the homepage (`?ref=<key>`); `index.html` carries that `ref` to the event landing page, which forwards it to the on-site purchase form (`buy.html?event=<id>&ref=<key>`). `buy.html` sends it as `affiliate_code` with the order.
 
 ---
 
@@ -354,6 +367,31 @@ Returns live stats for an ambassador. Ticket counts are computed from the Ticket
 
 **Debugging tip:** The `/exec` URL redirects, so DevTools Network tab shows "no content." To see the raw JSON, copy the full request URL and paste it directly into a browser tab.
 
+### `POST` (on-site purchase form → `doPost`)
+`buy.html` POSTs a JSON order to the same `/exec` URL. The body is sent as **`text/plain`** (the browser default for a string body) on purpose — that keeps it a CORS "simple request" with no preflight, which the Apps Script endpoint can answer. **Do not** set `Content-Type: application/json` (it triggers a preflight `OPTIONS` that Apps Script can't handle).
+
+Request body:
+```json
+{
+  "event_id": "27_06_2026-beach_party",
+  "buyer_name": "Jane",
+  "buyer_email": "jane@example.com",
+  "buyer_phone": "",
+  "ticket_type": "General Admission — RM50",
+  "quantity": 2,
+  "payment_method": "cash",
+  "affiliate_code": "<ref or ''>",
+  "company": "",
+  "screenshot": { "data": "<base64>", "mimeType": "image/jpeg", "name": "proof.jpg" }
+}
+```
+- `company` is a honeypot — if non-empty, `doPost` returns `{ok:true}` and records nothing.
+- `screenshot` is only sent for QR orders; `doPost` saves it to a Drive folder (`Nexa Payment Proofs`) via `savePaymentProof` and stores the file URL in `payment_proof`.
+- Both `doPost` and `onFormSubmitHandler` funnel into the shared `recordPurchase(fields)`, so cash vs QR behaviour is identical to the Google Form path.
+- Response: `{ ok, payment_method, ticket_url }` (cash returns the buyer's ticket URL) or `{ ok:false, error }`.
+
+> **Drive scope:** `savePaymentProof` uses `DriveApp`, a new OAuth scope. After deploying a version that includes it, run any function once in the Apps Script editor and **Review permissions → Allow**, or `doPost` will fail for QR orders.
+
 ---
 
 ## Payment Flow (Cash vs QR)
@@ -493,7 +531,7 @@ Ambassadors are people or businesses who refer ticket buyers and earn a commissi
 1. Organizer opens `ambassador-signup.html` and shows it to a potential ambassador — they scan the QR to open the signup form.
 2. Ambassador fills the signup form → `onAmbassadorSignupHandler` fires → creates row in Ambassadors tab → sends welcome email with their unique `ambassador.html?k=TOKEN` URL.
 3. Ambassador opens their page, finds their referral QR, and shares it. The QR encodes the site homepage with their key as `?ref=<ambassador_key>` (`https://synchronized.dance/?ref=KEY`) — one QR that works for every active event.
-4. Buyers scan the ambassador's QR → land on `index.html`, which reads `?ref=` and links each event button straight to that event's Google Form with the referral pre-filled (using `ticket_form_url` + `ticket_form_prefill_entry` from `events.json`). They complete the purchase normally.
+4. Buyers scan the ambassador's QR → land on `index.html` with `?ref=`, which carries the code through the event landing page to the on-site purchase form (`buy.html?event=<id>&ref=<key>`). `buy.html` submits it as `affiliate_code`. They complete the purchase normally.
 5. `onFormSubmitHandler` reads the Referral Code and stores it as `affiliate_code` in the Purchases row. `generateTicketsForRow` copies it to each Ticket row.
 6. At the door, when a ticket is scanned (and cash is confirmed for cash orders), it becomes "confirmed." The ambassador's stats update automatically — `get_ambassador` counts scanned Tickets with matching `affiliate_code`.
 7. After the event, organizer runs **Ticket System → Refresh ambassador stats** to update the Ambassadors tab, then pays out based on `amount_owing` using the `payment_details` on file.
