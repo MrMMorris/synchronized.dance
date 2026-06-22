@@ -265,6 +265,34 @@
 
   .honeypot { position: absolute; left: -5000px; width: 1px; height: 1px; overflow: hidden; }
 
+  .trust-strip {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 6px 16px;
+    margin-top: 16px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: var(--cream);
+    opacity: 0.7;
+  }
+  .trust-contact {
+    margin-top: 10px;
+    text-align: center;
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--cream);
+    opacity: 0.75;
+  }
+  .trust-contact a {
+    color: var(--gold);
+    text-decoration: none;
+    word-break: break-word;
+  }
+  .trust-contact a:hover { text-decoration: underline; }
+
   .form-error {
     background: rgba(206, 17, 38, 0.15);
     border: 1px solid var(--red);
@@ -471,6 +499,16 @@
         </div>
 
         <button type="submit" class="submit-btn" id="submitBtn">Get Tickets</button>
+
+        <div class="trust-strip">
+          <span>🔒 Secure form</span>
+          <span>✉️ Instant e-tickets</span>
+          <span>🎟️ Scan at door</span>
+        </div>
+        <div class="trust-contact">
+          Questions? <a href="mailto:nexa.events.marketing@gmail.com">nexa.events.marketing@gmail.com</a>
+          · <a href="https://instagram.com/nexa.events" target="_blank" rel="noopener">@nexa.events</a>
+        </div>
       </form>
     `;
 
