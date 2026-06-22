@@ -168,8 +168,20 @@
     padding: 12px 14px;
     font-size: 13px;
     line-height: 1.5;
-    margin-bottom: 14px;
+    margin: 0 auto 14px;
     white-space: pre-wrap;
+    text-align: center;
+    width: 200px;
+    max-width: 100%;
+  }
+  .pay-qr {
+    display: block;
+    width: 200px;
+    max-width: 100%;
+    margin: 0 auto 16px;
+    border-radius: 10px;
+    background: #fff;
+    padding: 10px;
   }
   .file-row {
     display: flex;
@@ -212,11 +224,17 @@
   }
   .total-row .t-label {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
+    font-size: 14px;
     letter-spacing: 2px;
     text-transform: uppercase;
     color: var(--cream);
   }
+  .total-row .t-note {
+    text-transform: none;
+    letter-spacing: 0.5px;
+    opacity: 0.7;
+  }
+  .total-row .t-note[hidden] { display: none; }
   .total-row .t-amount {
     font-family: 'Bagel Fat One', cursive;
     font-size: 30px;
@@ -401,10 +419,6 @@
           <input id="f-email" name="email" type="email" autocomplete="email" placeholder="your@email.com" required />
         </div>
         <div class="field">
-          <label class="lbl" for="f-phone">Phone <span style="opacity:.5">(optional)</span></label>
-          <input id="f-phone" name="phone" type="tel" autocomplete="tel" />
-        </div>
-        <div class="field">
           <label class="lbl" for="f-type">Ticket type <span class="req">*</span></label>
           <select id="f-type" name="type">${typeOptions}</select>
         </div>
@@ -416,21 +430,22 @@
         <div class="field">
           <label class="lbl">Payment <span class="req">*</span></label>
           <div class="pay-options">
-            <label class="pay-option selected" id="po-cash">
-              <input type="radio" name="pay" value="cash" checked />
-              <div class="po-title">Cash</div>
-              <div class="po-sub">Pay at the door</div>
-            </label>
-            <label class="pay-option" id="po-qr">
-              <input type="radio" name="pay" value="qr" />
+            <label class="pay-option selected" id="po-qr">
+              <input type="radio" name="pay" value="qr" checked />
               <div class="po-title">Bank / QR</div>
               <div class="po-sub">Pay now + upload</div>
             </label>
+            <label class="pay-option" id="po-cash">
+              <input type="radio" name="pay" value="cash" />
+              <div class="po-title">Cash</div>
+              <div class="po-sub">Pay at the door</div>
+            </label>
           </div>
 
-          <div class="qr-block" id="qrBlock" hidden>
+          <div class="qr-block" id="qrBlock">
             <div class="pay-instructions">${escapeHtml(event.payment_instructions || 'Transfer the total, then upload your payment screenshot below.')}</div>
-            <label class="lbl" for="f-shot">Payment screenshot <span class="req">*</span></label>
+            <img class="pay-qr" src="assets/QR.png" alt="DuitNow / bank transfer QR code" />
+            <label class="lbl" for="f-shot">Upload your proof of payment below <span class="req">*</span></label>
             <div class="file-row">
               <button type="button" class="file-btn" id="fileBtn">Choose image</button>
               <span class="file-name" id="fileName">No file selected</span>
@@ -441,7 +456,7 @@
         </div>
 
         <div class="total-row">
-          <span class="t-label">Total</span>
+          <span class="t-label">Total <span id="cashNote" class="t-note" hidden>(to be paid at the door)</span></span>
           <span class="t-amount" id="totalAmount">RM0</span>
         </div>
 
@@ -477,6 +492,7 @@
       qrBlock.hidden = !qr;
       poQr.classList.toggle('selected', qr);
       poCash.classList.toggle('selected', !qr);
+      document.getElementById('cashNote').hidden = qr;
     }
     poCash.addEventListener('change', syncPay);
     poQr.addEventListener('change', syncPay);
@@ -547,7 +563,6 @@
     e.preventDefault();
     const name = document.getElementById('f-name').value.trim();
     const email = document.getElementById('f-email').value.trim();
-    const phone = document.getElementById('f-phone').value.trim();
     const typeIdx = +document.getElementById('f-type').value;
     const qty = +document.getElementById('f-qty').value || 1;
     const pay = document.querySelector('input[name="pay"]:checked').value;
@@ -562,7 +577,7 @@
       event_id: eventId,
       buyer_name: name,
       buyer_email: email,
-      buyer_phone: phone,
+      buyer_phone: '',
       ticket_type: ticketLabel(t),
       quantity: qty,
       payment_method: pay,

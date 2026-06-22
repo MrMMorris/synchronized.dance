@@ -13,9 +13,8 @@
     "ticket_form_prefill_entry": "entry.799019575",
     "accent_color": "#ff7035",
     "ticket_types": [
-      { "label": "General Admission", "price": 50, "note": "" },
-      { "label": "Admission + Food Tasting", "price": 100, "note": "" }
+      { "label": "General Admission", "price": 55, "note": "Includes 1 free drink" }
     ],
-    "payment_instructions": "TODO: add your bank-transfer / DuitNow QR details here (account name, number, bank). Buyers pay first, then upload their screenshot below."
+    "payment_instructions": "MARCUS MORRIS\nHSBC\n303875462888"
   }
 ]
