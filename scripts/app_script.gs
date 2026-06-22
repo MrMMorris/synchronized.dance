@@ -996,7 +996,7 @@ function sendAmbassadorWelcomeEmail(email, name, pageUrl) {
           <a href="${pageUrl}" style="display: inline-block; background: #0a0a0a; color: #c6ff3a; padding: 14px 24px; text-decoration: none; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; font-size: 14px; border-radius: 4px;">Open Your Ambassador Page →</a>
         </div>
         <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #555;">
-          Your page has a personal QR code — share it with anyone interested in tickets. Your earnings are tracked automatically once tickets are confirmed at the door.
+          Your page has a personal QR code — share it with anyone interested in tickets. Your earnings are tracked automatically — prepaid tickets count once payment clears, and cash tickets once collected at the door.
         </p>
       </div>
     </div>`;
@@ -1007,6 +1007,18 @@ function sendAmbassadorWelcomeEmail(email, name, pageUrl) {
 // ============================================================================
 // AMBASSADOR STATS
 // ============================================================================
+
+/**
+ * Does a ticket count toward ambassador commission yet? The rule is "money is
+ * actually in hand": prepaid (non-cash) tickets only exist after payment is
+ * confirmed, so they count immediately; cash tickets count only once scanned
+ * (i.e. cash collected + confirmed at the door).
+ */
+function isCredited(scannedVal, paymentMethod) {
+  const scanned = scannedVal === true || String(scannedVal).toUpperCase() === 'TRUE';
+  const isCash = String(paymentMethod).toLowerCase().trim() === 'cash';
+  return scanned || !isCash;
+}
 
 function getAmbassadorStats(key) {
   if (!key) return { ok: false, error: 'No key' };
@@ -1043,13 +1055,13 @@ function getAmbassadorStats(key) {
   const tAffiliateCol  = tHeaders.indexOf('affiliate_code');
   const tScannedCol    = tHeaders.indexOf('scanned');
   const tEventIdCol    = tHeaders.indexOf('event_id');
+  const tPaymentCol    = tHeaders.indexOf('payment_method');
 
   let ticketsSold = 0, amountEarned = 0;
   if (tAffiliateCol !== -1) {
     for (let i = 1; i < tData.length; i++) {
       const codeMatch = String(tData[i][tAffiliateCol]).trim() === String(key).trim();
-      const scanned   = tData[i][tScannedCol] === true || String(tData[i][tScannedCol]).toUpperCase() === 'TRUE';
-      if (codeMatch && scanned) {
+      if (codeMatch && isCredited(tData[i][tScannedCol], tPaymentCol !== -1 ? tData[i][tPaymentCol] : '')) {
         ticketsSold++;
         const evId      = tEventIdCol !== -1 ? String(tData[i][tEventIdCol]).trim() : '';
         const commission= evId && EVENTS[evId] ? EVENTS[evId].COMMISSION_PER_TICKET : 0;
@@ -1082,14 +1094,14 @@ function refreshAmbassadorStats() {
   const tAffiliateCol = tHeaders.indexOf('affiliate_code');
   const tScannedCol   = tHeaders.indexOf('scanned');
   const tEventIdCol   = tHeaders.indexOf('event_id');
+  const tPaymentCol   = tHeaders.indexOf('payment_method');
 
   // Build map: affiliate_code → { count, earned }
   const earnedMap = {};
   if (tAffiliateCol !== -1) {
     for (let i = 1; i < tData.length; i++) {
       const code    = String(tData[i][tAffiliateCol]).trim();
-      const scanned = tData[i][tScannedCol] === true || String(tData[i][tScannedCol]).toUpperCase() === 'TRUE';
-      if (code && scanned) {
+      if (code && isCredited(tData[i][tScannedCol], tPaymentCol !== -1 ? tData[i][tPaymentCol] : '')) {
         const evId      = tEventIdCol !== -1 ? String(tData[i][tEventIdCol]).trim() : '';
         const commission= evId && EVENTS[evId] ? EVENTS[evId].COMMISSION_PER_TICKET : 0;
         if (!earnedMap[code]) earnedMap[code] = { count: 0, earned: 0 };

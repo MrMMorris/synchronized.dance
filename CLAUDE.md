@@ -236,7 +236,7 @@ Triggers that must be manually set up in the Apps Script editor:
 | `affiliate_code` | Copied from Purchases at ticket generation — must exist for ambassador tracking |
 | `scanned` | Set to `TRUE` when validated at the door |
 
-**Important:** `payment_method` and `affiliate_code` must be columns in the **Tickets** tab, not just Purchases. The API reads from Tickets for validation responses, and ambassador stats only count tickets where `affiliate_code` matches AND `scanned = TRUE`.
+**Important:** `payment_method` and `affiliate_code` must be columns in the **Tickets** tab, not just Purchases. The API reads from Tickets for validation responses, and ambassador stats count a ticket where `affiliate_code` matches AND it is "credited" — see `isCredited()`: prepaid (non-cash) tickets count as soon as they exist (a QR ticket row only exists after payment is confirmed), while cash tickets count only once `scanned = TRUE` (cash collected at the door).
 
 ### Scanners tab
 
@@ -535,7 +535,7 @@ Ambassadors are people or businesses who refer ticket buyers and earn a commissi
 3. Ambassador opens their page, finds their referral QR, and shares it. The QR encodes the site homepage with their key as `?ref=<ambassador_key>` (`https://synchronized.dance/?ref=KEY`) — one QR that works for every active event.
 4. Buyers scan the ambassador's QR → land on `index.html` with `?ref=`, which carries the code through the event landing page to the on-site purchase form (`buy.html?event=<id>&ref=<key>`). `buy.html` submits it as `affiliate_code`. They complete the purchase normally.
 5. `onFormSubmitHandler` reads the Referral Code and stores it as `affiliate_code` in the Purchases row. `generateTicketsForRow` copies it to each Ticket row.
-6. At the door, when a ticket is scanned (and cash is confirmed for cash orders), it becomes "confirmed." The ambassador's stats update automatically — `get_ambassador` counts scanned Tickets with matching `affiliate_code`.
+6. The ambassador's stats update automatically — `get_ambassador` counts "credited" Tickets with matching `affiliate_code` (see `isCredited()`): prepaid/QR tickets are credited once payment is confirmed (the ticket exists), cash tickets only once scanned + cash-confirmed at the door. So a prepaid no-show still credits the ambassador; a cash no-show does not.
 7. After the event, organizer runs **Ticket System → Refresh ambassador stats** to update the Ambassadors tab, then pays out based on `amount_owing` using the `payment_details` on file.
 
 ### Triggers required
