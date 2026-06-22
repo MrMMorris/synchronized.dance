@@ -6,26 +6,7 @@
 <title>Become an Ambassador — Nexa Events</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Caveat+Brush&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
-<script>
-  (function loadQR() {
-    const cdns = [
-      'https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js',
-      'https://unpkg.com/qrcode@1.5.3/build/qrcode.min.js',
-      'https://cdnjs.cloudflare.com/ajax/libs/qrcode/1.5.3/qrcode.min.js',
-    ];
-    let i = 0;
-    function tryNext() {
-      if (i >= cdns.length) { window.__qrLoadError = true; return; }
-      const s = document.createElement('script');
-      s.src = cdns[i++];
-      s.onload = () => { window.__qrLoaded = true; };
-      s.onerror = tryNext;
-      document.head.appendChild(s);
-    }
-    tryNext();
-  })();
-</script>
+<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Caveat+Brush&family=Dancing+Script:wght@600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
 <script src="config.js"></script>
 <style>
   :root {
@@ -203,18 +184,16 @@
     text-shadow: 0 0 12px rgba(212, 175, 55, 0.3);
   }
 
-  /* QR section */
-  .qr-section {
+  /* Form card */
+  .form-card {
     background: linear-gradient(180deg, rgba(20, 20, 20, 0.95) 0%, rgba(8, 8, 8, 0.98) 100%);
     border: 1px solid rgba(212, 175, 55, 0.2);
     border-radius: 14px;
-    padding: 28px 20px 22px;
-    text-align: center;
+    padding: 26px 22px;
     position: relative;
     overflow: hidden;
-    margin-bottom: 24px;
   }
-  .qr-section::before {
+  .form-card::before {
     content: '';
     position: absolute;
     inset: 0;
@@ -227,63 +206,121 @@
     pointer-events: none;
     opacity: 0.7;
   }
-  .qr-heading {
+  .form-heading {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 10px;
+    font-size: 11px;
     letter-spacing: 3px;
     text-transform: uppercase;
     color: var(--gold);
-    margin-bottom: 20px;
-  }
-  .qr-wrap {
-    background: var(--cream);
-    padding: 12px;
-    border-radius: 10px;
-    margin: 0 auto 18px;
-    width: 244px;
-    height: 244px;
-    box-shadow:
-      0 0 30px rgba(212, 175, 55, 0.2),
-      0 0 0 2px var(--teal),
-      0 0 0 4px var(--gold),
-      0 0 0 6px var(--ember);
-  }
-  .qr-wrap canvas, .qr-wrap img {
-    display: block;
-    width: 220px !important;
-    height: 220px !important;
-  }
-  .qr-cta {
-    font-family: 'Inter', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    color: var(--gold);
-    margin-bottom: 6px;
-  }
-  .qr-sub {
-    font-family: 'Inter', sans-serif;
-    font-size: 12px;
-    color: var(--cream);
-    opacity: 0.7;
+    text-align: center;
+    margin-bottom: 22px;
   }
 
-  /* Fallback button */
-  .signup-btn {
+  .field { margin-bottom: 18px; }
+  label.lbl {
     display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 7px;
+  }
+  label.lbl .req { color: var(--flame); }
+  label.lbl .opt { opacity: 0.5; }
+  input {
     width: 100%;
+    padding: 12px 13px;
+    border-radius: 9px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.06);
+    color: var(--cream);
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    -webkit-appearance: none;
+    appearance: none;
+  }
+  input:focus { outline: none; border-color: var(--gold); }
+  input::placeholder { color: rgba(240, 240, 240, 0.4); }
+
+  .pay-section {
+    margin-top: 6px;
+    border-top: 1px dashed rgba(212, 175, 55, 0.25);
+    padding-top: 18px;
+  }
+  .pay-section .pay-intro {
+    font-size: 12px;
+    line-height: 1.5;
+    color: var(--cream);
+    opacity: 0.75;
+    margin-bottom: 16px;
+  }
+
+  .submit-btn {
+    width: 100%;
+    padding: 16px;
+    border: none;
+    border-radius: 10px;
     background: linear-gradient(135deg, var(--amber) 0%, var(--amber-deep) 100%);
     color: var(--cream);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
+    transition: transform 0.1s ease, opacity 0.15s ease;
+  }
+  .submit-btn:active { transform: scale(0.98); }
+  .submit-btn[disabled] { opacity: 0.55; cursor: default; }
+
+  .honeypot { position: absolute; left: -5000px; width: 1px; height: 1px; overflow: hidden; }
+
+  .form-error {
+    background: rgba(206, 17, 38, 0.15);
+    border: 1px solid var(--red);
+    border-radius: 9px;
+    padding: 12px 14px;
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 16px;
+    display: none;
+  }
+
+  /* States */
+  .state { text-align: center; padding: 50px 20px; }
+  .state h2 {
+    font-family: 'Bagel Fat One', cursive;
+    font-size: 48px;
+    color: var(--gold);
+    text-shadow: 0 0 30px rgba(212, 175, 55, 0.5);
+    margin-bottom: 16px;
+    letter-spacing: 1px;
+  }
+  .state.error h2 { color: var(--flame); }
+  .state p {
+    font-family: 'Inter', sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.6;
+    color: var(--cream);
+    max-width: 360px;
+    margin: 0 auto;
+  }
+  .state .view-btn {
+    display: inline-block;
+    margin-top: 24px;
+    padding: 14px 24px;
+    border-radius: 10px;
     text-decoration: none;
-    text-align: center;
+    background: linear-gradient(135deg, var(--amber) 0%, var(--amber-deep) 100%);
+    color: var(--cream);
     font-family: 'JetBrains Mono', monospace;
     font-size: 13px;
     font-weight: 700;
     letter-spacing: 2px;
     text-transform: uppercase;
-    padding: 16px 20px;
-    border-radius: 10px;
-    margin-top: 14px;
-    box-shadow: 0 4px 20px rgba(212, 175, 55, 0.3);
   }
 
   footer {
@@ -307,41 +344,80 @@
     <h1>BECOME AN<span class="sub">Ambassador</span></h1>
   </header>
 
-  <div class="pitch-card">
-    <div class="commission-badge">
-      <span class="amount">RM5</span>
-      <span class="label">per confirmed ticket sold</span>
+  <div id="root">
+    <div class="pitch-card">
+      <div class="commission-badge">
+        <span class="amount">RM5</span>
+        <span class="label">per confirmed ticket sold</span>
+      </div>
+      <p class="pitch-text">
+        Help spread the word about <strong>Beach Party</strong> and earn for every ticket
+        that comes through your link.
+      </p>
+      <ul class="pitch-steps">
+        <li>
+          <span class="step-num">1</span>
+          <span>Sign up below — you'll receive your personal referral QR code by email.</span>
+        </li>
+        <li>
+          <span class="step-num">2</span>
+          <span>Share your QR with friends, followers, or customers. They scan it to buy tickets.</span>
+        </li>
+        <li>
+          <span class="step-num">3</span>
+          <span>Earn <strong style="color:var(--gold)">RM5</strong> for every ticket confirmed at the door — tracked automatically.</span>
+        </li>
+        <li>
+          <span class="step-num">4</span>
+          <span>After the event, we pay out via your chosen method based on your confirmed count.</span>
+        </li>
+      </ul>
     </div>
-    <p class="pitch-text">
-      Help spread the word about <strong>Beach Party</strong> and earn for every ticket
-      that comes through your link.
-    </p>
-    <ul class="pitch-steps">
-      <li>
-        <span class="step-num">1</span>
-        <span>Sign up below — you'll receive your personal referral QR code by email.</span>
-      </li>
-      <li>
-        <span class="step-num">2</span>
-        <span>Share your QR with friends, followers, or customers. They scan it to buy tickets.</span>
-      </li>
-      <li>
-        <span class="step-num">3</span>
-        <span>Earn <strong style="color:var(--gold)">RM5</strong> for every ticket confirmed at the door — tracked automatically.</span>
-      </li>
-      <li>
-        <span class="step-num">4</span>
-        <span>After the event, we pay out via your chosen method based on your confirmed count.</span>
-      </li>
-    </ul>
-  </div>
 
-  <div class="qr-section">
-    <div class="qr-heading">Scan to Sign Up</div>
-    <div class="qr-wrap">
-      <canvas id="signup-qr"></canvas>
-    </div>
-    <a id="signup-link" href="#" class="signup-btn" target="_blank">Open Signup Form →</a>
+    <form id="signupForm" class="form-card" novalidate>
+      <div class="form-heading">Sign Up</div>
+      <div class="form-error" id="formError"></div>
+
+      <div class="field">
+        <label class="lbl" for="f-name">Full name <span class="req">*</span></label>
+        <input id="f-name" name="name" type="text" autocomplete="name" required />
+      </div>
+      <div class="field">
+        <label class="lbl" for="f-email">Email <span class="req">*</span></label>
+        <input id="f-email" name="email" type="email" autocomplete="email" placeholder="your@email.com" required />
+      </div>
+      <div class="field">
+        <label class="lbl" for="f-phone">Phone <span class="opt">(optional)</span></label>
+        <input id="f-phone" name="phone" type="tel" autocomplete="tel" />
+      </div>
+      <div class="field">
+        <label class="lbl" for="f-business">Business / social handle <span class="opt">(optional)</span></label>
+        <input id="f-business" name="business" type="text" placeholder="@yourhandle or business name" />
+      </div>
+
+      <div class="pay-section">
+        <div class="pay-intro">How you'll get paid after the event (so we have it on file — you can also send it later).</div>
+        <div class="field">
+          <label class="lbl" for="f-bank">Bank name <span class="opt">(optional)</span></label>
+          <input id="f-bank" name="bank" type="text" />
+        </div>
+        <div class="field">
+          <label class="lbl" for="f-acctnum">Account number <span class="opt">(optional)</span></label>
+          <input id="f-acctnum" name="acctnum" type="text" inputmode="numeric" />
+        </div>
+        <div class="field">
+          <label class="lbl" for="f-acctowner">Account holder name <span class="opt">(optional)</span></label>
+          <input id="f-acctowner" name="acctowner" type="text" autocomplete="name" />
+        </div>
+      </div>
+
+      <!-- Honeypot: real users never see/fill this. -->
+      <div class="honeypot" aria-hidden="true">
+        <label>Leave this empty<input type="text" name="_gotcha" tabindex="-1" autocomplete="off" /></label>
+      </div>
+
+      <button type="submit" class="submit-btn" id="submitBtn">Become an Ambassador</button>
+    </form>
   </div>
 
   <footer>
@@ -350,46 +426,86 @@
 </div>
 
 <script>
-  const AMBASSADOR_SIGNUP_FORM_URL = window.AMBASSADOR_SIGNUP_FORM_URL || '';
+  const WEB_APP_URL = window.WEB_APP_URL || '';
+  const root = document.getElementById('root');
 
-  function waitForQR() {
-    return new Promise(resolve => {
-      const start = Date.now();
-      (function check() {
-        if (typeof QRCode !== 'undefined') return resolve();
-        if (window.__qrLoadError || Date.now() - start > 8000) return resolve();
-        setTimeout(check, 100);
-      })();
-    });
+  function escapeHtml(s) {
+    if (s == null) return '';
+    return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   }
 
-  async function boot() {
-    const url = AMBASSADOR_SIGNUP_FORM_URL;
-    if (!url) return;
+  function showState(kind, title, msg, viewUrl) {
+    root.innerHTML = `
+      <div class="state ${kind}">
+        <h2>${escapeHtml(title)}</h2>
+        <p>${escapeHtml(msg)}</p>
+        ${viewUrl ? `<a class="view-btn" href="${viewUrl}">Open Your Ambassador Page →</a>` : ''}
+      </div>`;
+  }
 
-    document.getElementById('signup-link').href = url;
+  function showError(msg) {
+    const box = document.getElementById('formError');
+    box.textContent = msg;
+    box.style.display = 'block';
+    box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
 
-    await waitForQR();
-    const canvas = document.getElementById('signup-qr');
-    if (typeof QRCode !== 'undefined') {
-      QRCode.toCanvas(canvas, url, {
-        width: 220,
-        margin: 1,
-        color: { dark: '#0a0a0a', light: '#f4e8d4' },
-      }, err => {
-        if (err) renderFallback(canvas, url);
-      });
-    } else {
-      renderFallback(canvas, url);
+  async function onSubmit(e) {
+    e.preventDefault();
+    const name      = document.getElementById('f-name').value.trim();
+    const email     = document.getElementById('f-email').value.trim();
+    const phone     = document.getElementById('f-phone').value.trim();
+    const business  = document.getElementById('f-business').value.trim();
+    const bank      = document.getElementById('f-bank').value.trim();
+    const acctnum   = document.getElementById('f-acctnum').value.trim();
+    const acctowner = document.getElementById('f-acctowner').value.trim();
+    const gotcha    = document.querySelector('input[name="_gotcha"]').value;
+
+    if (!name) return showError('Please enter your name.');
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showError('Please enter a valid email address.');
+
+    // Compose payment details in the same "bank | number | owner" format the
+    // sheet already uses; empty if none provided.
+    const paymentDetails = (bank || acctnum || acctowner) ? `${bank} | ${acctnum} | ${acctowner}` : '';
+
+    const payload = {
+      type: 'ambassador_signup',
+      name: name,
+      email: email,
+      phone: phone,
+      business: business,
+      payment_details: paymentDetails,
+      _gotcha: gotcha, // honeypot
+    };
+
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.textContent = 'Submitting…';
+
+    if (!WEB_APP_URL || WEB_APP_URL.includes('PASTE_YOUR')) {
+      btn.disabled = false; btn.textContent = 'Become an Ambassador';
+      return showError('Signups are not set up yet. Please check back soon.');
+    }
+
+    try {
+      // Plain-text body keeps this a CORS "simple request" (no preflight) so the
+      // Apps Script /exec endpoint can answer it.
+      const resp = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload), redirect: 'follow' });
+      const data = await resp.json();
+      if (!data.ok) {
+        btn.disabled = false; btn.textContent = 'Become an Ambassador';
+        return showError(data.error || 'Something went wrong. Please try again.');
+      }
+      showState('success', 'You’re in!',
+        `Welcome aboard! We’ve emailed your personal ambassador page and referral QR to ${email}.`,
+        data.ambassador_page_url || '');
+    } catch (err) {
+      btn.disabled = false; btn.textContent = 'Become an Ambassador';
+      showError('Could not reach the server. Check your connection and try again.');
     }
   }
 
-  function renderFallback(canvas, url) {
-    const fallbackUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=' + encodeURIComponent(url);
-    canvas.parentElement.innerHTML = `<img src="${fallbackUrl}" alt="Signup QR" width="220" height="220" style="display:block;" />`;
-  }
-
-  boot();
+  document.getElementById('signupForm').addEventListener('submit', onSubmit);
 </script>
 </body>
 </html>

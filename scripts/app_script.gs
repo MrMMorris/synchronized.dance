@@ -113,6 +113,17 @@ function doPost(e) {
     // Honeypot: bots fill hidden fields. Look successful, but record nothing.
     if (body.company || body._gotcha) return jsonResponse({ ok: true });
 
+    // On-site ambassador signup form posts here too (not event-specific).
+    if (body.type === 'ambassador_signup') {
+      return jsonResponse(recordAmbassador({
+        name:           body.name,
+        email:          body.email,
+        phone:          body.phone,
+        business:       body.business,
+        paymentDetails: body.payment_details,
+      }));
+    }
+
     if (!EVENTS[body.event_id]) return jsonResponse({ ok: false, error: 'Unknown event' });
 
     // Stash the payment screenshot (QR orders) in Drive; store its URL as proof.
@@ -877,10 +888,6 @@ function onAmbassadorSignupHandler(e) {
   const triggerSheet = e.range ? e.range.getSheet() : null;
   if (!triggerSheet || triggerSheet.getName() !== CONFIG.AMBASSADOR_FORM_RESPONSES_TAB) return;
 
-  const ss = SpreadsheetApp.getActive();
-  const ambassadorsSheet = ss.getSheetByName(CONFIG.AMBASSADORS_TAB);
-  if (!ambassadorsSheet) return;
-
   const v = e.values;
   const respHeaders = triggerSheet.getRange(1, 1, 1, triggerSheet.getLastColumn()).getValues()[0];
 
@@ -906,7 +913,26 @@ function onAmbassadorSignupHandler(e) {
     paymentDetails = String(v[qrIdx]).trim();
   }
 
-  if (!name || !email) return;
+  recordAmbassador({ name, email, phone, business, paymentDetails });
+}
+
+/**
+ * Shared ambassador-creation logic. Called by the Google Form trigger
+ * (onAmbassadorSignupHandler) and by the on-site signup form POST (doPost).
+ * Appends one Ambassadors row and sends the welcome email.
+ * Returns { ok, error?, ambassador_page_url? }.
+ */
+function recordAmbassador(fields) {
+  const name           = String(fields.name           || '').trim();
+  const email          = String(fields.email          || '').trim();
+  const phone          = String(fields.phone          || '').trim();
+  const business       = String(fields.business       || '').trim();
+  const paymentDetails = String(fields.paymentDetails || '').trim();
+
+  if (!name || !email) return { ok: false, error: 'Name and email are required' };
+
+  const ambassadorsSheet = SpreadsheetApp.getActive().getSheetByName(CONFIG.AMBASSADORS_TAB);
+  if (!ambassadorsSheet) return { ok: false, error: 'Ambassadors tab missing' };
 
   const ambassadorKey = randomKey(24);
   const pageUrl = `${CONFIG.AMBASSADOR_PAGE_URL}?k=${ambassadorKey}`;
@@ -932,10 +958,10 @@ function onAmbassadorSignupHandler(e) {
   }
   ambassadorsSheet.appendRow(newRow);
 
-  if (pageUrl) {
-    try { sendAmbassadorWelcomeEmail(email, name, pageUrl); }
-    catch (err) { Logger.log('Failed to send ambassador welcome email: ' + err); }
-  }
+  try { sendAmbassadorWelcomeEmail(email, name, pageUrl); }
+  catch (err) { Logger.log('Failed to send ambassador welcome email: ' + err); }
+
+  return { ok: true, ambassador_page_url: pageUrl };
 }
 
 function sendAmbassadorWelcomeEmail(email, name, pageUrl) {

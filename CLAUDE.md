@@ -53,7 +53,7 @@ Apps Script validates + marks ticket as scanned
 | `tickets.html` | Buyer-facing ticket viewer — loads per-event theme, shows QR codes |
 | `scanner.html` | Door staff scanner — validates tickets across all active events |
 | `ambassador.html` | Ambassador dashboard — per-event referral QRs + live earnings stats |
-| `ambassador-signup.html` | Pitch page the organizer shows to potential ambassadors |
+| `ambassador-signup.html` | Pitch + on-site signup form — POSTs new ambassadors to Apps Script `doPost` (replaces the Google signup form) |
 | `events.json` | Registry of all events — read by index.html and ambassador.html at runtime |
 | `events/<event_id>/` | Per-event folder (see Event Folder Structure below) |
 | `scripts/app_script.gs` | Google Apps Script (local copy only — see Deployment below) |
@@ -390,6 +390,8 @@ Request body:
 - Both `doPost` and `onFormSubmitHandler` funnel into the shared `recordPurchase(fields)`, so cash vs QR behaviour is identical to the Google Form path.
 - Response: `{ ok, payment_method, ticket_url }` (cash returns the buyer's ticket URL) or `{ ok:false, error }`.
 
+`doPost` also handles **ambassador signups** from `ambassador-signup.html`. Those bodies carry `"type": "ambassador_signup"` (with `name`, `email`, `phone`, `business`, `payment_details`, `_gotcha` honeypot) and route to the shared `recordAmbassador(fields)` instead of `recordPurchase` — creating the Ambassadors row and sending the welcome email. Response: `{ ok, ambassador_page_url }` or `{ ok:false, error }`.
+
 > **Drive scope:** `savePaymentProof` uses `DriveApp`, a new OAuth scope. After deploying a version that includes it, run any function once in the Apps Script editor and **Review permissions → Allow**, or `doPost` will fail for QR orders.
 
 ---
@@ -528,8 +530,8 @@ Ambassadors are people or businesses who refer ticket buyers and earn a commissi
 
 ### Flow
 
-1. Organizer opens `ambassador-signup.html` and shows it to a potential ambassador — they scan the QR to open the signup form.
-2. Ambassador fills the signup form → `onAmbassadorSignupHandler` fires → creates row in Ambassadors tab → sends welcome email with their unique `ambassador.html?k=TOKEN` URL.
+1. A potential ambassador opens `ambassador-signup.html` (e.g. via `/join`) — it shows the pitch plus an on-site signup form.
+2. Ambassador fills the form → POST to Apps Script `doPost` (`type: 'ambassador_signup'`) → `recordAmbassador` creates a row in Ambassadors tab → sends welcome email with their unique `ambassador.html?k=TOKEN` URL, and the page links them straight to it. (Legacy Google signup form still works via `onAmbassadorSignupHandler`; both funnel into the shared `recordAmbassador`.)
 3. Ambassador opens their page, finds their referral QR, and shares it. The QR encodes the site homepage with their key as `?ref=<ambassador_key>` (`https://synchronized.dance/?ref=KEY`) — one QR that works for every active event.
 4. Buyers scan the ambassador's QR → land on `index.html` with `?ref=`, which carries the code through the event landing page to the on-site purchase form (`buy.html?event=<id>&ref=<key>`). `buy.html` submits it as `affiliate_code`. They complete the purchase normally.
 5. `onFormSubmitHandler` reads the Referral Code and stores it as `affiliate_code` in the Purchases row. `generateTicketsForRow` copies it to each Ticket row.
@@ -598,6 +600,6 @@ Cloudflare Pages processes `_redirects` at the repo root. Current rules:
 
 | From | To | Notes |
 |---|---|---|
-| `/join` | Google ambassador signup form | QR codes and `ambassador-signup.html` point here — update this line if the form URL ever changes, then push |
+| `/join` | `/ambassador-signup.html` | Short link to the on-site ambassador signup page |
 
-Set `window.AMBASSADOR_SIGNUP_FORM_URL = 'https://synchronized.dance/join'` in `config.js` so the QR on `ambassador-signup.html` encodes the short URL, not the raw Google Form link.
+`/join` now points at the on-site `ambassador-signup.html`. (`AMBASSADOR_SIGNUP_FORM_URL` in `config.js` is legacy — it pointed the old pitch-page QR at the Google form and is no longer read by the on-site form.)
