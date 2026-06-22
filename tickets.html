@@ -630,12 +630,12 @@
     if (event.id && event.id !== eventIdParam) loadEventTheme(event.id);
   }
 
-  function fetchJson(url) {
+  function fetchJson(url, timeoutMs = 25000) {
     return new Promise(async (resolve, reject) => {
       debugState.url = url;
       debugState.startTime = Date.now();
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 15000);
+      const timeout = setTimeout(() => controller.abort(), timeoutMs);
       try {
         const resp = await fetch(url, { method: 'GET', redirect: 'follow', signal: controller.signal });
         clearTimeout(timeout);
@@ -652,7 +652,7 @@
         clearTimeout(timeout);
         debugState.endTime = Date.now();
         const err = new Error(e.message || 'fetch failed');
-        if (e.name === 'AbortError') { err.type = 'TIMEOUT'; err.detail = 'Server did not respond within 15 seconds.'; }
+        if (e.name === 'AbortError') { err.type = 'TIMEOUT'; err.detail = 'Server did not respond in time.'; }
         else if (e.name === 'SyntaxError') { err.type = 'BAD_JSON'; err.detail = 'Server response was not valid JSON: ' + e.message; }
         else { err.type = 'FETCH_ERROR'; err.detail = e.message || String(e); }
         reject(err);
@@ -759,22 +759,37 @@
       return;
     }
     const requestUrl = `${WEB_APP_URL}?action=get_tickets&key=${encodeURIComponent(key)}`;
-    try {
-      const resp = await fetchJson(requestUrl);
-      debugState.response = resp;
-      if (!resp.ok) {
-        showError('Not Found', resp.error || 'Could not find tickets for this link.', true);
+    // Just after a cash purchase, ticket generation may still be holding the
+    // Apps Script lock — get_tickets can time out or briefly return not-found.
+    // Retry a few times before surfacing an error so the buyer doesn't have to
+    // refresh manually.
+    const MAX_ATTEMPTS = 4;
+    let lastErr = null;
+    for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
+      try {
+        const resp = await fetchJson(requestUrl);
+        debugState.response = resp;
+        if (!resp.ok) {
+          lastErr = { detail: resp.error || 'Tickets not found yet.', type: 'NOT_FOUND' };
+          if (attempt < MAX_ATTEMPTS) { await sleep(2500); continue; }
+          showError('Not Found', resp.error || 'Could not find tickets for this link.', true);
+          return;
+        }
+        applyEventMeta(resp.event);
+        await render(resp.buyer_name, resp.tickets, resp.event);
         return;
+      } catch (err) {
+        lastErr = err;
+        if (attempt < MAX_ATTEMPTS) { await sleep(2500); continue; }
+        debugState.error = err.detail || err.message || String(err);
+        debugState.errorType = err.type || 'UNKNOWN';
+        debugState.diagnosticFetch = await runDiagnostic(requestUrl);
+        showError('Connection Error', 'Could not load your tickets. See debug info below.', true);
       }
-      applyEventMeta(resp.event);
-      await render(resp.buyer_name, resp.tickets, resp.event);
-    } catch (err) {
-      debugState.error = err.detail || err.message || String(err);
-      debugState.errorType = err.type || 'UNKNOWN';
-      debugState.diagnosticFetch = await runDiagnostic(requestUrl);
-      showError('Connection Error', 'Could not load your tickets. See debug info below.', true);
     }
   }
+
+  function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
   function waitForQR() {
     return new Promise((resolve) => {
