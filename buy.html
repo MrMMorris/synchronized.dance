@@ -454,12 +454,12 @@
         </div>
 
         <div class="field">
-          <label class="lbl">Payment <span class="req">*</span></label>
+          <label class="lbl">Payment <span class="req">*</span> <span class="opt">(Send payment to bank or QR below)</span></label>
 
           <div class="qr-block" id="qrBlock">
             <div class="pay-instructions">${escapeHtml(event.payment_instructions || 'Transfer the total, then upload your payment screenshot below.')}</div>
             <img class="pay-qr" src="assets/QR.webp" alt="DuitNow / bank transfer QR code" />
-            <a class="pay-switch" id="toCash" role="button" tabindex="0">I don't have QR payment</a>
+            <a class="pay-switch" id="toCash" role="button" tabindex="0">I don't have local bank or QR</a>
             <div class="pay-divider"></div>
             <label class="lbl" for="f-shot">Upload your proof of payment below <span class="req">*</span></label>
             <div class="file-row">
