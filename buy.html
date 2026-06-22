@@ -136,6 +136,7 @@
 
   .qr-block { margin-top: 6px; }
   .qr-block[hidden] { display: none; }
+  .pay-divider { border-top: 1px dashed rgba(255, 181, 71, 0.25); margin: 2px 0 16px; }
 
   .pay-switch {
     display: block;
@@ -459,6 +460,7 @@
             <div class="pay-instructions">${escapeHtml(event.payment_instructions || 'Transfer the total, then upload your payment screenshot below.')}</div>
             <img class="pay-qr" src="assets/QR.webp" alt="DuitNow / bank transfer QR code" />
             <a class="pay-switch" id="toCash" role="button" tabindex="0">I don't have QR payment</a>
+            <div class="pay-divider"></div>
             <label class="lbl" for="f-shot">Upload your proof of payment below <span class="req">*</span></label>
             <div class="file-row">
               <button type="button" class="file-btn" id="fileBtn">Choose image</button>
