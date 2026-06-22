@@ -246,14 +246,71 @@
   .pay-section {
     margin-top: 6px;
     border-top: 1px dashed rgba(212, 175, 55, 0.25);
-    padding-top: 18px;
+    padding-top: 20px;
   }
-  .pay-section .pay-intro {
-    font-size: 12px;
-    line-height: 1.5;
-    color: var(--cream);
-    opacity: 0.75;
+  .pay-question {
+    font-family: 'Caveat Brush', cursive;
+    font-size: 26px;
+    line-height: 1.2;
+    color: var(--gold);
+    text-align: center;
     margin-bottom: 16px;
+  }
+
+  .pay-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .pay-option {
+    position: relative;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 10px;
+    padding: 14px 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.12s ease;
+  }
+  .pay-option input { position: absolute; opacity: 0; pointer-events: none; }
+  .pay-option .po-title { font-weight: 700; font-size: 14px; }
+  .pay-option .po-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    opacity: 0.6;
+    margin-top: 3px;
+  }
+  .pay-option.selected { border-color: var(--gold); background: rgba(212, 175, 55, 0.12); }
+
+  .pay-method-block {
+    margin-top: 16px;
+    border-top: 1px dashed rgba(212, 175, 55, 0.25);
+    padding-top: 16px;
+  }
+  .pay-method-block[hidden] { display: none; }
+
+  .file-row { display: flex; align-items: center; gap: 12px; }
+  .file-btn {
+    flex-shrink: 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-weight: 700;
+    padding: 11px 14px;
+    border-radius: 9px;
+    border: 1px solid rgba(212, 175, 55, 0.4);
+    background: rgba(212, 175, 55, 0.1);
+    color: var(--gold);
+    cursor: pointer;
+  }
+  .file-name { font-size: 12px; opacity: 0.8; word-break: break-all; }
+  .file-thumb {
+    margin-top: 12px;
+    max-width: 160px;
+    max-height: 160px;
+    border-radius: 8px;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: #fff;
+    padding: 6px;
+    display: none;
   }
 
   .submit-btn {
@@ -396,18 +453,43 @@
       </div>
 
       <div class="pay-section">
-        <div class="pay-intro">How you'll get paid after the event (so we have it on file — you can also send it later).</div>
-        <div class="field">
-          <label class="lbl" for="f-bank">Bank name <span class="opt">(optional)</span></label>
-          <input id="f-bank" name="bank" type="text" />
+        <div class="pay-question">How would you like your payment sent to you?</div>
+        <div class="pay-options">
+          <label class="pay-option selected" id="po-qr">
+            <input type="radio" name="payout" value="qr" checked />
+            <div class="po-title">QR</div>
+            <div class="po-sub">Upload payout QR</div>
+          </label>
+          <label class="pay-option" id="po-bank">
+            <input type="radio" name="payout" value="bank" />
+            <div class="po-title">Bank Details</div>
+            <div class="po-sub">Account transfer</div>
+          </label>
         </div>
-        <div class="field">
-          <label class="lbl" for="f-acctnum">Account number <span class="opt">(optional)</span></label>
-          <input id="f-acctnum" name="acctnum" type="text" inputmode="numeric" />
+
+        <div class="pay-method-block" id="bankBlock" hidden>
+          <div class="field">
+            <label class="lbl" for="f-bank">Bank name</label>
+            <input id="f-bank" name="bank" type="text" />
+          </div>
+          <div class="field">
+            <label class="lbl" for="f-acctnum">Account number</label>
+            <input id="f-acctnum" name="acctnum" type="text" inputmode="numeric" />
+          </div>
+          <div class="field">
+            <label class="lbl" for="f-acctowner">Account holder name</label>
+            <input id="f-acctowner" name="acctowner" type="text" autocomplete="name" />
+          </div>
         </div>
-        <div class="field">
-          <label class="lbl" for="f-acctowner">Account holder name <span class="opt">(optional)</span></label>
-          <input id="f-acctowner" name="acctowner" type="text" autocomplete="name" />
+
+        <div class="pay-method-block" id="qrBlock">
+          <label class="lbl" for="f-qr">Upload your payout QR (DuitNow / e-wallet)</label>
+          <div class="file-row">
+            <button type="button" class="file-btn" id="fileBtn">Choose image</button>
+            <span class="file-name" id="fileName">No file selected</span>
+          </div>
+          <input id="f-qr" type="file" accept="image/*" style="display:none" />
+          <img id="fileThumb" class="file-thumb" alt="preview" />
         </div>
       </div>
 
@@ -428,10 +510,76 @@
 <script>
   const WEB_APP_URL = window.WEB_APP_URL || '';
   const root = document.getElementById('root');
+  let qrPayload = null; // { data, mimeType, name } — uploaded payout QR
 
   function escapeHtml(s) {
     if (s == null) return '';
     return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  }
+
+  // Toggle bank-details vs payout-QR upload.
+  const poBank = document.getElementById('po-bank');
+  const poQr = document.getElementById('po-qr');
+  const bankBlock = document.getElementById('bankBlock');
+  const qrBlock = document.getElementById('qrBlock');
+  function syncPayout() {
+    const qr = document.querySelector('input[name="payout"]:checked').value === 'qr';
+    qrBlock.hidden = !qr;
+    bankBlock.hidden = qr;
+    poQr.classList.toggle('selected', qr);
+    poBank.classList.toggle('selected', !qr);
+  }
+  poBank.addEventListener('change', syncPayout);
+  poQr.addEventListener('change', syncPayout);
+
+  // Payout-QR file picker (downscaled + re-encoded to keep the POST small).
+  const fileBtn = document.getElementById('fileBtn');
+  const fileInput = document.getElementById('f-qr');
+  const fileName = document.getElementById('fileName');
+  const fileThumb = document.getElementById('fileThumb');
+  fileBtn.addEventListener('click', () => fileInput.click());
+  fileInput.addEventListener('change', async () => {
+    const file = fileInput.files && fileInput.files[0];
+    if (!file) { fileName.textContent = 'No file selected'; qrPayload = null; fileThumb.style.display = 'none'; return; }
+    fileName.textContent = file.name;
+    fileBtn.textContent = 'Processing…';
+    try {
+      qrPayload = await fileToCompressedImage(file, 1280, 0.8);
+      fileThumb.src = 'data:' + qrPayload.mimeType + ';base64,' + qrPayload.data;
+      fileThumb.style.display = 'block';
+    } catch (err) {
+      qrPayload = null;
+      fileName.textContent = 'Could not read that image — try another';
+    }
+    fileBtn.textContent = 'Choose image';
+  });
+
+  function fileToCompressedImage(file, maxDim, quality) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onerror = () => reject(new Error('read failed'));
+      reader.onload = () => {
+        const img = new Image();
+        const fallback = () => resolve({ data: String(reader.result).split(',')[1], mimeType: file.type || 'image/jpeg', name: file.name });
+        img.onerror = fallback;
+        img.onload = () => {
+          try {
+            let { width, height } = img;
+            if (Math.max(width, height) > maxDim) {
+              const s = maxDim / Math.max(width, height);
+              width = Math.round(width * s); height = Math.round(height * s);
+            }
+            const canvas = document.createElement('canvas');
+            canvas.width = width; canvas.height = height;
+            canvas.getContext('2d').drawImage(img, 0, 0, width, height);
+            const dataUrl = canvas.toDataURL('image/jpeg', quality);
+            resolve({ data: dataUrl.split(',')[1], mimeType: 'image/jpeg', name: file.name });
+          } catch (_) { fallback(); }
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
   }
 
   function showState(kind, title, msg, viewUrl) {
@@ -460,13 +608,18 @@
     const acctnum   = document.getElementById('f-acctnum').value.trim();
     const acctowner = document.getElementById('f-acctowner').value.trim();
     const gotcha    = document.querySelector('input[name="_gotcha"]').value;
+    const payout    = document.querySelector('input[name="payout"]:checked').value;
 
     if (!name) return showError('Please enter your name.');
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showError('Please enter a valid email address.');
+    if (payout === 'qr' && !qrPayload) return showError('Please upload your payout QR, or switch to Bank Details.');
 
-    // Compose payment details in the same "bank | number | owner" format the
-    // sheet already uses; empty if none provided.
-    const paymentDetails = (bank || acctnum || acctowner) ? `${bank} | ${acctnum} | ${acctowner}` : '';
+    // Bank option → compose "bank | number | owner" (the format the sheet uses).
+    // QR option → leave payment_details empty; the server stores the uploaded
+    // QR image in Drive and saves its URL instead.
+    const paymentDetails = payout === 'bank' && (bank || acctnum || acctowner)
+      ? `${bank} | ${acctnum} | ${acctowner}`
+      : '';
 
     const payload = {
       type: 'ambassador_signup',
@@ -477,6 +630,7 @@
       payment_details: paymentDetails,
       _gotcha: gotcha, // honeypot
     };
+    if (payout === 'qr' && qrPayload) payload.screenshot = qrPayload;
 
     const btn = document.getElementById('submitBtn');
     btn.disabled = true;

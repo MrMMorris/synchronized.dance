@@ -115,12 +115,19 @@ function doPost(e) {
 
     // On-site ambassador signup form posts here too (not event-specific).
     if (body.type === 'ambassador_signup') {
+      // A payout QR image (if supplied) is stashed in Drive; its URL becomes the
+      // payment_details, matching the legacy form's "payment qr" convention.
+      let paymentDetails = String(body.payment_details || '');
+      if (body.screenshot && body.screenshot.data) {
+        try { paymentDetails = savePaymentProof(body.screenshot, 'ambassador', body.name); }
+        catch (err) { Logger.log('Failed to save ambassador payout QR: ' + err); }
+      }
       return jsonResponse(recordAmbassador({
         name:           body.name,
         email:          body.email,
         phone:          body.phone,
         business:       body.business,
-        paymentDetails: body.payment_details,
+        paymentDetails: paymentDetails,
       }));
     }
 
