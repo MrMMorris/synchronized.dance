@@ -29,7 +29,7 @@ const CONFIG = {
   AMBASSADORS_TAB:             'Ambassadors',
   AMBASSADOR_FORM_RESPONSES_TAB: 'Ambassador Signups',
   SUMMARY_TAB:                 'Summary',
-  ORGANIZER_EMAIL:     'nexa.events.marketing@gmail.com', // gets a notification on every new order
+  ORGANIZER_EMAIL:     'nexa.events.marketing@gmail.com,marcus.r.morris@gmail.com', // comma-separated; gets a notification on every new order
   TICKETS_PAGE_URL:    'https://synchronized.dance/tickets.html',
   SCANNER_PAGE_URL:    'https://synchronized.dance/scanner.html',
   AMBASSADOR_PAGE_URL: 'https://synchronized.dance/ambassador.html',
