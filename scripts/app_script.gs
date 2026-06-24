@@ -29,6 +29,7 @@ const CONFIG = {
   AMBASSADORS_TAB:             'Ambassadors',
   AMBASSADOR_FORM_RESPONSES_TAB: 'Ambassador Signups',
   SUMMARY_TAB:                 'Summary',
+  ORGANIZER_EMAIL:     'nexa.events.marketing@gmail.com', // gets a notification on every new order
   TICKETS_PAGE_URL:    'https://synchronized.dance/tickets.html',
   SCANNER_PAGE_URL:    'https://synchronized.dance/scanner.html',
   AMBASSADOR_PAGE_URL: 'https://synchronized.dance/ambassador.html',
@@ -134,10 +135,15 @@ function doPost(e) {
     if (!EVENTS[body.event_id]) return jsonResponse({ ok: false, error: 'Unknown event' });
 
     // Stash the payment screenshot (QR orders) in Drive; store its URL as proof.
+    // If saving fails (e.g. Drive scope not authorized), surface the error in the
+    // sheet cell rather than leaving payment_proof mysteriously blank.
     let proofUrl = '';
     if (body.screenshot && body.screenshot.data) {
       try { proofUrl = savePaymentProof(body.screenshot, body.event_id, body.buyer_name); }
-      catch (err) { Logger.log('Failed to save payment proof: ' + err); }
+      catch (err) {
+        Logger.log('Failed to save payment proof: ' + err);
+        proofUrl = 'ERROR saving proof — ' + err;
+      }
     }
 
     const result = recordPurchase({
@@ -622,6 +628,18 @@ function recordPurchase(fields) {
     }
   }
 
+  // Notify the organizer of every new order (replaces the old Google Form
+  // "new response" email that we lost moving to the on-site form).
+  try {
+    sendNewOrderNotification({
+      eventConfig, buyerName, buyerEmail, buyerPhone, ticketType,
+      quantity, unitPrice, totalCost, paymentType, affiliateCode,
+      paymentProof, isCashOrder, source: fields.source || '',
+    });
+  } catch (err) {
+    Logger.log('Failed to send organizer notification: ' + err);
+  }
+
   return { ok: true, payment_method: paymentType, ticket_url: ticketUrl };
 }
 
@@ -701,6 +719,65 @@ function sendOrderConfirmationEmail(email, name, ticketType, quantity, unitPrice
     </div>`;
 
   GmailApp.sendEmail(email, subject, textBody, { from: 'nexa.events.marketing@gmail.com', htmlBody, name: 'Nexa Events' });
+}
+
+/**
+ * Notifies the organizer that a new order came in. Sent for both cash and QR.
+ * For QR orders it flags that payment still needs verifying (set
+ * payment_confirmed = TRUE to release tickets) and links the proof screenshot.
+ */
+function sendNewOrderNotification(o) {
+  const to = CONFIG.ORGANIZER_EMAIL;
+  if (!to) return;
+
+  const ec = o.eventConfig;
+  const shortType = shortTicketType(o.ticketType);
+  const method = o.isCashOrder ? 'CASH (pay at door)' : 'QR / bank transfer';
+  const actionLine = o.isCashOrder
+    ? 'Tickets were generated and emailed automatically — no action needed.'
+    : 'ACTION NEEDED: verify the payment, then set payment_confirmed = TRUE on the Purchases row to release tickets.';
+
+  const proofIsUrl = /^https?:\/\//i.test(String(o.paymentProof || ''));
+
+  const subject = `New ${o.isCashOrder ? 'cash' : 'QR'} order — ${o.buyerName} · ${o.quantity}× ${shortType} · ${ec.EVENT_NAME}`;
+
+  const textBody =
+    `New order for ${ec.EVENT_NAME}\n\n` +
+    `Name:    ${o.buyerName}\n` +
+    `Email:   ${o.buyerEmail}\n` +
+    (o.buyerPhone ? `Phone:   ${o.buyerPhone}\n` : '') +
+    `Tickets: ${o.quantity} × ${shortType} @ RM${o.unitPrice}\n` +
+    `Total:   RM${o.totalCost}\n` +
+    `Payment: ${method}\n` +
+    (o.affiliateCode ? `Referral: ${o.affiliateCode}\n` : '') +
+    (o.paymentProof ? `Proof:   ${o.paymentProof}\n` : '') +
+    (o.source ? `Source:  ${o.source}\n` : '') +
+    `\n${actionLine}\n`;
+
+  const htmlBody = `
+    <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 480px; margin: 0 auto; padding: 24px; color: #0a0a0a;">
+      <div style="background: ${o.isCashOrder ? '#0d9488' : '#ff3d00'}; color: #fff7e8; padding: 16px 20px; border-radius: 8px 8px 0 0;">
+        <div style="font-size: 12px; letter-spacing: 3px; text-transform: uppercase; opacity: 0.9;">★ Nexa Events · New Order ★</div>
+        <h1 style="margin: 6px 0 0; font-size: 22px; letter-spacing: -0.5px;">${escapeForHtml(ec.EVENT_NAME)}</h1>
+      </div>
+      <div style="background: #fff7e8; padding: 22px; border-radius: 0 0 8px 8px; border: 2px solid #0a0a0a; border-top: 0; font-size: 14px; line-height: 1.6;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+          <tr><td style="padding: 3px 0; color: #555;">Name</td><td style="padding: 3px 0; text-align: right;"><strong>${escapeForHtml(o.buyerName)}</strong></td></tr>
+          <tr><td style="padding: 3px 0; color: #555;">Email</td><td style="padding: 3px 0; text-align: right;">${escapeForHtml(o.buyerEmail)}</td></tr>
+          ${o.buyerPhone ? `<tr><td style="padding: 3px 0; color: #555;">Phone</td><td style="padding: 3px 0; text-align: right;">${escapeForHtml(o.buyerPhone)}</td></tr>` : ''}
+          <tr><td style="padding: 3px 0; color: #555;">Tickets</td><td style="padding: 3px 0; text-align: right;"><strong>${o.quantity} × ${escapeForHtml(shortType)}</strong> @ RM${o.unitPrice}</td></tr>
+          <tr><td style="padding: 3px 0; color: #555;">Total</td><td style="padding: 3px 0; text-align: right;"><strong>RM${o.totalCost}</strong></td></tr>
+          <tr><td style="padding: 3px 0; color: #555;">Payment</td><td style="padding: 3px 0; text-align: right;">${escapeForHtml(method)}</td></tr>
+          ${o.affiliateCode ? `<tr><td style="padding: 3px 0; color: #555;">Referral</td><td style="padding: 3px 0; text-align: right;">${escapeForHtml(o.affiliateCode)}</td></tr>` : ''}
+        </table>
+        ${o.paymentProof ? `<div style="margin: 14px 0 0; font-size: 13px;">Proof: ${proofIsUrl ? `<a href="${escapeForHtml(o.paymentProof)}">view screenshot</a>` : escapeForHtml(o.paymentProof)}</div>` : ''}
+        <div style="margin: 16px 0 0; padding: 12px 14px; background: ${o.isCashOrder ? '#e6f7f4' : '#fff3cd'}; border: 2px solid #0a0a0a; font-size: 13px; line-height: 1.5;">
+          ${o.isCashOrder ? '✅ ' : '⚠️ '}${escapeForHtml(actionLine)}
+        </div>
+      </div>
+    </div>`;
+
+  GmailApp.sendEmail(to, subject, textBody, { from: 'nexa.events.marketing@gmail.com', htmlBody, name: 'Nexa Events', replyTo: o.buyerEmail || undefined });
 }
 
 // ============================================================================
