@@ -1175,15 +1175,13 @@ function refreshAmbassadorStats() {
 
   // Build map: affiliate_code → { count, earned }. earnedMap only counts
   // "credited" tickets (cash counts once collected at the door) — that drives
-  // payouts. grossTickets counts every ambassador-referred ticket regardless of
-  // whether cash was collected — i.e. tickets ambassadors "sold".
+  // each ambassador's payout figures. Per-event ambassador totals now live in
+  // the Summary event table (see refreshEventStats).
   const earnedMap = {};
-  let grossTickets = 0;
   if (tAffiliateCol !== -1) {
     for (let i = 1; i < tData.length; i++) {
       const code    = String(tData[i][tAffiliateCol]).trim();
       if (!code) continue;
-      grossTickets++;
       if (isCredited(tData[i][tScannedCol], tPaymentCol !== -1 ? tData[i][tPaymentCol] : '')) {
         const evId      = tEventIdCol !== -1 ? String(tData[i][tEventIdCol]).trim() : '';
         const commission= evId && EVENTS[evId] ? EVENTS[evId].COMMISSION_PER_TICKET : 0;
@@ -1202,7 +1200,6 @@ function refreshAmbassadorStats() {
   const aPaidCol   = aHeaders.indexOf('amount_paid');
   const aOwingCol  = aHeaders.indexOf('amount_owing');
 
-  let totalEarned = 0, totalPaid = 0, totalOwing = 0;
   for (let i = 1; i < aData.length; i++) {
     const key    = String(aData[i][aKeyCol]).trim();
     if (!key) continue;
@@ -1214,16 +1211,7 @@ function refreshAmbassadorStats() {
     if (aSoldCol   !== -1) ambassadorsSheet.getRange(i + 1, aSoldCol   + 1).setValue(sold);
     if (aEarnedCol !== -1) ambassadorsSheet.getRange(i + 1, aEarnedCol + 1).setValue(earned);
     if (aOwingCol  !== -1) ambassadorsSheet.getRange(i + 1, aOwingCol  + 1).setValue(owing);
-
-    totalEarned += earned;
-    totalPaid   += paid;
-    totalOwing  += owing;
   }
-
-  updateSummaryRow(ss, 'Ambassador payouts — number of tickets', grossTickets);
-  updateSummaryRow(ss, 'Ambassador payouts — earned', totalEarned);
-  updateSummaryRow(ss, 'Ambassador payouts — paid',   totalPaid);
-  updateSummaryRow(ss, 'Ambassador payouts — owing',  totalOwing);
 
   SpreadsheetApp.getUi().alert('Ambassador stats updated.');
 }
@@ -1234,41 +1222,65 @@ function refreshEventStats() {
   if (!ticketsSheet) { SpreadsheetApp.getUi().alert('No Tickets tab found.'); return; }
 
   const tData = ticketsSheet.getDataRange().getValues();
-  const tHeaders    = tData[0];
-  const tEventCol   = tHeaders.indexOf('event_id');
-  const tScannedCol = tHeaders.indexOf('scanned');
-  const tPaymentCol = tHeaders.indexOf('payment_method');
+  const tHeaders     = tData[0];
+  const tEventCol    = tHeaders.indexOf('event_id');
+  const tScannedCol  = tHeaders.indexOf('scanned');
+  const tPaymentCol  = tHeaders.indexOf('payment_method');
+  const tAffiliateCol= tHeaders.indexOf('affiliate_code');
 
   const eventMap = {};
   for (let i = 1; i < tData.length; i++) {
     const eventId = tEventCol !== -1 ? String(tData[i][tEventCol]).trim() : '';
     if (!eventId) continue;
-    if (!eventMap[eventId]) eventMap[eventId] = { total: 0, scanned: 0, confirmed: 0 };
-    eventMap[eventId].total++;
-    if (tData[i][tScannedCol] === true || String(tData[i][tScannedCol]).toUpperCase() === 'TRUE') eventMap[eventId].scanned++;
+    if (!eventMap[eventId]) eventMap[eventId] = { total: 0, scanned: 0, confirmed: 0, ambTickets: 0, ambEarned: 0 };
+    const m = eventMap[eventId];
+    m.total++;
+    if (tData[i][tScannedCol] === true || String(tData[i][tScannedCol]).toUpperCase() === 'TRUE') m.scanned++;
     // Confirmed = money actually in hand: prepaid tickets (which only exist once
     // payment is confirmed) plus cash tickets that were collected at the door.
     // Uncollected cash (cash + not scanned) is excluded.
-    if (isCredited(tData[i][tScannedCol], tPaymentCol !== -1 ? tData[i][tPaymentCol] : '')) eventMap[eventId].confirmed++;
+    const credited = isCredited(tData[i][tScannedCol], tPaymentCol !== -1 ? tData[i][tPaymentCol] : '');
+    if (credited) m.confirmed++;
+    // Ambassador columns: ambassador_tickets is the gross count sold via a
+    // referral (incl. uncollected cash); ambassador_earned is commission on
+    // credited referral tickets only.
+    const code = tAffiliateCol !== -1 ? String(tData[i][tAffiliateCol]).trim() : '';
+    if (code) {
+      m.ambTickets++;
+      if (credited) m.ambEarned += EVENTS[eventId] ? EVENTS[eventId].COMMISSION_PER_TICKET : 0;
+    }
   }
 
+  const sheet = ss.getSheetByName(CONFIG.SUMMARY_TAB);
+  if (!sheet) { SpreadsheetApp.getUi().alert('No Summary tab found.'); return; }
+
+  // One row per event, stats across columns. Rows are matched by event_id in
+  // column A and updated in place. Events not currently in the Tickets tab are
+  // left untouched, so an old event's row (and its numbers) survives even after
+  // you delete that event's tickets.
+  const HEADER = ['event_id', 'tickets_total', 'tickets_confirmed', 'tickets_scanned', 'ambassador_tickets', 'ambassador_earned'];
+  if (findRowByColA(sheet, 'event_id') === -1) sheet.appendRow(HEADER);
+
   for (const eventId in eventMap) {
-    updateSummaryRow(ss, `${eventId} — tickets_total`,     eventMap[eventId].total);
-    updateSummaryRow(ss, `${eventId} — tickets_confirmed`, eventMap[eventId].confirmed);
-    updateSummaryRow(ss, `${eventId} — tickets_scanned`,   eventMap[eventId].scanned);
+    const m = eventMap[eventId];
+    const rowValues = [eventId, m.total, m.confirmed, m.scanned, m.ambTickets, m.ambEarned];
+    const rowNum = findRowByColA(sheet, eventId);
+    if (rowNum === -1) sheet.appendRow(rowValues);
+    else sheet.getRange(rowNum, 1, 1, rowValues.length).setValues([rowValues]);
   }
 
   SpreadsheetApp.getUi().alert('Event stats updated.');
 }
 
-function updateSummaryRow(ss, label, value) {
-  const sheet = ss.getSheetByName(CONFIG.SUMMARY_TAB);
-  if (!sheet) return;
-  const data = sheet.getDataRange().getValues();
-  for (let i = 0; i < data.length; i++) {
-    if (String(data[i][0]).trim() === label) { sheet.getRange(i + 1, 2).setValue(value); return; }
+// Returns the 1-based row whose column A equals key, or -1 if none.
+function findRowByColA(sheet, key) {
+  const last = sheet.getLastRow();
+  if (last < 1) return -1;
+  const colA = sheet.getRange(1, 1, last, 1).getValues();
+  for (let i = 0; i < colA.length; i++) {
+    if (String(colA[i][0]).trim() === String(key).trim()) return i + 1;
   }
-  sheet.appendRow([label, value]);
+  return -1;
 }
 
 // ============================================================================
