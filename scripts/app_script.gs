@@ -1173,12 +1173,18 @@ function refreshAmbassadorStats() {
   const tEventIdCol   = tHeaders.indexOf('event_id');
   const tPaymentCol   = tHeaders.indexOf('payment_method');
 
-  // Build map: affiliate_code → { count, earned }
+  // Build map: affiliate_code → { count, earned }. earnedMap only counts
+  // "credited" tickets (cash counts once collected at the door) — that drives
+  // payouts. grossTickets counts every ambassador-referred ticket regardless of
+  // whether cash was collected — i.e. tickets ambassadors "sold".
   const earnedMap = {};
+  let grossTickets = 0;
   if (tAffiliateCol !== -1) {
     for (let i = 1; i < tData.length; i++) {
       const code    = String(tData[i][tAffiliateCol]).trim();
-      if (code && isCredited(tData[i][tScannedCol], tPaymentCol !== -1 ? tData[i][tPaymentCol] : '')) {
+      if (!code) continue;
+      grossTickets++;
+      if (isCredited(tData[i][tScannedCol], tPaymentCol !== -1 ? tData[i][tPaymentCol] : '')) {
         const evId      = tEventIdCol !== -1 ? String(tData[i][tEventIdCol]).trim() : '';
         const commission= evId && EVENTS[evId] ? EVENTS[evId].COMMISSION_PER_TICKET : 0;
         if (!earnedMap[code]) earnedMap[code] = { count: 0, earned: 0 };
@@ -1214,6 +1220,7 @@ function refreshAmbassadorStats() {
     totalOwing  += owing;
   }
 
+  updateSummaryRow(ss, 'Ambassador payouts — number of tickets', grossTickets);
   updateSummaryRow(ss, 'Ambassador payouts — earned', totalEarned);
   updateSummaryRow(ss, 'Ambassador payouts — paid',   totalPaid);
   updateSummaryRow(ss, 'Ambassador payouts — owing',  totalOwing);
@@ -1230,19 +1237,25 @@ function refreshEventStats() {
   const tHeaders    = tData[0];
   const tEventCol   = tHeaders.indexOf('event_id');
   const tScannedCol = tHeaders.indexOf('scanned');
+  const tPaymentCol = tHeaders.indexOf('payment_method');
 
   const eventMap = {};
   for (let i = 1; i < tData.length; i++) {
     const eventId = tEventCol !== -1 ? String(tData[i][tEventCol]).trim() : '';
     if (!eventId) continue;
-    if (!eventMap[eventId]) eventMap[eventId] = { total: 0, scanned: 0 };
+    if (!eventMap[eventId]) eventMap[eventId] = { total: 0, scanned: 0, confirmed: 0 };
     eventMap[eventId].total++;
     if (tData[i][tScannedCol] === true || String(tData[i][tScannedCol]).toUpperCase() === 'TRUE') eventMap[eventId].scanned++;
+    // Confirmed = money actually in hand: prepaid tickets (which only exist once
+    // payment is confirmed) plus cash tickets that were collected at the door.
+    // Uncollected cash (cash + not scanned) is excluded.
+    if (isCredited(tData[i][tScannedCol], tPaymentCol !== -1 ? tData[i][tPaymentCol] : '')) eventMap[eventId].confirmed++;
   }
 
   for (const eventId in eventMap) {
-    updateSummaryRow(ss, `${eventId} — tickets_total`,   eventMap[eventId].total);
-    updateSummaryRow(ss, `${eventId} — tickets_scanned`, eventMap[eventId].scanned);
+    updateSummaryRow(ss, `${eventId} — tickets_total`,     eventMap[eventId].total);
+    updateSummaryRow(ss, `${eventId} — tickets_confirmed`, eventMap[eventId].confirmed);
+    updateSummaryRow(ss, `${eventId} — tickets_scanned`,   eventMap[eventId].scanned);
   }
 
   SpreadsheetApp.getUi().alert('Event stats updated.');
