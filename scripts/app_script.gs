@@ -1229,10 +1229,13 @@ function refreshEventStats() {
   const tAffiliateCol= tHeaders.indexOf('affiliate_code');
 
   const eventMap = {};
+  // affiliate_code → { eventId → credited commission } — used to allocate each
+  // ambassador's amount_paid across their events (oldest first) for owing.
+  const earnedByCodeEvent = {};
   for (let i = 1; i < tData.length; i++) {
     const eventId = tEventCol !== -1 ? String(tData[i][tEventCol]).trim() : '';
     if (!eventId) continue;
-    if (!eventMap[eventId]) eventMap[eventId] = { total: 0, scanned: 0, confirmed: 0, ambTickets: 0, ambEarned: 0 };
+    if (!eventMap[eventId]) eventMap[eventId] = { total: 0, scanned: 0, confirmed: 0, ambTickets: 0, ambEarned: 0, ambOwing: 0 };
     const m = eventMap[eventId];
     m.total++;
     if (tData[i][tScannedCol] === true || String(tData[i][tScannedCol]).toUpperCase() === 'TRUE') m.scanned++;
@@ -1247,7 +1250,39 @@ function refreshEventStats() {
     const code = tAffiliateCol !== -1 ? String(tData[i][tAffiliateCol]).trim() : '';
     if (code) {
       m.ambTickets++;
-      if (credited) m.ambEarned += EVENTS[eventId] ? EVENTS[eventId].COMMISSION_PER_TICKET : 0;
+      if (credited) {
+        const commission = EVENTS[eventId] ? EVENTS[eventId].COMMISSION_PER_TICKET : 0;
+        m.ambEarned += commission;
+        if (!earnedByCodeEvent[code]) earnedByCodeEvent[code] = {};
+        earnedByCodeEvent[code][eventId] = (earnedByCodeEvent[code][eventId] || 0) + commission;
+      }
+    }
+  }
+
+  // ambassador_owing per event: draw each ambassador's amount_paid (a single
+  // running total on the Ambassadors tab) down against their events oldest-first,
+  // then the leftover earned per event is what's still owed for that event.
+  const paidByCode = {};
+  const ambassadorsSheet = ss.getSheetByName(CONFIG.AMBASSADORS_TAB);
+  if (ambassadorsSheet) {
+    const aData = ambassadorsSheet.getDataRange().getValues();
+    const aKeyCol  = aData[0].indexOf('ambassador_key');
+    const aPaidCol = aData[0].indexOf('amount_paid');
+    if (aKeyCol !== -1 && aPaidCol !== -1) {
+      for (let i = 1; i < aData.length; i++) {
+        const k = String(aData[i][aKeyCol]).trim();
+        if (k) paidByCode[k] = parseFloat(aData[i][aPaidCol]) || 0;
+      }
+    }
+  }
+  for (const code in earnedByCodeEvent) {
+    let remainingPaid = paidByCode[code] || 0;
+    const evIds = Object.keys(earnedByCodeEvent[code]).sort((a, b) => eventDateValue(a) - eventDateValue(b));
+    for (const evId of evIds) {
+      const earned  = earnedByCodeEvent[code][evId];
+      const applied = Math.min(remainingPaid, earned);
+      remainingPaid -= applied;
+      if (eventMap[evId]) eventMap[evId].ambOwing += earned - applied;
     }
   }
 
@@ -1258,18 +1293,24 @@ function refreshEventStats() {
   // column A and updated in place. Events not currently in the Tickets tab are
   // left untouched, so an old event's row (and its numbers) survives even after
   // you delete that event's tickets.
-  const HEADER = ['event_id', 'tickets_total', 'tickets_confirmed', 'tickets_scanned', 'ambassador_tickets', 'ambassador_earned'];
+  const HEADER = ['event_id', 'tickets_total', 'tickets_confirmed', 'tickets_scanned', 'ambassador_tickets', 'ambassador_earned', 'ambassador_owing'];
   if (findRowByColA(sheet, 'event_id') === -1) sheet.appendRow(HEADER);
 
   for (const eventId in eventMap) {
     const m = eventMap[eventId];
-    const rowValues = [eventId, m.total, m.confirmed, m.scanned, m.ambTickets, m.ambEarned];
+    const rowValues = [eventId, m.total, m.confirmed, m.scanned, m.ambTickets, m.ambEarned, m.ambOwing];
     const rowNum = findRowByColA(sheet, eventId);
     if (rowNum === -1) sheet.appendRow(rowValues);
     else sheet.getRange(rowNum, 1, 1, rowValues.length).setValues([rowValues]);
   }
 
   SpreadsheetApp.getUi().alert('Event stats updated.');
+}
+
+// Sortable timestamp from an event_id's "dd_mm_yyyy-..." prefix (0 if absent).
+function eventDateValue(eventId) {
+  const m = String(eventId).match(/^(\d{2})_(\d{2})_(\d{4})/);
+  return m ? new Date(+m[3], +m[2] - 1, +m[1]).getTime() : 0;
 }
 
 // Returns the 1-based row whose column A equals key, or -1 if none.
