@@ -363,10 +363,20 @@
     border-color: var(--teal);
   }
   .confirm-prompt {
+    display: flex;
+    align-items: center;
+    gap: 14px;
     font-family: 'Inter', sans-serif;
     font-size: 18px;
     font-weight: 700;
     line-height: 1.4;
+  }
+  .confirm-prompt .confirm-emoji {
+    flex: 0 0 auto;
+    font-size: 28px;
+  }
+  .confirm-prompt .confirm-text {
+    flex: 1;
     text-align: center;
   }
   @keyframes stamp {
@@ -846,12 +856,14 @@
             <div class="swipe-handle" id="swipeHandle">→</div>
             <div class="swipe-label">Swipe right — cash received</div>
           </div>
+          <button class="modal-ok-btn" id="cashCloseBtn">Cancel</button>
         </div>
       </div>
     `;
     document.body.appendChild(overlay);
     const resultEl = document.getElementById('result');
     if (resultEl) { resultEl.className = 'result idle'; resultEl.innerHTML = 'Awaiting Scan'; }
+    document.getElementById('cashCloseBtn').addEventListener('click', () => overlay.remove());
     setupSwipe(() => {
       // After the swipe, require an explicit final confirmation before we tell
       // the server to mark the ticket scanned.
@@ -870,7 +882,11 @@
     overlay.className = 'modal-overlay';
     overlay.innerHTML = `
       <div class="result cash">
-        <div class="confirm-prompt">⚠️ Please confirm that the ticket has been paid for ⚠️</div>
+        <div class="confirm-prompt">
+          <span class="confirm-emoji">⚠️</span>
+          <span class="confirm-text">Please confirm that the ticket has been paid for</span>
+          <span class="confirm-emoji">⚠️</span>
+        </div>
         <div class="modal-btn-row">
           <button class="modal-ok-btn" id="cashCancelBtn">Cancel</button>
           <button class="modal-ok-btn paid" id="cashPaidBtn">Paid</button>
