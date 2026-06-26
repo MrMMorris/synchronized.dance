@@ -352,6 +352,23 @@
     cursor: pointer;
   }
   .modal-ok-btn:active { transform: scale(0.97); }
+  .modal-btn-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 18px;
+  }
+  .modal-btn-row .modal-ok-btn { margin-top: 0; }
+  .modal-ok-btn.paid {
+    background: var(--teal);
+    border-color: var(--teal);
+  }
+  .confirm-prompt {
+    font-family: 'Inter', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    line-height: 1.4;
+    text-align: center;
+  }
   @keyframes stamp {
     0% { transform: scale(0.94) rotate(-1deg); }
     60% { transform: scale(1.02) rotate(0.5deg); }
@@ -835,12 +852,45 @@
     document.body.appendChild(overlay);
     const resultEl = document.getElementById('result');
     if (resultEl) { resultEl.className = 'result idle'; resultEl.innerHTML = 'Awaiting Scan'; }
-    setupSwipe(async () => {
+    setupSwipe(() => {
+      // After the swipe, require an explicit final confirmation before we tell
+      // the server to mark the ticket scanned.
+      showCashPaidConfirm(buyerName, ticketType, pos, logName, ticketId);
+    });
+  }
+
+  // Second-step confirmation modal shown after the cash swipe. Only "Paid" calls
+  // confirm_cash (which actually marks the ticket scanned); "Cancel" returns to
+  // the swipe screen so the ticket stays unused if cash wasn't collected.
+  function showCashPaidConfirm(buyerName, ticketType, pos, logName, ticketId) {
+    const existing = document.getElementById('resultModal');
+    if (existing) existing.remove();
+    const overlay = document.createElement('div');
+    overlay.id = 'resultModal';
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
+      <div class="result cash">
+        <div class="confirm-prompt">⚠️ Please confirm that the ticket has been paid for ⚠️</div>
+        <div class="modal-btn-row">
+          <button class="modal-ok-btn" id="cashCancelBtn">Cancel</button>
+          <button class="modal-ok-btn paid" id="cashPaidBtn">Paid</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+
+    document.getElementById('cashCancelBtn').addEventListener('click', () => {
+      overlay.remove();
+      showCashResult(buyerName, ticketType, pos, logName, ticketId);
+    });
+
+    document.getElementById('cashPaidBtn').addEventListener('click', async () => {
       // Confirm with the server — THIS is what actually marks the ticket scanned
       // for cash orders. Until this succeeds, the ticket stays unused, so a guest
       // who can't pay can simply be re-scanned later.
-      const label = overlay.querySelector('.swipe-label');
-      if (label) label.textContent = 'Confirming…';
+      const btn = document.getElementById('cashPaidBtn');
+      btn.textContent = 'Confirming…';
+      btn.disabled = true;
       try {
         const url = `${WEB_APP_URL}?action=confirm_cash&ticket_id=${encodeURIComponent(ticketId)}&token=${encodeURIComponent(token)}`;
         const resp = await fetchJson(url);
