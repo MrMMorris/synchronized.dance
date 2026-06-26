@@ -1227,6 +1227,7 @@ function refreshEventStats() {
   const tScannedCol  = tHeaders.indexOf('scanned');
   const tPaymentCol  = tHeaders.indexOf('payment_method');
   const tAffiliateCol= tHeaders.indexOf('affiliate_code');
+  const tTypeCol     = tHeaders.indexOf('ticket_type');
 
   const eventMap = {};
   // affiliate_code → { eventId → credited commission } — used to allocate each
@@ -1235,7 +1236,7 @@ function refreshEventStats() {
   for (let i = 1; i < tData.length; i++) {
     const eventId = tEventCol !== -1 ? String(tData[i][tEventCol]).trim() : '';
     if (!eventId) continue;
-    if (!eventMap[eventId]) eventMap[eventId] = { total: 0, scanned: 0, confirmed: 0, ambTickets: 0, ambEarned: 0, ambOwing: 0 };
+    if (!eventMap[eventId]) eventMap[eventId] = { total: 0, scanned: 0, confirmed: 0, revenue: 0, ambTickets: 0, ambEarned: 0, ambOwing: 0 };
     const m = eventMap[eventId];
     m.total++;
     if (tData[i][tScannedCol] === true || String(tData[i][tScannedCol]).toUpperCase() === 'TRUE') m.scanned++;
@@ -1243,7 +1244,13 @@ function refreshEventStats() {
     // payment is confirmed) plus cash tickets that were collected at the door.
     // Uncollected cash (cash + not scanned) is excluded.
     const credited = isCredited(tData[i][tScannedCol], tPaymentCol !== -1 ? tData[i][tPaymentCol] : '');
-    if (credited) m.confirmed++;
+    if (credited) {
+      m.confirmed++;
+      // Revenue: price of each confirmed ticket. Free tickets (price 0) are
+      // ignored so they don't count toward the money total.
+      const price = tTypeCol !== -1 ? priceFor(tData[i][tTypeCol]) : 0;
+      if (price > 0) m.revenue += price;
+    }
     // Ambassador columns: ambassador_tickets is the gross count sold via a
     // referral (incl. uncollected cash); ambassador_earned is commission on
     // credited referral tickets only.
@@ -1293,12 +1300,16 @@ function refreshEventStats() {
   // column A and updated in place. Events not currently in the Tickets tab are
   // left untouched, so an old event's row (and its numbers) survives even after
   // you delete that event's tickets.
-  const HEADER = ['event_id', 'tickets_total', 'tickets_confirmed', 'tickets_scanned', 'ambassador_tickets', 'ambassador_earned', 'ambassador_owing'];
-  if (findRowByColA(sheet, 'event_id') === -1) sheet.appendRow(HEADER);
+  const HEADER = ['event_id', 'tickets_total', 'tickets_confirmed', 'tickets_scanned', 'tickets_revenue', 'ambassador_tickets', 'ambassador_earned', 'ambassador_owing'];
+  const headerRow = findRowByColA(sheet, 'event_id');
+  // Write/refresh the header so existing Summary sheets pick up new columns
+  // (e.g. tickets_revenue) and stay aligned with the per-event row layout.
+  if (headerRow === -1) sheet.appendRow(HEADER);
+  else sheet.getRange(headerRow, 1, 1, HEADER.length).setValues([HEADER]);
 
   for (const eventId in eventMap) {
     const m = eventMap[eventId];
-    const rowValues = [eventId, m.total, m.confirmed, m.scanned, m.ambTickets, m.ambEarned, m.ambOwing];
+    const rowValues = [eventId, m.total, m.confirmed, m.scanned, m.revenue, m.ambTickets, m.ambEarned, m.ambOwing];
     const rowNum = findRowByColA(sheet, eventId);
     if (rowNum === -1) sheet.appendRow(rowValues);
     else sheet.getRange(rowNum, 1, 1, rowValues.length).setValues([rowValues]);
