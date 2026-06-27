@@ -461,6 +461,76 @@
     box-shadow: 0 0 20px rgba(201, 162, 39, 0.3);
   }
 
+  .walkin-bar {
+    margin-bottom: 22px;
+  }
+  .walkin-bar button {
+    width: 100%;
+    border-style: dashed;
+    border-color: rgba(212, 175, 55, 0.4);
+  }
+
+  /* Walk-in modal */
+  .walkin-box .result-status { font-size: 40px; margin-bottom: 16px; }
+  .walkin-field { margin-bottom: 14px; text-align: left; }
+  .walkin-field .label {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    opacity: 0.7;
+    margin-bottom: 6px;
+  }
+  .walkin-field select {
+    width: 100%;
+    padding: 12px;
+    font-family: 'Inter', sans-serif;
+    font-size: 15px;
+    background: rgba(0, 0, 0, 0.5);
+    color: var(--cream);
+    border: 1px solid rgba(212, 175, 55, 0.3);
+    border-radius: 8px;
+  }
+  .stepper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 18px;
+  }
+  .stepper button {
+    width: 56px;
+    height: 56px;
+    padding: 0;
+    font-size: 28px;
+    line-height: 1;
+    border-radius: 50%;
+    border-color: var(--amber);
+    color: var(--amber);
+  }
+  .stepper .qty {
+    font-family: 'Bagel Fat One', cursive;
+    font-size: 44px;
+    min-width: 70px;
+    text-align: center;
+  }
+  .walkin-total {
+    margin: 18px 0 4px;
+    font-family: 'Inter', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    text-align: center;
+  }
+  .walkin-total .sub {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    opacity: 0.6;
+    margin-top: 4px;
+  }
+
   /* Log */
   .log {
     background: rgba(0, 0, 0, 0.4);
@@ -567,6 +637,7 @@
   let html5QrCode = null;
   let scanning = false;
   let lastScanTime = 0;
+  let eventsData = [];
   let scanCount = 0;
   const log = [];
   const recentScans = new Set();
@@ -613,6 +684,10 @@
       }
       scannerName = resp.name;
       staffNameEl.textContent = scannerName;
+      try {
+        const evResp = await fetch('events.json', { cache: 'no-store' });
+        if (evResp.ok) eventsData = await evResp.json();
+      } catch (e) { /* walk-in button just won't show if events can't load */ }
       renderScanner();
     } catch (err) {
       renderError('Connection failed', 'Could not reach the validation server. Check your connection.');
@@ -643,6 +718,7 @@
         <button id="pauseBtn">Pause</button>
         <button id="manualBtn" class="primary">Enter ID</button>
       </div>
+      ${eventsData.length ? `<div class="walkin-bar"><button id="walkinBtn">+ Walk-in Cash Sale</button></div>` : ''}
       <div class="log" id="logSection" style="display:none;">
         <div class="log-title">Scan History</div>
         <div id="logList"></div>
@@ -650,6 +726,8 @@
     `;
     document.getElementById('pauseBtn').addEventListener('click', togglePause);
     document.getElementById('manualBtn').addEventListener('click', manualEntry);
+    const walkinBtn = document.getElementById('walkinBtn');
+    if (walkinBtn) walkinBtn.addEventListener('click', showWalkinModal);
     startScanner();
   }
 
@@ -930,6 +1008,136 @@
         overlay.remove();
         addLog('invalid', ticketId, 'cash confirm network error');
         showResult('invalid', 'No Signal', 'Could not confirm cash — scan again');
+        beep(150);
+      }
+    });
+  }
+
+  // Walk-in cash sale: count tickets sold at the door with no online order.
+  function showWalkinModal() {
+    if (!eventsData.length) return;
+    const existing = document.getElementById('resultModal');
+    if (existing) existing.remove();
+
+    let eventIdx = 0, typeIdx = 0, qty = 1;
+    const overlay = document.createElement('div');
+    overlay.id = 'resultModal';
+    overlay.className = 'modal-overlay';
+    document.body.appendChild(overlay);
+
+    const curEvent = () => eventsData[eventIdx];
+    const curTypes = () => (curEvent().ticket_types || []);
+    const curType  = () => curTypes()[typeIdx] || { label: 'General Admission', price: 0 };
+
+    function render() {
+      const types = curTypes();
+      const t = curType();
+      const total = (t.price || 0) * qty;
+      overlay.innerHTML = `
+        <div class="result cash walkin-box">
+          <div class="result-status">Walk-in</div>
+          ${eventsData.length > 1 ? `
+            <div class="walkin-field">
+              <span class="label">Event</span>
+              <select id="wkEvent">
+                ${eventsData.map((e, i) => `<option value="${i}" ${i === eventIdx ? 'selected' : ''}>${escapeHtml(e.name)}</option>`).join('')}
+              </select>
+            </div>` : ''}
+          ${types.length > 1 ? `
+            <div class="walkin-field">
+              <span class="label">Ticket Type</span>
+              <select id="wkType">
+                ${types.map((tt, i) => `<option value="${i}" ${i === typeIdx ? 'selected' : ''}>${escapeHtml(tt.label)} — RM${tt.price}</option>`).join('')}
+              </select>
+            </div>` : ''}
+          <div class="walkin-field">
+            <span class="label">Quantity</span>
+            <div class="stepper">
+              <button id="wkMinus">−</button>
+              <span class="qty" id="wkQty">${qty}</span>
+              <button id="wkPlus">+</button>
+            </div>
+          </div>
+          <div class="walkin-total">RM${total}<span class="sub">${qty} × ${escapeHtml(t.label)} @ RM${t.price || 0}</span></div>
+          <div class="modal-btn-row">
+            <button class="modal-ok-btn" id="wkCancel">Cancel</button>
+            <button class="modal-ok-btn paid" id="wkConfirm">Confirm</button>
+          </div>
+        </div>
+      `;
+      const evSel = document.getElementById('wkEvent');
+      if (evSel) evSel.addEventListener('change', () => { eventIdx = parseInt(evSel.value, 10); typeIdx = 0; render(); });
+      const tySel = document.getElementById('wkType');
+      if (tySel) tySel.addEventListener('change', () => { typeIdx = parseInt(tySel.value, 10); render(); });
+      document.getElementById('wkMinus').addEventListener('click', () => { if (qty > 1) { qty--; render(); } });
+      document.getElementById('wkPlus').addEventListener('click', () => { qty++; render(); });
+      document.getElementById('wkCancel').addEventListener('click', () => overlay.remove());
+      document.getElementById('wkConfirm').addEventListener('click', () => {
+        const t = curType();
+        overlay.remove();
+        showWalkinPaidConfirm(curEvent().id, `${t.label} — RM${t.price || 0}`, t.label, t.price || 0, qty);
+      });
+    }
+    render();
+  }
+
+  // Same paid reminder as the cash-scan flow, then POST the walk-in to the server.
+  function showWalkinPaidConfirm(eventId, ticketTypeFull, label, price, qty) {
+    const existing = document.getElementById('resultModal');
+    if (existing) existing.remove();
+    const total = price * qty;
+    const overlay = document.createElement('div');
+    overlay.id = 'resultModal';
+    overlay.className = 'modal-overlay';
+    overlay.innerHTML = `
+      <div class="result cash">
+        <div class="confirm-prompt">
+          <span class="confirm-emoji">⚠️</span>
+          <span class="confirm-text">Confirm ${qty} × ${escapeHtml(label)} walk-in — collect RM${total} cash</span>
+          <span class="confirm-emoji">⚠️</span>
+        </div>
+        <div class="modal-btn-row">
+          <button class="modal-ok-btn" id="wkBackBtn">Cancel</button>
+          <button class="modal-ok-btn paid" id="wkPaidBtn">Paid</button>
+        </div>
+      </div>
+    `;
+    document.body.appendChild(overlay);
+
+    document.getElementById('wkBackBtn').addEventListener('click', () => {
+      overlay.remove();
+      showWalkinModal();
+    });
+
+    document.getElementById('wkPaidBtn').addEventListener('click', async () => {
+      const btn = document.getElementById('wkPaidBtn');
+      btn.textContent = 'Recording…';
+      btn.disabled = true;
+      try {
+        // text/plain body (no Content-Type header) keeps this a CORS simple
+        // request, same as buy.html's order POST.
+        const resp = await fetch(WEB_APP_URL, {
+          method: 'POST',
+          redirect: 'follow',
+          body: JSON.stringify({ type: 'walkin', token, event_id: eventId, ticket_type: ticketTypeFull, quantity: qty }),
+        });
+        const data = await resp.json();
+        overlay.remove();
+        if (data.ok) {
+          scanCount += qty;
+          stubCountEl.textContent = `${String(scanCount).padStart(2, '0')} Scan${scanCount === 1 ? '' : 's'}`;
+          addLog('valid', 'walk-in', `Walk-in ×${qty} — RM${data.total} cash`);
+          showResult('valid', 'Recorded', 'Walk-in', `${qty} × ${label}`, `RM${data.total} cash collected`);
+          beep(1);
+        } else {
+          addLog('invalid', 'walk-in', 'walk-in failed');
+          showResult('invalid', 'Failed', data.error || 'Could not record walk-in');
+          beep(150);
+        }
+      } catch (err) {
+        overlay.remove();
+        addLog('invalid', 'walk-in', 'walk-in network error');
+        showResult('invalid', 'No Signal', 'Could not record walk-in — try again');
         beep(150);
       }
     });

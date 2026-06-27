@@ -114,6 +114,16 @@ function doPost(e) {
     // Honeypot: bots fill hidden fields. Look successful, but record nothing.
     if (body.company || body._gotcha) return jsonResponse({ ok: true });
 
+    // Door staff record a cash walk-in sale from the scanner page.
+    if (body.type === 'walkin') {
+      return jsonResponse(recordWalkin({
+        token:      body.token,
+        eventId:    body.event_id,
+        ticketType: body.ticket_type,
+        quantity:   body.quantity,
+      }));
+    }
+
     // On-site ambassador signup form posts here too (not event-specific).
     if (body.type === 'ambassador_signup') {
       // A payout QR image (if supplied) is stashed in Drive; its URL becomes the
@@ -641,6 +651,86 @@ function recordPurchase(fields) {
   }
 
   return { ok: true, payment_method: paymentType, ticket_url: ticketUrl };
+}
+
+/**
+ * Records a cash walk-in sale made at the door from the scanner page. Walk-ins
+ * have no buyer/email and need no QR ticket — they exist purely so the door's
+ * cash sales flow into the same Tickets/Purchases tables (and therefore the
+ * Summary totals + revenue). Each walk-in ticket is written already-scanned and
+ * paid in cash, so isCredited() counts it as confirmed revenue immediately.
+ */
+function recordWalkin(fields) {
+  const scanner = lookupScanner(String(fields.token || '').trim());
+  if (!scanner || !scanner.active) return { ok: false, error: 'Invalid scanner token' };
+
+  const eventId = String(fields.eventId || '').trim();
+  if (!EVENTS[eventId]) return { ok: false, error: 'Unknown event' };
+
+  const quantity = parseInt(fields.quantity, 10) || 0;
+  if (quantity < 1) return { ok: false, error: 'Quantity must be at least 1' };
+
+  const ticketType = String(fields.ticketType || 'General Admission').trim();
+  const unitPrice = priceFor(ticketType);
+  const total = unitPrice * quantity;
+
+  const ss = SpreadsheetApp.getActive();
+  const purchasesSheet = ss.getSheetByName(CONFIG.PURCHASES_TAB);
+  const ticketsSheet   = ss.getSheetByName(CONFIG.TICKETS_TAB);
+
+  const purchaseHeaders = purchasesSheet.getRange(1, 1, 1, purchasesSheet.getLastColumn()).getValues()[0];
+  const purchaseId = randomKey(12);
+  const now = new Date();
+  const newRow = new Array(purchaseHeaders.length).fill('');
+  const valueMap = {
+    'event_id':          eventId,
+    'purchase_id':       purchaseId,
+    'buyer_name':        'Walk-in',
+    'ticket_type':       ticketType,
+    'quantity':          quantity,
+    'amount_paid':       total,
+    'payment_method':    'cash',
+    'payment_confirmed': true,
+    'affiliate_code':    '',
+    'notes':             'Walk-in (door) — ' + scanner.name,
+    'purchase_time':     now,
+    'tickets_generated': true,
+  };
+  for (let i = 0; i < purchaseHeaders.length; i++) {
+    if (valueMap.hasOwnProperty(purchaseHeaders[i])) newRow[i] = valueMap[purchaseHeaders[i]];
+  }
+
+  const tHeaders = ticketsSheet.getRange(1, 1, 1, ticketsSheet.getLastColumn()).getValues()[0];
+  function buildTicketRow(values) {
+    const row = new Array(tHeaders.length).fill('');
+    for (const h in values) { const idx = tHeaders.indexOf(h); if (idx !== -1) row[idx] = values[h]; }
+    return row;
+  }
+  const ticketRows = [];
+  for (let j = 0; j < quantity; j++) {
+    ticketRows.push(buildTicketRow({
+      ticket_id:      randomKey(16),
+      purchase_id:    purchaseId,
+      event_id:       eventId,
+      buyer_name:     'Walk-in',
+      ticket_type:    ticketType,
+      payment_method: 'cash',
+      affiliate_code: '',
+      scanned: true, scanned_at: now, scanned_by: scanner.name,
+    }));
+  }
+
+  const lock = LockService.getScriptLock();
+  lock.waitLock(30000);
+  try {
+    purchasesSheet.appendRow(newRow);
+    SpreadsheetApp.flush();
+    ticketsSheet.getRange(ticketsSheet.getLastRow() + 1, 1, ticketRows.length, tHeaders.length).setValues(ticketRows);
+  } finally {
+    lock.releaseLock();
+  }
+
+  return { ok: true, quantity: quantity, unit_price: unitPrice, total: total };
 }
 
 /**
@@ -1228,6 +1318,7 @@ function refreshEventStats() {
   const tPaymentCol  = tHeaders.indexOf('payment_method');
   const tAffiliateCol= tHeaders.indexOf('affiliate_code');
   const tTypeCol     = tHeaders.indexOf('ticket_type');
+  const tBuyerCol    = tHeaders.indexOf('buyer_name');
 
   const eventMap = {};
   // affiliate_code → { eventId → credited commission } — used to allocate each
@@ -1236,9 +1327,10 @@ function refreshEventStats() {
   for (let i = 1; i < tData.length; i++) {
     const eventId = tEventCol !== -1 ? String(tData[i][tEventCol]).trim() : '';
     if (!eventId) continue;
-    if (!eventMap[eventId]) eventMap[eventId] = { total: 0, scanned: 0, confirmed: 0, revenue: 0, ambTickets: 0, ambEarned: 0, ambOwing: 0 };
+    if (!eventMap[eventId]) eventMap[eventId] = { total: 0, scanned: 0, confirmed: 0, revenue: 0, walkins: 0, ambTickets: 0, ambEarned: 0, ambOwing: 0 };
     const m = eventMap[eventId];
     m.total++;
+    if (tBuyerCol !== -1 && String(tData[i][tBuyerCol]).trim().toLowerCase() === 'walk-in') m.walkins++;
     if (tData[i][tScannedCol] === true || String(tData[i][tScannedCol]).toUpperCase() === 'TRUE') m.scanned++;
     // Confirmed = money actually in hand: prepaid tickets (which only exist once
     // payment is confirmed) plus cash tickets that were collected at the door.
@@ -1300,7 +1392,7 @@ function refreshEventStats() {
   // column A and updated in place. Events not currently in the Tickets tab are
   // left untouched, so an old event's row (and its numbers) survives even after
   // you delete that event's tickets.
-  const HEADER = ['event_id', 'tickets_total', 'tickets_confirmed', 'tickets_scanned', 'tickets_revenue', 'ambassador_tickets', 'ambassador_earned', 'ambassador_owing'];
+  const HEADER = ['event_id', 'tickets_total', 'tickets_confirmed', 'tickets_scanned', 'tickets_revenue', 'walkin_tickets', 'ambassador_tickets', 'ambassador_earned', 'ambassador_owing'];
   const headerRow = findRowByColA(sheet, 'event_id');
   // Write/refresh the header so existing Summary sheets pick up new columns
   // (e.g. tickets_revenue) and stay aligned with the per-event row layout.
@@ -1309,7 +1401,7 @@ function refreshEventStats() {
 
   for (const eventId in eventMap) {
     const m = eventMap[eventId];
-    const rowValues = [eventId, m.total, m.confirmed, m.scanned, m.revenue, m.ambTickets, m.ambEarned, m.ambOwing];
+    const rowValues = [eventId, m.total, m.confirmed, m.scanned, m.revenue, m.walkins, m.ambTickets, m.ambEarned, m.ambOwing];
     const rowNum = findRowByColA(sheet, eventId);
     if (rowNum === -1) sheet.appendRow(rowValues);
     else sheet.getRange(rowNum, 1, 1, rowValues.length).setValues([rowValues]);
