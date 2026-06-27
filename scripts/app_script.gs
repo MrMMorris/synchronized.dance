@@ -1392,7 +1392,7 @@ function refreshEventStats() {
   // column A and updated in place. Events not currently in the Tickets tab are
   // left untouched, so an old event's row (and its numbers) survives even after
   // you delete that event's tickets.
-  const HEADER = ['event_id', 'tickets_total', 'tickets_confirmed', 'tickets_scanned', 'tickets_revenue', 'walkin_tickets', 'ambassador_tickets', 'ambassador_earned', 'ambassador_owing'];
+  const HEADER = ['event_id', 'tickets_total', 'tickets_confirmed', 'tickets_scanned', 'walkin_tickets', 'tickets_revenue', 'ambassador_tickets', 'ambassador_earned', 'ambassador_owing'];
   const headerRow = findRowByColA(sheet, 'event_id');
   // Write/refresh the header so existing Summary sheets pick up new columns
   // (e.g. tickets_revenue) and stay aligned with the per-event row layout.
@@ -1401,7 +1401,7 @@ function refreshEventStats() {
 
   for (const eventId in eventMap) {
     const m = eventMap[eventId];
-    const rowValues = [eventId, m.total, m.confirmed, m.scanned, m.revenue, m.walkins, m.ambTickets, m.ambEarned, m.ambOwing];
+    const rowValues = [eventId, m.total, m.confirmed, m.scanned, m.walkins, m.revenue, m.ambTickets, m.ambEarned, m.ambOwing];
     const rowNum = findRowByColA(sheet, eventId);
     if (rowNum === -1) sheet.appendRow(rowValues);
     else sheet.getRange(rowNum, 1, 1, rowValues.length).setValues([rowValues]);
