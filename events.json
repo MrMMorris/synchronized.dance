@@ -16,5 +16,23 @@
       { "label": "General Admission", "price": 55, "note": "Includes 1 free drink" }
     ],
     "payment_instructions": "MARCUS MORRIS\nHSBC\n303875462888"
+  },
+  {
+    "id": "18_07_2026-Bon_Odori_After_Party",
+    "date_iso": "2026-07-18",
+    "date_display": "July 18",
+    "name": "Bon Odori After-Party",
+    "genres": ["Trance", "Techno", "House"],
+    "time": "8PM – 11:30PM",
+    "venue": "The Palm House, Penang",
+    "address": "The Palm House, George Town, Penang",
+    "maps_url": "https://maps.app.goo.gl/ksLahWyVATJG9U4a9",
+    "ticket_form_url": "",
+    "ticket_form_prefill_entry": "",
+    "accent_color": "#c9a077",
+    "ticket_types": [
+      { "label": "General Admission", "price": 20, "note": "" }
+    ],
+    "payment_instructions": "MARCUS MORRIS\nHSBC\n303875462888"
   }
 ]

@@ -45,6 +45,14 @@ const EVENTS = {
     EVENT_ADDRESS: '515 Jalan C M Hashim, Tanjung Tokong, George Town',
     COMMISSION_PER_TICKET: 5,
   },
+  '18_07_2026-Bon_Odori_After_Party': {
+    EVENT_NAME:    'Bon Odori After-Party',
+    EVENT_DATE:    'July 18',
+    EVENT_TIME:    '8PM – 11:30PM',
+    EVENT_VENUE:   'The Palm House, Penang',
+    EVENT_ADDRESS: 'The Palm House, George Town, Penang',
+    COMMISSION_PER_TICKET: 5,
+  },
 };
 
 // ============================================================================
