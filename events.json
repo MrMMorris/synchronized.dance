@@ -30,6 +30,7 @@
     "ticket_form_url": "",
     "ticket_form_prefill_entry": "",
     "accent_color": "#c9a077",
+    "instagram": "thepalmhousepg",
     "ticket_types": [
       { "label": "General Admission", "price": 20, "note": "" }
     ],

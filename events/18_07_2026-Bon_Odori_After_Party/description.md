@@ -1,6 +1,7 @@
 OFF-GRID Social VOL 001
 GET LOST IN THE FREQUENCY.
 Trance Techno House
+
 This Saturday night, we shed the noise of the outside world and let sound serve as our collective somatic release. Lose your mind. Find your rhythm. 🌿
 
 Ticket: RM20
