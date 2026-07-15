@@ -458,7 +458,7 @@
 
           <div class="qr-block" id="qrBlock">
             <div class="pay-instructions">${escapeHtml(event.payment_instructions || 'Transfer the total, then upload your payment screenshot below.')}</div>
-            <img class="pay-qr" src="assets/QR.webp" alt="DuitNow / bank transfer QR code" />
+            <img class="pay-qr" src="/events/${escapeHtml(eventId)}/QR.webp" onerror="this.onerror=null;this.src='assets/QR.webp';" alt="DuitNow / bank transfer QR code" />
             <a class="pay-switch" id="toCash" role="button" tabindex="0">I don't have local bank or QR</a>
             <div class="pay-divider"></div>
             <label class="lbl" for="f-shot">Upload your proof of payment below <span class="req">*</span></label>
