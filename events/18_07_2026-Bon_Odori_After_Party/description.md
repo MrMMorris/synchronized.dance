@@ -4,7 +4,7 @@ Trance Techno House
 
 This Saturday night, we shed the noise of the outside world and let sound serve as our collective somatic release. Lose your mind. Find your rhythm. 🌿
 
-Ticket: RM20
+Ticket: RM20 (Cash or Duitnow/bank transfer)
 
 8:00 PM: Doors Open 
 8: 30 PM – 11:30 PM:  DJ Shlant
@@ -21,7 +21,7 @@ Floor capacity is strictly limited to ensure total freedom of movement. Pre-regi
 Pack light, wear dance-friendly, comfortable, smooth rubber soles and bring only good energy.
 
 The Fuel Bar: 
-Crafted Gin & Tonic, Beers, Red Wine, 100plus
+Gin & Tonic, Beers, Red Wine, 100plus
 Free-Flow Hydration: Complimentary filtered water is available all night. Kindly bring your own water bottle to refill!
 
 🏁 Respect the Journey: 
