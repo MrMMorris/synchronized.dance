@@ -586,7 +586,7 @@
 <body>
 <div class="container">
   <header>
-    <img src="assets/NEXA_white.png" alt="Nexa Events" class="top-logo" />
+    <img src="assets/NEXA_white.png" alt="Nexa Events" class="top-logo" id="topLogo" />
     <div class="top-tagline">Good People <span class="dot">•</span> Good Music <span class="dot">•</span> Good Vibes</div>
     <h1><span id="eventTitle">Your</span><span class="tickets">Tickets</span></h1>
     <div class="subtitle" id="subtitle">Loading…</div>
@@ -618,6 +618,16 @@
     document.head.appendChild(link);
   }
 
+  // Use the event's own logo.webp if present, else fall back to the Nexa logo.
+  function setEventLogo(eventId) {
+    if (!eventId) return;
+    const img = document.getElementById('topLogo');
+    if (!img) return;
+    img.onerror = function () { this.onerror = null; this.src = 'assets/NEXA_white.png'; };
+    img.src = '/events/' + eventId + '/logo.webp';
+  }
+  setEventLogo(eventIdParam);
+
   function applyEventMeta(event) {
     if (!event) return;
     if (event.name) document.getElementById('eventTitle').textContent = event.name;
@@ -627,7 +637,7 @@
         escapeHtml(event.venue) + ' <span class="accent">✦</span> ' +
         escapeHtml(event.time);
     }
-    if (event.id && event.id !== eventIdParam) loadEventTheme(event.id);
+    if (event.id && event.id !== eventIdParam) { loadEventTheme(event.id); setEventLogo(event.id); }
   }
 
   function fetchJson(url, timeoutMs = 25000) {

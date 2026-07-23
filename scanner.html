@@ -607,7 +607,7 @@
 <body>
 <div class="app">
   <header>
-    <img src="assets/NEXA_white.png" alt="Nexa Events" class="top-logo" />
+    <img src="assets/NEXA_white.png" alt="Nexa Events" class="top-logo" id="topLogo" />
     <div class="top-tagline">★<span class="dot">•</span>Nexa Events<span class="dot">•</span>★</div>
     <h1>Nexa Events<span class="door">Door Scan</span></h1>
     <div class="staff-line">Hi, <span class="name" id="staffName">…</span></div>
@@ -688,10 +688,22 @@
         const evResp = await fetch('events.json', { cache: 'no-store' });
         if (evResp.ok) eventsData = await evResp.json();
       } catch (e) { /* walk-in button just won't show if events can't load */ }
+      setEventLogo();
       renderScanner();
     } catch (err) {
       renderError('Connection failed', 'Could not reach the validation server. Check your connection.');
     }
+  }
+
+  // Swap in an event's logo.webp if present: use the ?event= param when given,
+  // else the sole active event. Falls back to the Nexa logo if none/missing.
+  function setEventLogo() {
+    const eventId = params.get('event') || (eventsData.length === 1 ? eventsData[0].id : null);
+    if (!eventId) return;
+    const img = document.getElementById('topLogo');
+    if (!img) return;
+    img.onerror = function () { this.onerror = null; this.src = 'assets/NEXA_white.png'; };
+    img.src = '/events/' + eventId + '/logo.webp';
   }
 
   function renderGate(title, msg) {

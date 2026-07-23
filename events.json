@@ -13,7 +13,7 @@
     "ticket_form_prefill_entry": "",
     "accent_color": "#d9a441",
     "ticket_types": [
-      { "label": "General Admission", "price": 55, "note": "Pre-registration — RM65 at the door. Includes welcome drink." }
+      { "label": "General Admission", "price": 65, "note": "Includes welcome drink" }
     ],
     "payment_instructions": "Malaysia National QR (DuitNow) — BAMBA KEMO\nScan the QR below to pay, then upload your screenshot."
   }
