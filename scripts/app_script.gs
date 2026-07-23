@@ -37,20 +37,12 @@ const CONFIG = {
 
 // Per-event config — key is the event ID, which must also be the form responses tab name
 const EVENTS = {
-  '27_06_2026-beach_party': {
-    EVENT_NAME:    'Beach Party',
-    EVENT_DATE:    'June 27',
-    EVENT_TIME:    '4PM – 12AM',
+  '01_08_2026-Beach_Party': {
+    EVENT_NAME:    'Penang Beach Party',
+    EVENT_DATE:    'August 1',
+    EVENT_TIME:    '6PM – 12AM',
     EVENT_VENUE:   'Northern Cove, Penang',
-    EVENT_ADDRESS: '515 Jalan C M Hashim, Tanjung Tokong, George Town',
-    COMMISSION_PER_TICKET: 5,
-  },
-  '18_07_2026-Bon_Odori_After_Party': {
-    EVENT_NAME:    'Bon Odori After-Party',
-    EVENT_DATE:    'July 18',
-    EVENT_TIME:    '8PM – 11:30PM',
-    EVENT_VENUE:   'The Palm House, Penang',
-    EVENT_ADDRESS: 'The Palm House, George Town, Penang',
+    EVENT_ADDRESS: '515 Jalan C M Hashim, 11200 Tanjung Bungah, Penang',
     COMMISSION_PER_TICKET: 5,
   },
 };

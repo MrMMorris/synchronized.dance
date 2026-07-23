@@ -1,21 +1,20 @@
 [
   {
-    "id": "18_07_2026-Bon_Odori_After_Party",
-    "date_iso": "2026-07-18",
-    "date_display": "July 18",
-    "name": "Bon Odori After-Party",
-    "genres": ["Trance", "Techno", "House"],
-    "time": "8PM – 11:30PM",
-    "venue": "The Palm House, Penang",
-    "address": "The Palm House, George Town, Penang",
-    "maps_url": "https://maps.app.goo.gl/ksLahWyVATJG9U4a9",
+    "id": "01_08_2026-Beach_Party",
+    "date_iso": "2026-08-01",
+    "date_display": "August 1",
+    "name": "Penang Beach Party",
+    "genres": ["Afrohouse", "Deep House", "Amapiano", "Hip Hop", "RnB"],
+    "time": "6PM – 12AM",
+    "venue": "Northern Cove, Penang",
+    "address": "515 Jalan C M Hashim, 11200 Tanjung Bungah, Penang",
+    "maps_url": "https://maps.app.goo.gl/zzpVh7ByuNHCBdg48",
     "ticket_form_url": "",
     "ticket_form_prefill_entry": "",
-    "accent_color": "#c9a077",
-    "instagram": "thepalmhousepg",
+    "accent_color": "#d9a441",
     "ticket_types": [
-      { "label": "General Admission", "price": 20, "note": "" }
+      { "label": "General Admission", "price": 55, "note": "Pre-registration — RM65 at the door. Includes welcome drink." }
     ],
-    "payment_instructions": "PALM RECOVERY HUB SDN. BHD.\nUnited Overseas Bank Limited UOB\n  2303095510"
+    "payment_instructions": "Malaysia National QR (DuitNow) — BAMBA KEMO\nScan the QR below to pay, then upload your screenshot."
   }
 ]
