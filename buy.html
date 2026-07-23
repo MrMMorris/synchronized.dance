@@ -420,6 +420,7 @@
       .map((t, i) => `<option value="${i}">${escapeHtml(t.label)} — RM${t.price}${t.note ? ' · ' + escapeHtml(t.note) : ''}</option>`)
       .join('');
     const qtyOptions = [1,2,3,4,5,6,7,8].map(n => `<option value="${n}">${n}</option>`).join('');
+    const qrOnly = !!event.qr_only;
 
     root.innerHTML = `
       <a class="back-link" href="/events/${escapeHtml(eventId)}/">← Back to event</a>
@@ -454,12 +455,12 @@
         </div>
 
         <div class="field">
-          <label class="lbl">Payment <span class="req">*</span> <span class="opt">(Send payment to bank or QR below)</span></label>
+          <label class="lbl">Payment <span class="req">*</span> <span class="opt">(${qrOnly ? 'Scan the QR below to pay' : 'Send payment to bank or QR below'})</span></label>
 
           <div class="qr-block" id="qrBlock">
             <div class="pay-instructions">${escapeHtml(event.payment_instructions || 'Transfer the total, then upload your payment screenshot below.')}</div>
-            <img class="pay-qr" src="/events/${escapeHtml(eventId)}/QR.webp" onerror="this.onerror=null;this.src='assets/QR.webp';" alt="DuitNow / bank transfer QR code" />
-            <a class="pay-switch" id="toCash" role="button" tabindex="0">I don't have local bank or QR</a>
+            <img class="pay-qr" src="/events/${escapeHtml(eventId)}/QR.webp" onerror="this.onerror=null;this.src='assets/QR.webp';" alt="${qrOnly ? 'DuitNow QR code' : 'DuitNow / bank transfer QR code'}" />
+            <a class="pay-switch" id="toCash" role="button" tabindex="0">${qrOnly ? "I can't pay by QR" : "I don't have local bank or QR"}</a>
             <div class="pay-divider"></div>
             <label class="lbl" for="f-shot">Upload your proof of payment below <span class="req">*</span></label>
             <div class="file-row">

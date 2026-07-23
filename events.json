@@ -15,6 +15,7 @@
     "ticket_types": [
       { "label": "General Admission", "price": 65, "note": "Includes welcome drink" }
     ],
+    "qr_only": true,
     "payment_instructions": "Malaysia National QR (DuitNow) — BAMBA KEMO\nScan the QR below to pay, then upload your screenshot."
   }
 ]
