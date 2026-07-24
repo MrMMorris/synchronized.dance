@@ -618,13 +618,17 @@
     document.head.appendChild(link);
   }
 
-  // Use the event's own logo.webp if present, else fall back to the Nexa logo.
+  // Use the event's own logo (webp or png) if present, else the Nexa logo.
   function setEventLogo(eventId) {
     if (!eventId) return;
     const img = document.getElementById('topLogo');
     if (!img) return;
-    img.onerror = function () { this.onerror = null; this.src = 'assets/NEXA_white.png'; };
-    img.src = '/events/' + eventId + '/logo.webp';
+    const base = '/events/' + eventId + '/logo';
+    img.onerror = function () {
+      this.onerror = function () { this.onerror = null; this.src = 'assets/NEXA_white.png'; };
+      this.src = base + '.png';
+    };
+    img.src = base + '.webp';
   }
   setEventLogo(eventIdParam);
 

@@ -702,8 +702,12 @@
     if (!eventId) return;
     const img = document.getElementById('topLogo');
     if (!img) return;
-    img.onerror = function () { this.onerror = null; this.src = 'assets/NEXA_white.png'; };
-    img.src = '/events/' + eventId + '/logo.webp';
+    const base = '/events/' + eventId + '/logo';
+    img.onerror = function () {
+      this.onerror = function () { this.onerror = null; this.src = 'assets/NEXA_white.png'; };
+      this.src = base + '.png';
+    };
+    img.src = base + '.webp';
   }
 
   function renderGate(title, msg) {
