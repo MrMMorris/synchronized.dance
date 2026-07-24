@@ -428,7 +428,7 @@
     root.innerHTML = `
       <a class="back-link" href="/events/${escapeHtml(eventId)}/">← Back to event</a>
       <header>
-        <img class="top-logo" src="assets/NEXA_white.png" alt="Nexa Events" />
+        <img class="top-logo" src="/events/${escapeHtml(eventId)}/logo.webp" onerror="this.onerror=function(){this.onerror=null;this.src='assets/NEXA_white.png';};this.src='/events/${escapeHtml(eventId)}/logo.png';" alt="Nexa Events" />
         <h1>Get<span class="sub">Tickets</span></h1>
         <div class="event-meta">
           <span class="accent">${escapeHtml(event.name)}</span><br/>
