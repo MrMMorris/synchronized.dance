@@ -247,6 +247,8 @@ Each row has a token that door staff use in their URL (`scanner.html?k=<token>`)
 | Column | Notes |
 |---|---|
 | `ambassador_key` | Secret token — used as both the URL key (`ambassador.html?k=`) and the affiliate code stored in Purchases/Tickets |
+| `vip` | `TRUE`/`FALSE` — organizer toggle for the perpetual VIP pass on that ambassador's page |
+| `vip_key` | Secret encoded in the VIP pass QR. Minted automatically the first time the page loads with `vip = TRUE` — leave blank |
 | `name` | From signup form |
 | `email` | From signup form |
 | `phone` | From signup form |
@@ -330,7 +332,7 @@ Returns all tickets for a purchase:
 }
 ```
 
-### `?action=validate&ticket_id=<ticket_id>&token=<scanner_token>`
+### `?action=validate&ticket_id=<ticket_id>&token=<scanner_token>&event_id=<event_id>`
 Validates a scanned ticket. Uses a script lock to prevent double-admit. Returns:
 ```json
 {
@@ -344,6 +346,8 @@ Validates a scanned ticket. Uses a script lock to prevent double-admit. Returns:
 }
 ```
 Possible `status` values: `valid`, `cash_due`, `already_scanned`, `invalid`, `unauthorized`.
+
+`event_id` is optional and only matters for ambassador VIP passes (see below) — normal tickets carry their own event. `scanner.html` sends its `?event=` param, or the sole event in `events.json`; the script otherwise falls back to the `EVENTS` entry dated closest to today.
 
 **Cash orders are NOT marked scanned by `validate`** — they return `status: "cash_due"` and stay unused until the door staff confirm payment (see `confirm_cash`). Non-cash orders are marked scanned immediately.
 
@@ -361,9 +365,13 @@ Returns live stats for an ambassador. Ticket counts are computed from the Ticket
   "amount_earned": 25,
   "amount_paid": 0,
   "amount_owing": 25,
-  "commission_per_ticket": 5
+  "commission_per_ticket": 5,
+  "vip": true,
+  "vip_ticket_id": "<vip_key, or '' when vip is FALSE>"
 }
 ```
+
+Setting `vip = TRUE` on the Ambassadors row is all the organizer does — the next load of that ambassador's page mints `vip_key` into the sheet and reveals the VIP tab. Setting it back to `FALSE` hides the tab and makes the existing pass stop scanning.
 
 **Debugging tip:** The `/exec` URL redirects, so DevTools Network tab shows "no content." To see the raw JSON, copy the full request URL and paste it directly into a browser tab.
 
@@ -537,6 +545,17 @@ Ambassadors are people or businesses who refer ticket buyers and earn a commissi
 5. `onFormSubmitHandler` reads the Referral Code and stores it as `affiliate_code` in the Purchases row. `generateTicketsForRow` copies it to each Ticket row.
 6. The ambassador's stats update automatically — `get_ambassador` counts "credited" Tickets with matching `affiliate_code` (see `isCredited()`): prepaid/QR tickets are credited once payment is confirmed (the ticket exists), cash tickets only once scanned + cash-confirmed at the door. So a prepaid no-show still credits the ambassador; a cash no-show does not.
 7. After the event, organizer runs **Ticket System → Refresh ambassador stats** to update the Ambassadors tab, then pays out based on `amount_owing` using the `payment_details` on file.
+
+### Ambassador VIP pass
+
+An ambassador with `vip = TRUE` gets a permanent free-entry QR that works at **every** event, shown on a second tab of their ambassador page ("★ VIP Pass") alongside the shareable referral QR. The tab bar only appears when `vip` is TRUE.
+
+- The QR encodes `vip_key` — a **separate secret** from `ambassador_key`. That matters: `ambassador_key` is published in every referral QR the ambassador shares, so a pass derived from it would let anyone who scanned that QR walk in free.
+- There is no pre-existing Tickets row. On the first scan at a given event, `admitVipTicket()` materialises one with `ticket_id = "<vip_key>#<event_id>"`, `ticket_type = 'Ambassador VIP'`, `payment_method = 'comp'`, `scanned = TRUE`.
+- Re-scanning at the same event finds that row → `already_scanned`. The next event has no row yet → admitted again. That's what makes the pass perpetual while still being single-use per event.
+- `affiliate_code` is left blank on VIP rows so an ambassador never earns commission on their own comp ticket. `ticket_type` has no `RMxx` in it, so `priceFor()` values it at 0 and it adds a head to attendance without touching revenue.
+- The scan response carries `vip: true`; `scanner.html` shows the result banner as "VIP" instead of "Valid".
+- Flipping `vip` back to `FALSE` immediately kills the pass — `lookupVipAmbassador()` returns null and the scan reads as an invalid ticket.
 
 ### Triggers required
 

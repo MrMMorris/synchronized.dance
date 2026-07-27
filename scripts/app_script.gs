@@ -35,6 +35,10 @@ const CONFIG = {
   AMBASSADOR_PAGE_URL: 'https://synchronized.dance/ambassador.html',
 };
 
+// Ticket type written for an ambassador VIP admission. Deliberately has no RMxx
+// in it so priceFor() values it at 0 and it never lands in revenue.
+const VIP_TICKET_TYPE = 'Ambassador VIP';
+
 // Per-event config — key is the event ID, which must also be the form responses tab name
 const EVENTS = {
   '01_08_2026-Beach_Party': {
@@ -83,8 +87,8 @@ function doGet(e) {
   try {
     let result;
     switch (action) {
-      case 'validate':      result = validateTicket(params.ticket_id, params.token); break;
-      case 'confirm_cash':  result = confirmCashScan(params.ticket_id, params.token); break;
+      case 'validate':      result = validateTicket(params.ticket_id, params.token, params.event_id); break;
+      case 'confirm_cash':  result = confirmCashScan(params.ticket_id, params.token, params.event_id); break;
       case 'check_scanner': result = checkScanner(params.token); break;
       case 'get_tickets':   result = getTicketsForBuyer(params.key); break;
       case 'get_ambassador':result = getAmbassadorStats(params.key); break;
@@ -186,13 +190,13 @@ function jsonResponse(obj, callback) {
 // VALIDATION LOGIC (called by scanner page)
 // ============================================================================
 
-function validateTicket(ticketId, token) {
-  return admitTicket(ticketId, token, false);
+function validateTicket(ticketId, token, eventId) {
+  return admitTicket(ticketId, token, false, eventId);
 }
 
 // Called when door staff swipe to confirm cash was collected for a cash order.
-function confirmCashScan(ticketId, token) {
-  return admitTicket(ticketId, token, true);
+function confirmCashScan(ticketId, token, eventId) {
+  return admitTicket(ticketId, token, true, eventId);
 }
 
 /**
@@ -205,8 +209,11 @@ function confirmCashScan(ticketId, token) {
  * only include cash that was actually collected.
  *
  * Non-cash orders are admitted immediately on the first scan, as before.
+ *
+ * A scanned code with no Tickets row may still be an ambassador VIP pass —
+ * see admitVipTicket().
  */
-function admitTicket(ticketId, token, confirmCash) {
+function admitTicket(ticketId, token, confirmCash, eventId) {
   if (!ticketId) return { ok: false, status: 'invalid', reason: 'No ticket ID provided' };
   if (!token) return { ok: false, status: 'unauthorized', reason: 'Missing scanner token' };
 
@@ -234,7 +241,11 @@ function admitTicket(ticketId, token, confirmCash) {
     for (let i = 1; i < data.length; i++) {
       if (String(data[i][idCol]).trim() === String(ticketId).trim()) { foundRow = i; break; }
     }
-    if (foundRow === -1) return { ok: true, status: 'invalid', reason: 'Ticket not found' };
+    if (foundRow === -1) {
+      const vipResult = admitVipTicket(ticketId, eventId, scanner, sheet, data, headers);
+      if (vipResult) return vipResult;
+      return { ok: true, status: 'invalid', reason: 'Ticket not found' };
+    }
 
     let ticketIndex = 0, ticketTotal = 0;
     if (purchaseIdCol !== -1) {
@@ -321,6 +332,121 @@ function lookupScanner(token) {
     }
   }
   return null;
+}
+
+// ============================================================================
+// AMBASSADOR VIP PASS
+// ============================================================================
+
+/**
+ * Ambassador VIP passes: one permanent QR per ambassador (vip = TRUE on the
+ * Ambassadors tab) that admits them to every event, forever. There is no
+ * pre-existing Tickets row — the first scan at a given event materialises one
+ * with ticket_id "<vip_key>#<event_id>", so a re-scan at the same event reads as
+ * already_scanned while the next event starts clean.
+ *
+ * Returns null when the code isn't a live VIP pass, so admitTicket() can fall
+ * through to its normal "Ticket not found" answer.
+ */
+function admitVipTicket(vipKey, eventId, scanner, ticketsSheet, tData, tHeaders) {
+  const ambassador = lookupVipAmbassador(vipKey);
+  if (!ambassador) return null;
+
+  const evId = currentEventId(eventId);
+  if (!evId) return { ok: true, status: 'invalid', reason: 'No event configured for VIP pass' };
+
+  const scopedId     = String(vipKey).trim() + '#' + evId;
+  const idCol        = tHeaders.indexOf('ticket_id');
+  const scannedAtCol = tHeaders.indexOf('scanned_at');
+  const scannedByCol = tHeaders.indexOf('scanned_by');
+
+  for (let i = 1; i < tData.length; i++) {
+    if (String(tData[i][idCol]).trim() !== scopedId) continue;
+    return {
+      ok: true, status: 'already_scanned', vip: true,
+      buyer_name: ambassador.name,
+      ticket_type: VIP_TICKET_TYPE,
+      payment_method: 'comp',
+      ticket_index: 0, ticket_total: 0,
+      scanned_at: scannedAtCol !== -1 ? tData[i][scannedAtCol] : '',
+      scanned_by: scannedByCol !== -1 ? tData[i][scannedByCol] : '',
+    };
+  }
+
+  const now = new Date();
+  const values = {
+    ticket_id:      scopedId,
+    purchase_id:    'VIP-' + String(vipKey).trim(),
+    event_id:       evId,
+    buyer_name:     ambassador.name,
+    ticket_type:    VIP_TICKET_TYPE,
+    payment_method: 'comp',
+    affiliate_code: '', // a comp pass must not earn its own holder commission
+    scanned: true, scanned_at: now, scanned_by: scanner.name,
+  };
+  const row = new Array(tHeaders.length).fill('');
+  for (const h in values) {
+    const idx = tHeaders.indexOf(h);
+    if (idx !== -1) row[idx] = values[h];
+  }
+  ticketsSheet.appendRow(row);
+  if (scannedAtCol !== -1) {
+    ticketsSheet.getRange(ticketsSheet.getLastRow(), scannedAtCol + 1).setNumberFormat('yyyy-mm-dd hh:mm:ss');
+  }
+
+  return {
+    ok: true, status: 'valid', vip: true,
+    buyer_name: ambassador.name,
+    ticket_type: VIP_TICKET_TYPE,
+    payment_method: 'comp',
+    ticket_index: 0, ticket_total: 0,
+    scanned_by: scanner.name,
+  };
+}
+
+// Resolves a scanned code to an ambassador whose VIP pass is currently enabled.
+// Returns null if the code is unknown or vip has been switched back to FALSE.
+function lookupVipAmbassador(vipKey) {
+  const key = String(vipKey || '').trim();
+  if (!key) return null;
+
+  const sheet = SpreadsheetApp.getActive().getSheetByName(CONFIG.AMBASSADORS_TAB);
+  if (!sheet) return null;
+  const data = sheet.getDataRange().getValues();
+  const headers = data[0];
+  const keyCol      = headers.indexOf('vip_key');
+  const enabledCol  = headers.indexOf('vip');
+  const nameCol     = headers.indexOf('name');
+  const businessCol = headers.indexOf('business');
+  if (keyCol === -1) return null;
+
+  for (let i = 1; i < data.length; i++) {
+    if (String(data[i][keyCol]).trim() !== key) continue;
+    const enabled = enabledCol !== -1 &&
+      (data[i][enabledCol] === true || String(data[i][enabledCol]).toUpperCase() === 'TRUE');
+    if (!enabled) return null;
+    return {
+      name:     nameCol     !== -1 ? data[i][nameCol]     : 'Ambassador',
+      business: businessCol !== -1 ? data[i][businessCol] : '',
+    };
+  }
+  return null;
+}
+
+/**
+ * Which event is a scan happening at? The scanner passes event_id when it knows
+ * one (its ?event= param, or the only event in events.json). Otherwise fall back
+ * to the EVENTS entry whose date sits closest to today.
+ */
+function currentEventId(preferred) {
+  const p = String(preferred || '').trim();
+  if (p && EVENTS[p]) return p;
+
+  const ids = Object.keys(EVENTS);
+  if (ids.length <= 1) return ids[0] || '';
+  const today = Date.now();
+  return ids.slice().sort((a, b) =>
+    Math.abs(eventDateValue(a) - today) - Math.abs(eventDateValue(b) - today))[0];
 }
 
 // ============================================================================
@@ -1124,6 +1250,7 @@ function recordAmbassador(fields) {
     'amount_earned':       0,
     'amount_paid':         0,
     'amount_owing':        0,
+    'vip':                 false, // organizer flips to TRUE to hand out a VIP pass
     'ambassador_page_url': pageUrl,
     'created_at':          new Date(),
   };
@@ -1200,6 +1327,8 @@ function getAmbassadorStats(key) {
   const aNameCol     = aHeaders.indexOf('name');
   const aBusinessCol = aHeaders.indexOf('business');
   const aPaidCol     = aHeaders.indexOf('amount_paid');
+  const aVipCol      = aHeaders.indexOf('vip');
+  const aVipKeyCol   = aHeaders.indexOf('vip_key');
 
   if (aKeyCol === -1) return { ok: false, error: 'ambassador_key column not found' };
 
@@ -1210,11 +1339,31 @@ function getAmbassadorStats(key) {
         name:        aData[i][aNameCol],
         business:    aData[i][aBusinessCol],
         amount_paid: parseFloat(aData[i][aPaidCol]) || 0,
+        vip:         aVipCol !== -1 &&
+                     (aData[i][aVipCol] === true || String(aData[i][aVipCol]).toUpperCase() === 'TRUE'),
+        vip_key:     aVipKeyCol !== -1 ? String(aData[i][aVipKeyCol]).trim() : '',
+        row:         i + 1,
       };
       break;
     }
   }
   if (!ambassador) return { ok: false, error: 'Invalid link' };
+
+  // The VIP pass gets its own secret rather than reusing ambassador_key: that
+  // key is published in every referral QR the ambassador shares, so a pass
+  // derived from it would let anyone who scanned that QR walk in free. Minted
+  // the first time the organizer flips vip = TRUE.
+  let vipTicketId = '';
+  if (ambassador.vip) {
+    vipTicketId = ambassador.vip_key;
+    if (!vipTicketId) {
+      ensureColumn(ambassadorsSheet, 'vip_key');
+      const keyColIdx = ambassadorsSheet
+        .getRange(1, 1, 1, ambassadorsSheet.getLastColumn()).getValues()[0].indexOf('vip_key');
+      vipTicketId = randomKey(20);
+      ambassadorsSheet.getRange(ambassador.row, keyColIdx + 1).setValue(vipTicketId);
+    }
+  }
 
   const ticketsSheet = ss.getSheetByName(CONFIG.TICKETS_TAB);
   const tData = ticketsSheet.getDataRange().getValues();
@@ -1247,6 +1396,8 @@ function getAmbassadorStats(key) {
     amount_paid:           ambassador.amount_paid,
     amount_owing:          amountOwing,
     commission_per_ticket: null, // varies per event now
+    vip:                   ambassador.vip,
+    vip_ticket_id:         vipTicketId,
   };
 }
 

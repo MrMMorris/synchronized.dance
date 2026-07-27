@@ -698,7 +698,7 @@
   // Swap in an event's logo.webp if present: use the ?event= param when given,
   // else the sole active event. Falls back to the Nexa logo if none/missing.
   function setEventLogo() {
-    const eventId = params.get('event') || (eventsData.length === 1 ? eventsData[0].id : null);
+    const eventId = scanEventId();
     if (!eventId) return;
     const img = document.getElementById('topLogo');
     if (!img) return;
@@ -801,10 +801,16 @@
     validate(decodedText);
   }
 
+  // Which event this door is working. Only ambassador VIP passes need it (they
+  // carry no event of their own); normal tickets already know their event.
+  function scanEventId() {
+    return params.get('event') || (eventsData.length === 1 ? eventsData[0].id : '');
+  }
+
   async function validate(ticketId) {
     showResult('loading', 'Checking', 'Validating ticket…');
     try {
-      const url = `${WEB_APP_URL}?action=validate&ticket_id=${encodeURIComponent(ticketId)}&token=${encodeURIComponent(token)}`;
+      const url = `${WEB_APP_URL}?action=validate&ticket_id=${encodeURIComponent(ticketId)}&token=${encodeURIComponent(token)}&event_id=${encodeURIComponent(scanEventId())}`;
       const resp = await fetchJson(url);
 
       if (!resp.ok) {
@@ -826,7 +832,7 @@
         addLog('warn', ticketId, `${logName} — CASH DUE`);
         beep(2);
       } else if (resp.status === 'valid') {
-        showResult('valid', 'Valid', resp.buyer_name, resp.ticket_type, null, pos);
+        showResult('valid', resp.vip ? 'VIP' : 'Valid', resp.buyer_name, resp.ticket_type, null, pos);
         addLog('valid', ticketId, `${logName} — ${resp.ticket_type}`);
         scanCount++;
         stubCountEl.textContent = `${String(scanCount).padStart(2, '0')} Scan${scanCount === 1 ? '' : 's'}`;

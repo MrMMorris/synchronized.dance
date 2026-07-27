@@ -288,6 +288,127 @@
   }
   .qr-btn:hover { background: rgba(212, 175, 55, 0.2); border-color: var(--gold); }
 
+  /* Tabs — only rendered when the ambassador has a VIP pass */
+  .tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+  }
+  .tab-btn {
+    flex: 1;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    font-weight: 700;
+    padding: 13px 6px;
+    border-radius: 10px;
+    border: 1px solid rgba(212, 175, 55, 0.22);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--cream);
+    opacity: 0.55;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+  .tab-btn:hover { opacity: 0.85; }
+  .tab-btn.active {
+    opacity: 1;
+    color: var(--night);
+    background: linear-gradient(135deg, var(--gold) 0%, var(--gold-soft) 100%);
+    border-color: var(--gold);
+    box-shadow: 0 0 24px rgba(212, 175, 55, 0.25);
+  }
+
+  /* VIP pass — deliberately looks nothing like the shareable referral card */
+  .vip-pass {
+    position: relative;
+    background: linear-gradient(165deg, #1c1608 0%, #0a0a0a 55%, #16110a 100%);
+    border: 1.5px solid var(--gold);
+    border-radius: 16px;
+    padding: 26px 20px 24px;
+    text-align: center;
+    margin-bottom: 22px;
+    box-shadow: 0 0 44px rgba(212, 175, 55, 0.16), inset 0 0 70px rgba(212, 175, 55, 0.05);
+  }
+  .vip-crown {
+    font-size: 22px;
+    line-height: 1;
+    margin-bottom: 8px;
+  }
+  .vip-title {
+    font-family: 'Bagel Fat One', cursive;
+    font-size: 38px;
+    line-height: 1;
+    letter-spacing: 1px;
+    color: var(--gold);
+    text-shadow: 0 2px 0 rgba(0, 0, 0, 0.6), 0 0 26px rgba(212, 175, 55, 0.45);
+  }
+  .vip-sub {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 9px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--gold-soft);
+    margin-top: 8px;
+    opacity: 0.85;
+  }
+  .vip-name {
+    font-family: 'Dancing Script', cursive;
+    font-size: 26px;
+    font-weight: 700;
+    color: var(--cream);
+    margin-top: 12px;
+  }
+  /* Perforated stub line, with notches punched out at both edges */
+  .vip-perf {
+    position: relative;
+    border-top: 1.5px dashed rgba(212, 175, 55, 0.45);
+    margin: 20px -20px;
+  }
+  .vip-perf::before, .vip-perf::after {
+    content: '';
+    position: absolute;
+    top: -11px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--night);
+    border: 1.5px solid var(--gold);
+  }
+  .vip-perf::before { left: -11px; }
+  .vip-perf::after  { right: -11px; }
+  .vip-qr-wrap {
+    background: var(--cream);
+    padding: 12px;
+    border-radius: 10px;
+    margin: 0 auto;
+    width: 244px;
+    height: 244px;
+    box-shadow:
+      0 0 34px rgba(212, 175, 55, 0.28),
+      0 0 0 3px var(--gold),
+      0 0 0 6px #0a0a0a,
+      0 0 0 8px var(--gold-soft);
+  }
+  .vip-qr-wrap canvas, .vip-qr-wrap img {
+    display: block;
+    width: 220px !important;
+    height: 220px !important;
+  }
+  .vip-warning {
+    margin-top: 20px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid rgba(206, 17, 38, 0.45);
+    background: rgba(206, 17, 38, 0.1);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    line-height: 1.6;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    color: #ff9a9a;
+  }
+
   /* Info block */
   .info-block {
     background: rgba(0, 0, 0, 0.4);
@@ -394,18 +515,43 @@
       </div>
     </div>
 
-    <div class="qr-section">
-      <div class="qr-heading">Your Referral QR</div>
-      <div id="qr-cards"></div>
+    <div class="tabs" id="tabs" style="display:none">
+      <button class="tab-btn active" data-panel="referral">Referral QR</button>
+      <button class="tab-btn" data-panel="vip">★ VIP Pass</button>
     </div>
 
-    <div class="info-block">
-      <h3>How it works</h3>
-      <ol>
-        <li>Show or share your referral QR — buyers scan it to see upcoming events with your referral code tracked.</li>
-        <li>Once a ticket is scanned and confirmed at the door, it counts toward your total.</li>
-        <li>After the event, payouts are sent based on your confirmed count.</li>
-      </ol>
+    <div id="panel-referral">
+      <div class="qr-section">
+        <div class="qr-heading">Your Referral QR — Share This</div>
+        <div id="qr-cards"></div>
+      </div>
+
+      <div class="info-block">
+        <h3>How it works</h3>
+        <ol>
+          <li>Show or share your referral QR — buyers scan it to see upcoming events with your referral code tracked.</li>
+          <li>Once a ticket is scanned and confirmed at the door, it counts toward your total.</li>
+          <li>After the event, payouts are sent based on your confirmed count.</li>
+        </ol>
+      </div>
+    </div>
+
+    <div id="panel-vip" style="display:none">
+      <div class="vip-pass">
+        <div class="vip-crown">👑</div>
+        <div class="vip-title">VIP PASS</div>
+        <div class="vip-sub">Admit One · Every Nexa Event</div>
+        <div class="vip-name" id="vip-name"></div>
+        <div class="vip-perf"></div>
+        <div class="vip-qr-wrap" id="vip-qr"></div>
+        <div class="vip-warning">⚠ This is your personal entry pass — not for sharing. Show it at the door.</div>
+      </div>
+
+      <div class="info-block">
+        <h3>Your VIP pass</h3>
+        <p>Free entry to every Nexa Events party, for as long as you're an ambassador. Show this QR at the door — it works again at each new event, so keep it handy.</p>
+        <p style="margin-top:10px; opacity:0.75;">Don't send this one to friends — it only admits you, and sharing it gets it switched off. Your referral QR is the one to share.</p>
+      </div>
     </div>
   </div>
 
@@ -436,6 +582,27 @@
 
   function rm(n) { return 'RM ' + Number(n).toFixed(0); }
 
+  // Draws a QR into `wrap`, falling back to a remote renderer if the CDN script
+  // never loaded. Returns the data URL when it rendered locally, else null.
+  async function renderQR(wrap, text) {
+    if (typeof QRCode !== 'undefined') {
+      try {
+        const dataUrl = await new Promise((resolve, reject) => {
+          QRCode.toDataURL(text, { width: 220, margin: 1, color: { dark: '#0a0a0a', light: '#f4e8d4' } },
+            (err, url) => err ? reject(err) : resolve(url));
+        });
+        const img = document.createElement('img');
+        img.src = dataUrl;
+        img.width = img.height = 220;
+        img.style.display = 'block';
+        wrap.appendChild(img);
+        return dataUrl;
+      } catch (_) { /* fall through to the remote renderer */ }
+    }
+    wrap.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(text)}" width="220" height="220" style="display:block;" />`;
+    return null;
+  }
+
   async function buildReferralQR(ambassadorKey) {
     const container = document.getElementById('qr-cards');
     const referralUrl = `https://synchronized.dance/?ref=${encodeURIComponent(ambassadorKey)}`;
@@ -448,26 +615,7 @@
         <button class="qr-btn" id="btn-copy">🔗 Copy Link</button>
       </div>`;
 
-    const wrap = document.getElementById('qr-wrap-inner');
-    let qrDataUrl = null;
-
-    if (typeof QRCode !== 'undefined') {
-      try {
-        qrDataUrl = await new Promise((resolve, reject) => {
-          QRCode.toDataURL(referralUrl, { width: 220, margin: 1, color: { dark: '#0a0a0a', light: '#f4e8d4' } },
-            (err, url) => err ? reject(err) : resolve(url));
-        });
-        const img = document.createElement('img');
-        img.src = qrDataUrl;
-        img.width = img.height = 220;
-        img.style.display = 'block';
-        wrap.appendChild(img);
-      } catch (_) { qrDataUrl = null; }
-    }
-
-    if (!qrDataUrl) {
-      wrap.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(referralUrl)}" width="220" height="220" style="display:block;" />`;
-    }
+    const qrDataUrl = await renderQR(document.getElementById('qr-wrap-inner'), referralUrl);
 
     document.getElementById('btn-download').addEventListener('click', () => {
       if (qrDataUrl) {
@@ -484,6 +632,28 @@
       const btn = document.getElementById('btn-copy');
       const finish = () => { btn.textContent = '✓ Copied!'; setTimeout(() => { btn.textContent = '🔗 Copy Link'; }, 2000); };
       navigator.clipboard ? navigator.clipboard.writeText(referralUrl).then(finish).catch(finish) : finish();
+    });
+  }
+
+  /**
+   * The VIP pass QR encodes a ticket ID the scanner recognises directly — a
+   * different secret from the ambassador key in the referral QR, so sharing the
+   * referral link can never hand out free entry.
+   */
+  async function buildVipPass(vipTicketId, name) {
+    document.getElementById('vip-name').textContent = name || '';
+    await waitForQR();
+    await renderQR(document.getElementById('vip-qr'), vipTicketId);
+
+    const tabs = document.getElementById('tabs');
+    tabs.style.display = 'flex';
+    const buttons = tabs.querySelectorAll('.tab-btn');
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        buttons.forEach(b => b.classList.toggle('active', b === btn));
+        document.getElementById('panel-referral').style.display = btn.dataset.panel === 'referral' ? 'block' : 'none';
+        document.getElementById('panel-vip').style.display      = btn.dataset.panel === 'vip'      ? 'block' : 'none';
+      });
     });
   }
 
@@ -514,6 +684,7 @@
       document.getElementById('content').style.display = 'block';
 
       await buildReferralQR(key);
+      if (data.vip && data.vip_ticket_id) await buildVipPass(data.vip_ticket_id, data.name);
     } catch (err) {
       document.getElementById('loading').style.display = 'none';
       document.getElementById('error').style.display = 'block';
