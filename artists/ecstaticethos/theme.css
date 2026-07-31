@@ -1,0 +1,38 @@
+/* Ecstatic Ethos — drawn from the logo: white powder/chalk marks on pure black.
+   Deliberately monochrome; the only "colour" is light through smoke. */
+:root {
+  --night: #050507;
+  --ember: #101014;
+  --amber: #e6e6e6;
+  --amber-deep: #8f9096;
+  --gold: #cfd0d4;
+  --gold-soft: #b9babf;
+  --flame: #ffffff;
+  --teal: #6f7378;
+  --teal-deep: #3a3d42;
+  --red: #ce1126;
+  --cream: #f2f3f5;
+  --paper: #fafafa;
+  --smoke: rgba(255, 255, 255, 0.14);
+  --hairline: rgba(255, 255, 255, 0.16);
+
+  /* The mark is stark and geometric — a chunky display face fights it. */
+  --display-font: 'Inter', sans-serif;
+  --display-size: 34px;
+  --display-tilt: 0deg;
+  --logo-size: 168px;
+  --logo-radius: 16px;
+}
+
+.artist-name {
+  font-weight: 800;
+  letter-spacing: 6px;
+}
+
+body {
+  background:
+    radial-gradient(ellipse 85% 55% at 50% 0%, rgba(255, 255, 255, 0.16) 0%, transparent 58%),
+    radial-gradient(ellipse 100% 70% at 50% 38%, rgba(255, 255, 255, 0.06) 0%, transparent 62%),
+    radial-gradient(ellipse 65% 45% at 80% 85%, rgba(150, 158, 170, 0.10) 0%, transparent 60%),
+    linear-gradient(180deg, var(--ember) 0%, var(--night) 55%, #000000 100%);
+}

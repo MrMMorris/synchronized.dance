@@ -164,6 +164,84 @@ Manual steps remaining:
 
 ---
 
+## Artist Pages
+
+A link-tree page per artist, living at `/artists/<slug>/`. Unlike events (where each
+`index.html` is hand-written), artist pages share one renderer — the per-artist HTML is a
+~30-line shell that exists only so link previews have real `<head>` tags. Everything
+visible is built at runtime from `artists.json`.
+
+| File | Role |
+|---|---|
+| `artists.json` | Registry — one entry per artist (name, tagline, bio, embed, links) |
+| `artists/artist.css` | Shared layout. Colours are all `var()`s filled in by the theme |
+| `artists/artist.js` | Shared renderer + inline brand-icon set |
+| `artists/index.html` | Directory listing every artist. **Nothing links to it** — the artist pages deliberately have no "all artists" back link |
+| `artists/<slug>/index.html` | Head-only shell: title, OG tags, `<body data-artist="<slug>">` |
+| `artists/<slug>/theme.css` | CSS var overrides + body background, derived from the logo |
+| `artists/<slug>/logo.webp` | Square logo, shown at the top |
+| `artists/<slug>/og.png` | 1200×630 link-preview image |
+
+### Adding an artist
+
+1. `mkdir artists/<slug>/`
+2. Convert the logo: `python3 -c "from PIL import Image; Image.open('SRC.png').convert('RGB').resize((640,640), Image.LANCZOS).save('logo.webp','WEBP',quality=90,method=6)"`
+   (`sips -s format webp` silently produces nothing on this machine — use Pillow.)
+3. Generate `og.png` — 1200×630 black canvas with the 630² logo centred.
+4. Write `theme.css` from the logo's palette. See **CSS Theming Guide**; artist pages add
+   `--hairline` (border colour) and four display knobs: `--display-font`, `--display-size`,
+   `--display-tilt`, `--logo-size`.
+5. Copy an existing `index.html`, update title/OG tags/`data-artist`. **All paths in it must
+   be absolute** (`/artists/<slug>/theme.css`) — see Custom Domains below.
+6. Add the entry to `artists.json`.
+
+### artists.json fields
+
+```json
+{
+  "id": "ecstaticethos",
+  "name": "Ecstatic Ethos",
+  "tagline": "Shown in mono caps under the name",
+  "bio": "Optional paragraph",
+  "accent_color": "#e6e6e6",
+  "show_events": false,
+  "event_ids": ["01_08_2026-Beach_Party"],
+  "embed": { "type": "soundcloud", "url": "<permalink>", "visual": false, "height": 166 },
+  "links": [{ "label": "Instagram", "url": "...", "icon": "instagram", "note": "optional subtitle" }]
+}
+```
+
+- `icon` keys: `soundcloud`, `instagram`, `facebook`, `spotify`, `youtube`, `tiktok`,
+  `bandcamp`, `mixcloud`, `ticket`, `email`, `link` (fallback). `ticket` also switches the
+  button to the filled/primary style.
+- `embed.visual` — SoundCloud's big artwork player (`true`, 340px) vs the compact bar
+  (`false`, 166px). `height` overrides both; `20` is SoundCloud's bare strip.
+- `embed.type` other than `soundcloud` → `embed.url` is used as a ready-made iframe `src`.
+- `show_events: true` pulls upcoming events from `events.json` and renders them as ticket
+  buttons above the links, filtered by `event_ids` if present. Off by default — most
+  artists are separate brands from Nexa.
+
+### Custom domains (e.g. ecstaticethos.com → /artists/ecstaticethos/)
+
+An artist page can be the whole site for its own domain, with **no change to
+synchronized.dance**. Both hostnames point at the same Pages project; a Cloudflare Rewrite
+Rule maps the new domain's root to the artist path. It's a rewrite, not a redirect — the
+branded domain stays in the address bar.
+
+1. Cloudflare → **Workers & Pages** → the project → **Custom domains** → add the domain.
+2. Cloudflare → the new domain's zone → **Rules → Transform Rules → Rewrite URL**:
+   - *When*: `http.request.uri.path eq "/"`
+   - *Then*: rewrite **path** → static → `/artists/<slug>/`
+3. Set `og:url` and `<link rel="canonical">` on that artist's `index.html` to the new
+   domain — the same file is served on both hostnames, so canonical is what tells search
+   engines which one is the real home.
+
+**Why paths must be absolute:** under the rewrite the browser's URL is `/`, so a relative
+`theme.css` would resolve to `/theme.css` and 404. `artist.js` reads the slug from
+`<body data-artist>` before falling back to the URL path, for the same reason.
+
+---
+
 ## config.js
 
 This file is committed to git. It holds URLs that the HTML pages read at load time.

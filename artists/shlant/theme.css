@@ -1,0 +1,32 @@
+/* Shlant — placeholder palette (site default warm gold).
+   Replace once logo.webp lands, same way event themes are derived from a poster. */
+:root {
+  --night: #0a0a12;
+  --ember: #14121c;
+  --amber: #d9a441;
+  --amber-deep: #a06f1c;
+  --gold: #f0cf7a;
+  --gold-soft: #e6bd5c;
+  --flame: #e0952c;
+  --teal: #0d9488;
+  --teal-deep: #065f46;
+  --red: #ce1126;
+  --cream: #f5ecd8;
+  --paper: #faf3e2;
+  --smoke: rgba(217, 164, 65, 0.18);
+  --hairline: rgba(240, 207, 122, 0.22);
+
+  --display-font: 'Bagel Fat One', cursive;
+  --display-size: 46px;
+  --display-tilt: -1deg;
+  --logo-size: 150px;
+  --logo-radius: 18px;
+}
+
+body {
+  background:
+    radial-gradient(ellipse 90% 60% at 50% 0%, rgba(217, 164, 65, 0.38) 0%, transparent 55%),
+    radial-gradient(ellipse 100% 70% at 50% 35%, rgba(160, 111, 28, 0.20) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 50% at 80% 80%, rgba(13, 148, 136, 0.15) 0%, transparent 60%),
+    linear-gradient(180deg, var(--ember) 0%, var(--night) 60%, var(--ember) 100%);
+}

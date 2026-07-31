@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Artists — Nexa Events</title>
+<meta name="description" content="Artists, DJs and collectives in the Nexa Events orbit.">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Artists — Nexa Events">
+<meta property="og:description" content="Artists, DJs and collectives in the Nexa Events orbit.">
+<meta property="og:image" content="https://synchronized.dance/assets/og-default.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:url" content="https://synchronized.dance/artists/">
+<meta name="twitter:card" content="summary_large_image">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-RE0PHC72VJ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-RE0PHC72VJ');
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/artists/artist.css">
+<style>
+  :root {
+    --smoke: rgba(217, 164, 65, 0.18);
+    --hairline: rgba(240, 207, 122, 0.22);
+  }
+  body {
+    background:
+      radial-gradient(ellipse 90% 60% at 50% 0%, rgba(217, 164, 65, 0.34) 0%, transparent 55%),
+      radial-gradient(ellipse 70% 50% at 80% 80%, rgba(13, 148, 136, 0.14) 0%, transparent 60%),
+      linear-gradient(180deg, var(--ember) 0%, var(--night) 60%, var(--ember) 100%);
+  }
+  .page-title {
+    font-family: 'Bagel Fat One', cursive;
+    font-size: 40px;
+    text-transform: uppercase;
+    transform: rotate(-1deg);
+    text-shadow: 0 2px 0 rgba(0,0,0,0.5), 0 0 30px var(--smoke);
+  }
+  .artist-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    width: 100%;
+    padding: 14px;
+    border-radius: 14px;
+    text-decoration: none;
+    color: var(--cream);
+    background: rgba(0, 0, 0, 0.45);
+    border: 1px solid var(--hairline);
+    backdrop-filter: blur(8px);
+    transition: transform 0.15s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+  }
+  .artist-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--amber);
+    box-shadow: 0 0 24px var(--smoke);
+  }
+  .artist-card img {
+    width: 58px;
+    height: 58px;
+    flex: 0 0 58px;
+    object-fit: cover;
+    border-radius: 10px;
+    background: #000;
+  }
+  .artist-card-name {
+    display: block;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+  .artist-card-tagline {
+    display: block;
+    font-size: 11px;
+    opacity: 0.55;
+    margin-top: 4px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <a href="/" class="back-link">← Home</a>
+  <div class="page-title">Artists</div>
+  <div class="links" id="list"></div>
+</div>
+<script>
+  (async function () {
+    const list = document.getElementById('list');
+    let artists;
+    try {
+      artists = await fetch('/artists.json').then(r => r.json());
+    } catch (_) {
+      list.innerHTML = '<div class="empty-note">Could not load artists.</div>';
+      return;
+    }
+    const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c =>
+      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    list.innerHTML = artists.map(a => `
+      <a class="artist-card" href="/artists/${esc(a.id)}/">
+        <img src="/artists/${esc(a.id)}/logo.webp" alt="" onerror="this.style.visibility='hidden'">
+        <span>
+          <span class="artist-card-name">${esc(a.name)}</span>
+          ${a.tagline ? `<span class="artist-card-tagline">${esc(a.tagline)}</span>` : ''}
+        </span>
+      </a>`).join('');
+  })();
+</script>
+</body>
+</html>

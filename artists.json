@@ -1,0 +1,30 @@
+[
+  {
+    "id": "ecstaticethos",
+    "name": "Ecstatic Ethos",
+    "tagline": "Ecstatic dance, run at cost",
+    "bio": "Ecstatic dance events with businesses, spaces and festivals across South East Asia — run at cost, with proceeds going to local charities.",
+    "accent_color": "#e6e6e6",
+    "show_events": false,
+    "embed": {
+      "type": "soundcloud",
+      "url": "https://soundcloud.com/ecstaticethos/ecstatic-dance-bao-sheng-durian-festival-2018-penang-malaysia",
+      "visual": false
+    },
+    "links": [
+      { "label": "SoundCloud", "url": "https://soundcloud.com/ecstaticethos", "icon": "soundcloud" },
+      { "label": "Instagram", "url": "https://instagram.com/ecstatic.ethos", "icon": "instagram" },
+      { "label": "Facebook", "url": "https://www.facebook.com/EcstaticEthos", "icon": "facebook" }
+    ]
+  },
+  {
+    "id": "shlant",
+    "name": "Shlant",
+    "tagline": "",
+    "bio": "",
+    "accent_color": "#d9a441",
+    "show_events": false,
+    "embed": null,
+    "links": []
+  }
+]
