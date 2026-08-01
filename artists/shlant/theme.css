@@ -18,7 +18,7 @@
 
   --display-font: 'Bagel Fat One', cursive;
   --display-size: 46px;
-  --display-tilt: -1deg;
+  --display-tilt: 0deg;
   --logo-size: 150px;
   --logo-radius: 18px;
 }

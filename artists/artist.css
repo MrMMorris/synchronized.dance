@@ -10,7 +10,7 @@
   --cream: #f5ecd8;
   --display-font: 'Bagel Fat One', cursive;
   --display-size: 46px;
-  --display-tilt: -1deg;
+  --display-tilt: 0deg; /* upright by default; opt in per artist if wanted */
   --logo-size: 150px;
   --logo-radius: 18px;
 }
