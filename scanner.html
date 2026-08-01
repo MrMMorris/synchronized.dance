@@ -756,9 +756,16 @@
       await html5QrCode.start(
         { facingMode: 'environment' },
         {
-          fps: 10,
+          fps: 20,
           qrbox: (w, h) => { const side = Math.min(w, h) * 0.7; return { width: side, height: side }; },
           aspectRatio: 1.0,
+          // Ticket QRs are never mirrored, and by default the library decodes
+          // each frame twice — once normal, once flipped.
+          disableFlip: true,
+          // Hands decoding to the browser's native (hardware-accelerated)
+          // BarcodeDetector where it exists — Android Chrome. Falls back to the
+          // JS decoder elsewhere, so iOS is unaffected.
+          experimentalFeatures: { useBarCodeDetectorIfSupported: true },
         },
         onScanSuccess,
         () => {}
