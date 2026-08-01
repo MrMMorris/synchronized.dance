@@ -152,12 +152,15 @@
   }
   .commission-badge .label {
     font-family: 'JetBrains Mono', monospace;
-    font-size: 11px;
+    font-size: 12px;
+    font-weight: 700;
     letter-spacing: 1.5px;
     text-transform: uppercase;
     text-align: center;
     color: var(--cream);
-    opacity: 0.85;
+    /* letter-spacing leaves a trailing gap after the last character, so centred
+       text sits half a space left of the amount above it. Pull it back. */
+    margin-right: -1.5px;
   }
 
   .pitch-text {
@@ -193,6 +196,41 @@
     width: 24px;
     text-shadow: 0 0 12px rgba(212, 175, 55, 0.3);
   }
+
+  /* Perpetual VIP pass callout — the perk beyond per-ticket commission */
+  .vip-note {
+    margin-top: 18px;
+    padding: 14px 40px;
+    border-radius: 10px;
+    background: color-mix(in srgb, var(--gold) 8%, transparent);
+    border: 1px solid color-mix(in srgb, var(--gold) 32%, transparent);
+    text-align: center;
+  }
+  .vip-note-head {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+  .vip-note-head .star {
+    font-size: 15px;
+    line-height: 1;
+    text-shadow: 0 0 12px color-mix(in srgb, var(--gold) 60%, transparent);
+  }
+  .vip-note p {
+    font-size: 13px;
+    line-height: 1.6;
+    color: var(--cream);
+    opacity: 0.85;
+  }
+  .vip-note strong { color: var(--gold); opacity: 1; }
 
   /* Form card */
   .form-card {
@@ -415,8 +453,9 @@
   <div id="root">
     <div class="pitch-card">
       <div class="commission-badge">
-        <span class="amount">RM5</span>
-        <span class="label">per confirmed ticket sold</span>
+        <span class="label">Earn</span>
+        <span class="amount">10%</span>
+        <span class="label">of your ticket sales</span>
       </div>
       <p class="pitch-text">
         Help spread the word about <strong>NEXA Events</strong> and earn for every ticket
@@ -433,13 +472,18 @@
         </li>
         <li>
           <span class="step-num">3</span>
-          <span>Earn <strong style="color:var(--gold)">RM5</strong> for every ticket confirmed at the door — tracked automatically.</span>
+          <span>Earn <strong style="color:var(--gold)">10%</strong> on every ticket confirmed at the door — tracked automatically.</span>
         </li>
         <li>
           <span class="step-num">4</span>
           <span>After the event, we pay out via your chosen method based on your confirmed count.</span>
         </li>
       </ul>
+
+      <div class="vip-note">
+        <div class="vip-note-head"><span class="star">★</span> Perpetual VIP Pass</div>
+        <p>Our best ambassadors earn <strong>one free entry to every Nexa event, for life!</strong></p>
+      </div>
     </div>
 
     <form id="signupForm" class="form-card" novalidate>
