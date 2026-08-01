@@ -65,9 +65,9 @@
   }
   body {
     background:
-      radial-gradient(ellipse 90% 60% at 50% 0%, rgba(255, 120, 50, 0.4) 0%, transparent 55%),
-      radial-gradient(ellipse 100% 70% at 50% 35%, rgba(200, 70, 0, 0.2) 0%, transparent 60%),
-      radial-gradient(ellipse 70% 50% at 80% 80%, rgba(13, 148, 136, 0.18) 0%, transparent 60%),
+      radial-gradient(ellipse 90% 60% at 50% 0%, color-mix(in srgb, var(--amber) 40%, transparent) 0%, transparent 55%),
+      radial-gradient(ellipse 100% 70% at 50% 35%, color-mix(in srgb, var(--amber-deep) 20%, transparent) 0%, transparent 60%),
+      radial-gradient(ellipse 70% 50% at 80% 80%, color-mix(in srgb, var(--teal) 18%, transparent) 0%, transparent 60%),
       linear-gradient(180deg, var(--ember) 0%, var(--night) 60%, var(--ember) 100%);
     padding: 20px 14px 60px;
     overflow-x: hidden;
@@ -147,7 +147,7 @@
     text-transform: uppercase;
     text-shadow:
       0 2px 0 rgba(0,0,0,0.5),
-      0 0 30px rgba(255, 107, 26, 0.4);
+      0 0 30px color-mix(in srgb, var(--amber) 40%, transparent);
     transform: rotate(-1deg);
   }
   h1 .tickets {
@@ -161,7 +161,7 @@
     margin-top: -6px;
     text-shadow:
       0 2px 0 rgba(0,0,0,0.6),
-      0 0 25px rgba(252, 209, 22, 0.5);
+      0 0 25px color-mix(in srgb, var(--gold) 50%, transparent);
   }
 
   .subtitle {
@@ -187,7 +187,7 @@
     text-transform: uppercase;
     color: var(--cream);
     background: rgba(0, 0, 0, 0.4);
-    border: 1px solid rgba(255, 181, 71, 0.3);
+    border: 1px solid color-mix(in srgb, var(--gold) 30%, transparent);
     padding: 8px 16px;
     border-radius: 100px;
     backdrop-filter: blur(8px);
@@ -196,12 +196,12 @@
 
   /* Tickets */
   .ticket {
-    background: linear-gradient(180deg, rgba(26, 10, 5, 0.95) 0%, rgba(13, 6, 4, 0.98) 100%);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--ember) 95%, transparent) 0%, color-mix(in srgb, var(--night) 98%, transparent) 100%);
     margin-bottom: 24px;
     position: relative;
     border-radius: 14px;
     overflow: hidden;
-    border: 1px solid rgba(255, 181, 71, 0.25);
+    border: 1px solid color-mix(in srgb, var(--gold) 25%, transparent);
     box-shadow:
       0 0 0 1px rgba(0,0,0,0.5),
       0 12px 30px -10px rgba(0,0,0,0.8),
@@ -226,7 +226,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    border-bottom: 1px dashed rgba(255, 181, 71, 0.2);
+    border-bottom: 1px dashed color-mix(in srgb, var(--gold) 20%, transparent);
     position: relative;
   }
   .ticket-number {
@@ -239,7 +239,7 @@
   }
   .ticket-number .num {
     color: var(--amber);
-    text-shadow: 0 0 14px rgba(255, 107, 26, 0.5);
+    text-shadow: 0 0 14px color-mix(in srgb, var(--amber) 50%, transparent);
   }
   .ticket-type {
     font-family: 'JetBrains Mono', monospace;
@@ -251,8 +251,8 @@
     background: linear-gradient(135deg, var(--teal) 0%, var(--teal-deep) 100%);
     padding: 5px 12px;
     border-radius: 100px;
-    box-shadow: 0 2px 12px rgba(13, 148, 136, 0.4);
-    border: 1px solid rgba(252, 209, 22, 0.4);
+    box-shadow: 0 2px 12px color-mix(in srgb, var(--teal) 40%, transparent);
+    border: 1px solid color-mix(in srgb, var(--gold) 40%, transparent);
   }
 
   .ticket-body {
@@ -270,7 +270,7 @@
     height: 244px;
     position: relative;
     box-shadow:
-      0 0 30px rgba(13, 148, 136, 0.3),
+      0 0 30px color-mix(in srgb, var(--teal) 30%, transparent),
       0 0 0 2px var(--teal),
       0 0 0 4px var(--gold),
       0 0 0 6px var(--ember);
@@ -288,14 +288,14 @@
     font-family: 'Bagel Fat One', cursive;
     font-size: 38px;
     color: var(--cream);
-    background: rgba(206, 17, 38, 0.95);
+    background: color-mix(in srgb, var(--red) 95%, transparent);
     border: 3px solid var(--cream);
     padding: 6px 18px;
     letter-spacing: 4px;
     pointer-events: none;
     display: none;
     text-shadow: 0 2px 0 rgba(0,0,0,0.5);
-    box-shadow: 0 0 20px rgba(206, 17, 38, 0.6);
+    box-shadow: 0 0 20px color-mix(in srgb, var(--red) 60%, transparent);
   }
   .ticket.used .used-stamp { display: block; }
 
@@ -319,8 +319,8 @@
 
   .ticket-foot {
     padding: 14px 18px;
-    border-top: 1px dashed rgba(252, 209, 22, 0.25);
-    background: linear-gradient(90deg, rgba(13, 148, 136, 0.15) 0%, transparent 100%);
+    border-top: 1px dashed color-mix(in srgb, var(--gold) 25%, transparent);
+    background: linear-gradient(90deg, color-mix(in srgb, var(--teal) 15%, transparent) 0%, transparent 100%);
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -412,7 +412,7 @@
     justify-content: space-between;
     align-items: flex-start;
     padding: 8px 0;
-    border-bottom: 1px dashed rgba(13, 148, 136, 0.2);
+    border-bottom: 1px dashed color-mix(in srgb, var(--teal) 20%, transparent);
     font-family: 'Inter', sans-serif;
     font-size: 13px;
     gap: 16px;
@@ -439,7 +439,7 @@
     margin-top: 24px;
     background: rgba(0, 0, 0, 0.4);
     backdrop-filter: blur(8px);
-    border: 1px solid rgba(255, 181, 71, 0.25);
+    border: 1px solid color-mix(in srgb, var(--gold) 25%, transparent);
     border-radius: 12px;
     padding: 22px 20px;
   }
@@ -468,7 +468,7 @@
     font-family: 'Bagel Fat One', cursive;
     font-size: 56px;
     color: var(--flame);
-    text-shadow: 0 0 30px rgba(255, 60, 0, 0.6);
+    text-shadow: 0 0 30px color-mix(in srgb, var(--flame) 60%, transparent);
     margin-bottom: 14px;
     letter-spacing: 1px;
   }
@@ -505,13 +505,13 @@
   .debug-panel {
     margin-top: 30px;
     padding: 20px;
-    background: #0a0504;
-    color: #ffb547;
+    background: var(--night);
+    color: var(--gold);
     font-family: 'JetBrains Mono', monospace;
     font-size: 11px;
     line-height: 1.6;
     border-radius: 10px;
-    border: 1px solid rgba(255, 181, 71, 0.3);
+    border: 1px solid color-mix(in srgb, var(--gold) 30%, transparent);
     overflow-x: auto;
     text-align: left;
   }
@@ -523,7 +523,7 @@
     text-transform: uppercase;
     margin-bottom: 12px;
     padding-bottom: 8px;
-    border-bottom: 1px dashed rgba(255, 181, 71, 0.2);
+    border-bottom: 1px dashed color-mix(in srgb, var(--gold) 20%, transparent);
   }
   .debug-row {
     display: grid;
@@ -538,7 +538,7 @@
   .debug-pre {
     margin-top: 10px;
     padding: 10px;
-    background: #050201;
+    background: color-mix(in srgb, var(--night) 70%, #000);
     border-radius: 4px;
     white-space: pre-wrap;
     word-break: break-all;
@@ -549,7 +549,7 @@
   .debug-hint {
     margin-top: 12px;
     padding: 10px;
-    background: rgba(255, 107, 26, 0.1);
+    background: color-mix(in srgb, var(--amber) 10%, transparent);
     border-left: 3px solid var(--amber);
     color: var(--cream);
     font-size: 11px;
@@ -820,10 +820,21 @@
     });
   }
 
+  // The QR is drawn to a canvas, so it can't use CSS vars directly — read the
+  // event theme's values at render time instead. Keep --night dark and --paper
+  // light in every theme: scanners need the contrast.
+  function qrColors() {
+    const css = getComputedStyle(document.documentElement);
+    return {
+      dark: css.getPropertyValue('--night').trim() || '#0d0604',
+      light: css.getPropertyValue('--paper').trim() || '#f4e8d4',
+    };
+  }
+
   function renderQRFallback(canvas, ticketId, errMsg) {
     const wrap = canvas.parentElement;
     const fallbackUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=' + encodeURIComponent(ticketId);
-    wrap.innerHTML = `<img src="${fallbackUrl}" alt="QR" width="220" height="220" style="display:block;" onerror="this.outerHTML='<div style=\\'width:220px;height:220px;background:#1a0a05;border:2px solid #ff3d00;display:flex;align-items:center;justify-content:center;text-align:center;padding:12px;font-family:monospace;font-size:11px;color:#ff3d00;\\'>QR library failed. Show staff: <br/><b>${escapeHtml(ticketId)}</b></div>'" />`;
+    wrap.innerHTML = `<img src="${fallbackUrl}" alt="QR" width="220" height="220" style="display:block;" onerror="this.outerHTML='<div style=\\'width:220px;height:220px;background:var(--night);border:2px solid var(--red);display:flex;align-items:center;justify-content:center;text-align:center;padding:12px;font-family:monospace;font-size:11px;color:var(--red);\\'>QR library failed. Show staff: <br/><b>${escapeHtml(ticketId)}</b></div>'" />`;
     if (errMsg) console.error('QR generation failed:', errMsg);
   }
 
@@ -891,7 +902,7 @@
       try {
         QRCode.toCanvas(canvas, t.ticket_id, {
           width: 220, margin: 1,
-          color: { dark: '#0d0604', light: '#f4e8d4' },
+          color: qrColors(),
           errorCorrectionLevel: 'M',
         }, (err) => { if (err) renderQRFallback(canvas, t.ticket_id, err.message); });
       } catch (e) { renderQRFallback(canvas, t.ticket_id, e.message); }

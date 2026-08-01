@@ -1,23 +1,27 @@
+/* Penang Beach Party — sampled from poster.webp.
+   The poster is cream paper, gold foliage/rules, and navy-black ink (#24243c).
+   These pages stay dark, so the ink becomes the field and the golds carry the accents.
+   --teal / --red are status colours (valid / invalid), not brand colours — left alone. */
 :root {
-  --night: #0a0a12;
-  --ember: #14121c;
-  --amber: #d9a441;
-  --amber-deep: #a06f1c;
-  --gold: #f0cf7a;
-  --gold-soft: #e6bd5c;
-  --flame: #e0952c;
+  --night: #080a12;
+  --ember: #12172a;
+  --amber: #c9922e;
+  --amber-deep: #8f6420;
+  --gold: #e4b46c;
+  --gold-soft: #d2a355;
+  --flame: #e8c88a;
   --teal: #0d9488;
   --teal-deep: #065f46;
   --red: #ce1126;
-  --cream: #f5ecd8;
-  --paper: #faf3e2;
-  --smoke: rgba(217, 164, 65, 0.06);
+  --cream: #f4f1ea;
+  --paper: #faf8f2;
+  --smoke: rgba(201, 146, 46, 0.10);
 }
 
 body {
   background:
-    radial-gradient(ellipse 90% 60% at 50% 0%, rgba(217, 164, 65, 0.38) 0%, transparent 55%),
-    radial-gradient(ellipse 100% 70% at 50% 35%, rgba(160, 111, 28, 0.20) 0%, transparent 60%),
-    radial-gradient(ellipse 70% 50% at 80% 80%, rgba(13, 148, 136, 0.15) 0%, transparent 60%),
-    linear-gradient(180deg, var(--ember) 0%, var(--night) 60%, var(--ember) 100%);
+    radial-gradient(ellipse 90% 60% at 50% 0%, rgba(201, 146, 46, 0.30) 0%, transparent 55%),
+    radial-gradient(ellipse 100% 70% at 50% 35%, rgba(143, 100, 32, 0.18) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 50% at 80% 80%, rgba(36, 36, 60, 0.55) 0%, transparent 62%),
+    linear-gradient(180deg, var(--ember) 0%, var(--night) 58%, #0e1322 100%);
 }
