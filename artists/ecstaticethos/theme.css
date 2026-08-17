@@ -36,3 +36,20 @@ body {
     radial-gradient(ellipse 65% 45% at 80% 85%, rgba(150, 158, 170, 0.10) 0%, transparent 60%),
     linear-gradient(180deg, var(--ember) 0%, var(--night) 55%, #000000 100%);
 }
+
+/* Moth illustration, pinned to the bottom edge, only its top two-thirds showing. */
+body::after {
+  content: '';
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 66vw;
+  height: calc(66vw * 1742 / 2200 * 2 / 3);
+  background-image: url("/artists/ecstaticethos/bg-moth.webp");
+  background-size: 100% auto;
+  background-position: top center;
+  background-repeat: no-repeat;
+  pointer-events: none;
+  z-index: 0;
+}
