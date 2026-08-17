@@ -53,3 +53,10 @@ body::after {
   pointer-events: none;
   z-index: 0;
 }
+
+@media (max-width: 600px) {
+  body::after {
+    width: 110vw;
+    height: calc(110vw * 1742 / 2200 * 2 / 3);
+  }
+}
