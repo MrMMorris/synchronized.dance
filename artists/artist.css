@@ -96,6 +96,7 @@ body::before {
   text-transform: uppercase;
   color: var(--gold);
   margin-top: 10px;
+  white-space: pre-line;
 }
 
 .artist-bio {
