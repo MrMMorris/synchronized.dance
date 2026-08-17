@@ -56,6 +56,7 @@
       show_user: 'true',
       show_reposts: 'false',
       show_teaser: 'false',
+      show_artwork: 'false',
       visual: embed.visual === false ? 'false' : 'true',
     });
     return 'https://w.soundcloud.com/player/?' + params.toString();
