@@ -25,8 +25,8 @@
 }
 
 .artist-name {
-  font-weight: 800;
-  letter-spacing: 6px;
+  /* Logo already spells out the name, so the text heading is redundant here. */
+  display: none;
 }
 
 body {
