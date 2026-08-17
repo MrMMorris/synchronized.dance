@@ -40,6 +40,11 @@
     return ICONS[name] || ICONS.link;
   }
 
+  // Runs after esc(), so it's only ever matching already-escaped text.
+  function linkifyEmails(s) {
+    return s.replace(/[\w.+-]+@[\w-]+\.[\w.-]+/g, m => `<a href="mailto:${m}">${m}</a>`);
+  }
+
   // SoundCloud's widget takes the plain permalink, so no track ID lookup needed.
   function soundcloudSrc(embed, accent) {
     const params = new URLSearchParams({
@@ -128,7 +133,7 @@
         <div class="artist-name">${esc(artist.name)}</div>
         ${artist.tagline ? `<div class="artist-tagline">${esc(artist.tagline)}</div>` : ''}
       </div>`,
-      artist.bio ? `<p class="artist-bio">${esc(artist.bio)}</p>` : '',
+      artist.bio ? `<p class="artist-bio">${linkifyEmails(esc(artist.bio))}</p>` : '',
       embedHtml(artist.embed, artist.accent_color),
       links.length
         ? `<div class="links">${links.map(linkHtml).join('')}</div>`

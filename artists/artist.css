@@ -99,13 +99,19 @@ body::before {
 }
 
 .artist-bio {
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.6;
   text-align: center;
   color: var(--cream);
   opacity: 0.65;
   max-width: 360px;
 }
+.artist-bio a {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.artist-bio a:hover { opacity: 0.8; }
 
 /* Embedded player (SoundCloud / anything else iframe-shaped). */
 .embed-wrap {
