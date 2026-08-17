@@ -122,7 +122,7 @@
       return;
     }
 
-    document.title = `${artist.name} — Nexa Events`;
+    document.title = artist.name;
 
     const links = (await eventLinks(artist)).concat(artist.links || []);
 
