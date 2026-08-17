@@ -19,6 +19,7 @@
 
 html, body {
   min-height: 100vh;
+  background: var(--night);
   font-family: 'Inter', sans-serif;
   color: var(--cream);
   -webkit-font-smoothing: antialiased;
