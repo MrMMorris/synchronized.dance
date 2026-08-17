@@ -90,7 +90,7 @@ body::before {
 
 .artist-tagline {
   font-family: 'JetBrains Mono', monospace;
-  font-size: 10px;
+  font-size: 14px;
   font-weight: 600;
   letter-spacing: 3px;
   text-transform: uppercase;
