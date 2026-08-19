@@ -12,8 +12,8 @@
       "visual": false
     },
     "links": [
-      { "label": "SoundCloud", "url": "https://soundcloud.com/ecstaticethos", "icon": "soundcloud" },
       { "label": "Instagram", "url": "https://instagram.com/ecstatic.ethos", "icon": "instagram" },
+      { "label": "SoundCloud", "url": "https://soundcloud.com/ecstaticethos", "icon": "soundcloud" },
       { "label": "Facebook", "url": "https://www.facebook.com/EcstaticEthos", "icon": "facebook" }
     ]
   },
