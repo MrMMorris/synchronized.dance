@@ -68,8 +68,8 @@ body::before {
 .back-link:hover { opacity: 1; }
 
 .artist-logo {
-  width: var(--logo-size);
-  height: var(--logo-size);
+  width: var(--logo-width);
+  height: var(--logo-height);
   object-fit: cover;
   border-radius: var(--logo-radius);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
