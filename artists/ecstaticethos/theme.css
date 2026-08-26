@@ -36,6 +36,10 @@
   box-shadow: none;
   padding: 15px;
   box-sizing: border-box;
+  /* Scale to the viewport so the wide mark never gets cropped on narrow screens. */
+  width: min(var(--logo-width), 100%);
+  height: auto;
+  aspect-ratio: var(--logo-width) / var(--logo-height);
 }
 
 body {
@@ -51,8 +55,9 @@ body::after {
   content: '';
   position: fixed;
   bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  left: 0;
+  right: 0;
+  margin: 0 auto;
   width: 66vw;
   height: calc(66vw * 1742 / 2200 * 2 / 3);
   background-image: url("/artists/ecstaticethos/bg-moth.webp");
