@@ -358,7 +358,7 @@
 <body>
 <div class="container">
   <div id="root"><div class="loading">Loading…</div></div>
-  <footer>★ Nexa Events ★</footer>
+  <footer id="footer">★ Nexa Events ★</footer>
 </div>
 
 <script>
@@ -408,6 +408,10 @@
       showState('error', 'Coming soon', 'Tickets for this event aren’t on sale yet.');
       return;
     }
+    if (event.organizer) {
+      document.title = 'Buy Tickets — ' + event.organizer;
+      document.getElementById('footer').remove();
+    }
     renderForm();
   }
 
@@ -424,11 +428,13 @@
     const payText = event.payment_instructions !== undefined
       ? event.payment_instructions
       : 'Transfer the total, then upload your payment screenshot below.';
+    const contactEmail = event.contact_email || 'nexa.events.marketing@gmail.com';
+    const contactIg = event.contact_instagram || 'nexa.events';
 
     root.innerHTML = `
       <a class="back-link" href="/events/${escapeHtml(eventId)}/">← Back to event</a>
       <header>
-        <img class="top-logo" src="/events/${escapeHtml(eventId)}/logo.webp" onerror="this.onerror=function(){this.onerror=null;this.src='assets/NEXA_white.png';};this.src='/events/${escapeHtml(eventId)}/logo.png';" alt="Nexa Events" />
+        ${event.organizer ? '' : `<img class="top-logo" src="/events/${escapeHtml(eventId)}/logo.webp" onerror="this.onerror=function(){this.onerror=null;this.src='assets/NEXA_white.png';};this.src='/events/${escapeHtml(eventId)}/logo.png';" alt="Nexa Events" />`}
         <h1>Get<span class="sub">Tickets</span></h1>
         <div class="event-meta">
           <span class="accent">${escapeHtml(event.name)}</span><br/>
@@ -498,8 +504,8 @@
           <span>🎟️ Scan at door</span>
         </div>
         <div class="trust-contact">
-          Questions?\n <a href="mailto:nexa.events.marketing@gmail.com">nexa.events.marketing@gmail.com</a>
-          · <a href="https://instagram.com/nexa.events" target="_blank" rel="noopener">@nexa.events</a>
+          Questions?\n <a href="mailto:${escapeHtml(contactEmail)}">${escapeHtml(contactEmail)}</a>
+          · <a href="https://instagram.com/${escapeHtml(contactIg)}" target="_blank" rel="noopener">@${escapeHtml(contactIg)}</a>
         </div>
       </form>
     `;

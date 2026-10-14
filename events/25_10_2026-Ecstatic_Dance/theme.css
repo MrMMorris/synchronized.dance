@@ -1,0 +1,28 @@
+/* Ecstatic Dance — sampled from poster.gif.
+   The poster is misty lake water: slate (#182329 / #26333c) fading up through
+   blue-grey (#879eae) to pale mist (#d2e4ed). No warm hue at all, so the
+   "amber"/"gold" slots carry the mist blues instead.
+   --teal / --red are status colours (valid / invalid), not brand colours — left alone. */
+:root {
+  --night: #0b1115;
+  --ember: #182329;
+  --amber: #879eae;
+  --amber-deep: #4f6573;
+  --gold: #d2e4ed;
+  --gold-soft: #b3c6d5;
+  --flame: #e6eff5;
+  --teal: #0d9488;
+  --teal-deep: #065f46;
+  --red: #ce1126;
+  --cream: #eef3f6;
+  --paper: #f6f9fb;
+  --smoke: rgba(135, 158, 174, 0.10);
+}
+
+body {
+  background:
+    radial-gradient(ellipse 90% 60% at 50% 0%, rgba(203, 221, 233, 0.22) 0%, transparent 55%),
+    radial-gradient(ellipse 100% 70% at 50% 35%, rgba(99, 120, 135, 0.22) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 50% at 80% 80%, rgba(55, 72, 83, 0.55) 0%, transparent 62%),
+    linear-gradient(180deg, var(--ember) 0%, var(--night) 58%, #121c22 100%);
+}

@@ -49,6 +49,14 @@ const EVENTS = {
     EVENT_ADDRESS: '515 Jalan C M Hashim, 11200 Tanjung Bungah, Penang',
     COMMISSION_PER_TICKET: 5,
   },
+  '25_10_2026-Ecstatic_Dance': {
+    EVENT_NAME:    'Ecstatic Dance',
+    EVENT_DATE:    'October 25',
+    EVENT_TIME:    '3PM – 5PM',
+    EVENT_VENUE:   'The Palm House, Penang',
+    EVENT_ADDRESS: '2nd Floor, 2 Gat Lebuh Chulia, 10300 George Town, Penang',
+    COMMISSION_PER_TICKET: 5,
+  },
 };
 
 // ============================================================================

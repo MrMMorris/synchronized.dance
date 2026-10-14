@@ -1,19 +1,22 @@
 [
   {
-    "id": "01_08_2026-Beach_Party",
-    "date_iso": "2026-08-01",
-    "date_display": "August 1",
-    "name": "Penang Beach Party",
-    "genres": ["Afrohouse", "Deep House", "Amapiano", "Hip Hop", "RnB"],
-    "time": "6PM – 12AM",
-    "venue": "Northern Cove, Penang",
-    "address": "515 Jalan C M Hashim, 11200 Tanjung Bungah, Penang",
-    "maps_url": "https://maps.app.goo.gl/zzpVh7ByuNHCBdg48",
+    "id": "25_10_2026-Ecstatic_Dance",
+    "date_iso": "2026-10-25",
+    "date_display": "October 25",
+    "name": "Ecstatic Dance",
+    "organizer": "Ecstatic Ethos",
+    "contact_email": "marcus@ecstaticethos.com",
+    "contact_instagram": "ecstatic.ethos",
+    "genres": ["Ambient","House","Breakbeat","Techno"],
+    "time": "3PM – 5PM",
+    "venue": "The Palm House, Penang",
+    "address": "2nd Floor, 2 Gat Lebuh Chulia, 10300 George Town, Penang",
+    "maps_url": "https://maps.app.goo.gl/9jQpYBJPypEv4vn88",
     "ticket_form_url": "",
     "ticket_form_prefill_entry": "",
-    "accent_color": "#d9a441",
+    "accent_color": "#879eae",
     "ticket_types": [
-      { "label": "General Admission", "price": 55, "note": "Includes welcome drink" }
+      { "label": "General Admission", "price": 30 }
     ],
     "qr_only": true,
     "payment_instructions": ""
