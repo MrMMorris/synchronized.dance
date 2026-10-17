@@ -119,6 +119,18 @@
     backdrop-filter: blur(8px);
   }
   .btn-map:hover { border-color: var(--gold); transform: translateY(-1px); }
+  .back-link {
+    align-self: flex-start;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    text-decoration: none;
+    opacity: 0.7;
+    transition: opacity 0.15s;
+  }
+  .back-link:hover { opacity: 1; }
   .modal {
     display: none;
     position: fixed;
@@ -130,10 +142,27 @@
   }
   .modal.open { display: flex; }
   .modal img { max-width: 90vw; max-height: 90vh; border-radius: 12px; }
+  .blurb {
+    width: min(442px, calc(100vw - 16px));
+    padding: 18px 20px;
+    background: rgba(0,0,0,0.45);
+    border: 1px solid rgba(210, 228, 237, 0.3);
+    border-radius: 14px;
+    backdrop-filter: blur(8px);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--cream);
+  }
+  .blurb[hidden] { display: none; }
+  .blurb .quote { font-style: italic; text-align: center; color: var(--gold); }
 </style>
 </head>
 <body>
 <div class="container">
+  <a href="/" class="back-link">← All Events</a>
   <img src="poster.webp" alt="Ecstatic Dance Poster" class="poster" id="posterImg" fetchpriority="high">
   <div class="meta-strip">
     3PM – 5PM <span class="sep">✦</span> The Palm House, Penang
@@ -142,6 +171,7 @@
     <a href="/buy.html?event=25_10_2026-Ecstatic_Dance" class="btn btn-ticket" id="ticketBtn" onclick="trackTicketClick()"><span>🎟</span><span>Tickets</span></a>
     <a href="https://maps.app.goo.gl/9jQpYBJPypEv4vn88" target="_blank" class="btn btn-map" onclick="trackMapClick()"><span>📍</span><span>Map</span></a>
   </div>
+  <div class="blurb" id="blurb" hidden></div>
 </div>
 
 <div class="modal" id="posterModal">
@@ -158,6 +188,20 @@
     const btn = document.getElementById('ticketBtn');
     btn.href += (btn.href.indexOf('?') === -1 ? '?' : '&') + 'ref=' + encodeURIComponent(ref);
   })();
+  // Optional blurb from events.json — paragraphs split on blank lines.
+  fetch('/events.json').then(r => r.json()).then(events => {
+    const id = location.pathname.split('/').filter(Boolean)[1];
+    const ev = events.find(e => e.id === id);
+    if (!ev || !ev.description) return;
+    const el = document.getElementById('blurb');
+    ev.description.split(/\n\s*\n/).forEach(t => {
+      const p = document.createElement('p');
+      p.textContent = t.trim();
+      if (/^["“]/.test(p.textContent)) p.className = 'quote';
+      el.appendChild(p);
+    });
+    el.hidden = false;
+  }).catch(() => {});
   document.getElementById('posterImg').addEventListener('click', () => document.getElementById('posterModal').classList.add('open'));
   document.getElementById('posterModal').addEventListener('click', () => document.getElementById('posterModal').classList.remove('open'));
 </script>

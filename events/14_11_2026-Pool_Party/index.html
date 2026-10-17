@@ -130,6 +130,22 @@
   }
   .modal.open { display: flex; }
   .modal img { max-width: 90vw; max-height: 90vh; border-radius: 12px; }
+  .blurb {
+    width: min(442px, calc(100vw - 16px));
+    padding: 18px 20px;
+    background: rgba(0,0,0,0.45);
+    border: 1px solid rgba(210, 228, 237, 0.3);
+    border-radius: 14px;
+    backdrop-filter: blur(8px);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--cream);
+  }
+  .blurb[hidden] { display: none; }
+  .blurb .quote { font-style: italic; text-align: center; color: var(--gold); }
 </style>
 </head>
 <body>
@@ -142,6 +158,7 @@
     <a href="/buy.html?event=14_11_2026-Pool_Party" class="btn btn-ticket" id="ticketBtn" onclick="trackTicketClick()"><span>🎟</span><span>Tickets</span></a>
     <a href="https://maps.app.goo.gl/d96bMoBKAWsmyBru6" target="_blank" class="btn btn-map" onclick="trackMapClick()"><span>📍</span><span>Map</span></a>
   </div>
+  <div class="blurb" id="blurb" hidden></div>
 </div>
 
 <div class="modal" id="posterModal">
@@ -158,6 +175,20 @@
     const btn = document.getElementById('ticketBtn');
     btn.href += (btn.href.indexOf('?') === -1 ? '?' : '&') + 'ref=' + encodeURIComponent(ref);
   })();
+  // Optional blurb from events.json — paragraphs split on blank lines.
+  fetch('/events.json').then(r => r.json()).then(events => {
+    const id = location.pathname.split('/').filter(Boolean)[1];
+    const ev = events.find(e => e.id === id);
+    if (!ev || !ev.description) return;
+    const el = document.getElementById('blurb');
+    ev.description.split(/\n\s*\n/).forEach(t => {
+      const p = document.createElement('p');
+      p.textContent = t.trim();
+      if (/^["“]/.test(p.textContent)) p.className = 'quote';
+      el.appendChild(p);
+    });
+    el.hidden = false;
+  }).catch(() => {});
   document.getElementById('posterImg').addEventListener('click', () => document.getElementById('posterModal').classList.add('open'));
   document.getElementById('posterModal').addEventListener('click', () => document.getElementById('posterModal').classList.remove('open'));
 </script>
