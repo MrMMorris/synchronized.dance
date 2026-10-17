@@ -38,6 +38,6 @@
     "ticket_types": [
       { "label": "Entry", "price": 48, "note": "includes 1 cocktail/mocktail" }
     ],
-    "payment_instructions": "Bank transfer to HSBC · Account 303875462888 · Marcus Morris. Then upload your screenshot."
+    "payment_instructions": "Bank details:\nHSBC\n303875462888\nMarcus Morris"
   }
 ]
