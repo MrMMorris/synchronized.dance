@@ -1,0 +1,28 @@
+/* Picnic & Pool Party — sampled from poster.png.
+   Navy title ink (#001032) as the base, flamingo pink (#f26b7a) as the warm accent,
+   pool-leaf aqua (#7fd0dc) for labels, rubber-duck yellow (#fae33f) as the hot spark,
+   poster paper (#f2eee3) for text.
+   --teal / --red are status colours (valid / invalid), not brand colours — left alone. */
+:root {
+  --night: #000a22;
+  --ember: #001032;
+  --amber: #f26b7a;
+  --amber-deep: #c8475b;
+  --gold: #7fd0dc;
+  --gold-soft: #a9e1e9;
+  --flame: #fae33f;
+  --teal: #0d9488;
+  --teal-deep: #065f46;
+  --red: #ce1126;
+  --cream: #f2eee3;
+  --paper: #faf7f0;
+  --smoke: rgba(127, 208, 220, 0.10);
+}
+
+body {
+  background:
+    radial-gradient(ellipse 90% 60% at 50% 0%, rgba(242, 107, 122, 0.30) 0%, transparent 55%),
+    radial-gradient(ellipse 100% 70% at 50% 35%, rgba(200, 71, 91, 0.16) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 50% at 80% 80%, rgba(127, 208, 220, 0.22) 0%, transparent 62%),
+    linear-gradient(180deg, var(--ember) 0%, var(--night) 58%, var(--ember) 100%);
+}

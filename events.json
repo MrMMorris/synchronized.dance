@@ -20,5 +20,25 @@
     ],
     "qr_only": true,
     "payment_instructions": ""
+  },
+  {
+    "id": "14_11_2026-Pool_Party",
+    "date_iso": "2026-11-14",
+    "date_display": "November 14",
+    "name": "Picnic & Pool Party",
+    "genres": ["House","Disco"],
+    "time": "4PM – 10PM",
+    "venue": "Lone Pine, Penang",
+    "address": "97 Jalan Batu Ferringhi, 11100 Batu Ferringhi, Penang",
+    "maps_url": "https://maps.app.goo.gl/d96bMoBKAWsmyBru6",
+    "ticket_form_url": "",
+    "ticket_form_prefill_entry": "",
+    "accent_color": "#f26b7a",
+    "ticket_types": [
+      { "label": "Entry", "price": 48, "note": "includes 1 cocktail/mocktail" },
+      { "label": "Entry + Picnic for 2", "price": 194, "admits": 2, "note": "2 entries + picnic + free rubber ducky" },
+      { "label": "Entry + Family of 4 Picnic", "price": 360, "admits": 4, "note": "4 entries + picnic + free rubber ducky" }
+    ],
+    "payment_instructions": "Bank transfer to HSBC · Account 303875462888 · Marcus Morris. Then upload your screenshot."
   }
 ]

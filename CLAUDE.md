@@ -131,7 +131,7 @@ Add a new entry to the array. Required fields:
 ```
 Pick `accent_color` from the poster's dominant warm hue.
 
-`ticket_types` and `payment_instructions` drive the on-site purchase form (`buy.html`). `buy.html` builds each order's `ticket_type` string as `"<label> — RM<price>"`, which `priceFor` then parses server-side — so prices live here, in one place. `payment_instructions` is shown to QR buyers above the screenshot upload (fill in real bank/QR details before going live). `ticket_form_url` / `ticket_form_prefill_entry` are now only needed if you still run the legacy Google Form.
+`ticket_types` and `payment_instructions` drive the on-site purchase form (`buy.html`). `buy.html` builds each order's `ticket_type` string as `"<label> — RM<price>"`, which `priceFor` then parses server-side — so prices live here, in one place. A ticket type can set `"admits": N` for a bundle (e.g. "Entry + Picnic for 2", `price` = the whole bundle): `buy.html` then sends `quantity × N` tickets, each labelled at `price / N`, so every head gets its own QR and revenue still sums correctly. `payment_instructions` is shown to QR buyers above the screenshot upload (fill in real bank/QR details before going live). `ticket_form_url` / `ticket_form_prefill_entry` are now only needed if you still run the legacy Google Form.
 
 ### Step 6 — Add event to `scripts/app_script.gs` EVENTS map
 Add a new entry to the `EVENTS` object using the event ID as the key:

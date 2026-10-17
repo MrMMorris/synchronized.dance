@@ -415,8 +415,12 @@
     renderForm();
   }
 
+  // A bundle (admits > 1) is sent as one ticket per head at the per-head price,
+  // so the door scans each person and priceFor() still sums to the bundle price.
+  function admits(t) { return t.admits > 1 ? t.admits : 1; }
+
   function ticketLabel(t) {
-    return `${t.label} — RM${t.price}${t.note ? ' (' + t.note + ')' : ''}`;
+    return `${t.label} — RM${Math.round(t.price / admits(t))}${t.note ? ' (' + t.note + ')' : ''}`;
   }
 
   function renderForm() {
@@ -619,7 +623,7 @@
       buyer_email: email,
       buyer_phone: '',
       ticket_type: ticketLabel(t),
-      quantity: qty,
+      quantity: qty * admits(event.ticket_types[typeIdx]),
       payment_method: pay,
       affiliate_code: ref,
       company: company, // honeypot

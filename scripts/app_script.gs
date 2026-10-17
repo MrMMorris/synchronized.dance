@@ -57,6 +57,14 @@ const EVENTS = {
     EVENT_ADDRESS: '2nd Floor, 2 Gat Lebuh Chulia, 10300 George Town, Penang',
     COMMISSION_PER_TICKET: 5,
   },
+  '14_11_2026-Pool_Party': {
+    EVENT_NAME:    'Picnic & Pool Party',
+    EVENT_DATE:    'November 14',
+    EVENT_TIME:    '4PM – 10PM',
+    EVENT_VENUE:   'Lone Pine, Penang',
+    EVENT_ADDRESS: '97 Jalan Batu Ferringhi, 11100 Batu Ferringhi, Penang',
+    COMMISSION_PER_TICKET: 5,
+  },
 };
 
 // ============================================================================
