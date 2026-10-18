@@ -65,6 +65,20 @@ const EVENTS = {
     EVENT_VENUE:   'Lone Pine, Penang',
     EVENT_ADDRESS: '97 Jalan Batu Ferringhi, 11100 Batu Ferringhi, Penang',
     COMMISSION_PER_TICKET: 5,
+    // Shown in this event's ticket emails. Points at the add-on below.
+    UPSELL_URL:  'https://synchronized.dance/picnic',
+    UPSELL_TEXT: 'Make it a picnic — pre-order a poolside picnic set from Lone Pine (RM98 for two, RM168 for four).',
+  },
+  // Add-on sold via buy.html?addon=1 (events.json "addon"). Its own event ID keeps
+  // picnic vouchers out of entry counts, revenue per event, and ambassador commission.
+  '14_11_2026-Pool_Party-Picnic': {
+    EVENT_NAME:    'Picnic Add-on — Picnic & Pool Party',
+    EVENT_DATE:    'November 14',
+    EVENT_TIME:    '4PM – 10PM',
+    EVENT_VENUE:   'Lone Pine, Penang',
+    EVENT_ADDRESS: '97 Jalan Batu Ferringhi, 11100 Batu Ferringhi, Penang',
+    COMMISSION_PER_TICKET: 0,
+    ADDON_NOTE: 'Picnic sets do not include entry — each guest still needs an event ticket. Show your picnic QR at the pool bar to collect your set.',
   },
 };
 
@@ -1166,6 +1180,9 @@ function sendTicketEmail(rowNum) {
   const eventTime    = ec ? ec.EVENT_TIME    : '';
   const eventVenue   = ec ? ec.EVENT_VENUE   : '';
   const eventAddress = ec ? ec.EVENT_ADDRESS : '';
+  const upsellUrl    = ec && ec.UPSELL_URL  ? ec.UPSELL_URL  : '';
+  const upsellText   = ec && ec.UPSELL_TEXT ? ec.UPSELL_TEXT : '';
+  const addonNote    = ec && ec.ADDON_NOTE  ? ec.ADDON_NOTE  : '';
 
   const subject = `Your tickets — ${eventName}`;
   const textBody =
@@ -1174,6 +1191,8 @@ function sendTicketEmail(rowNum) {
     `View your tickets:\n${ticketUrl}\n\n` +
     `Save the link — you'll need to show each QR code at the door (one per guest).\n\n` +
     (isCash ? `PAYMENT: Please have cash ready to pay at the door.\n\n` : '') +
+    (addonNote ? `NOTE: ${addonNote}\n\n` : '') +
+    (upsellUrl ? `${upsellText}\n${upsellUrl}\n\n` : '') +
     (eventDate ? `See you ${eventDate} at ${eventVenue}, ${eventTime}.\n\n` : '') +
     `— Nexa Events`;
 
@@ -1194,6 +1213,13 @@ function sendTicketEmail(rowNum) {
         <div style="text-align: center; margin: 24px 0;">
           <a href="${ticketUrl}" style="display: inline-block; background: #0a0a0a; color: #c6ff3a; padding: 14px 24px; text-decoration: none; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; font-size: 14px; border-radius: 4px;">View Your Tickets →</a>
         </div>
+        ${addonNote ? `<div style="background: #fff3cd; border: 2px solid #0a0a0a; padding: 14px 16px; margin: 0 0 18px; font-size: 13px; line-height: 1.5;">
+          ⚠️ ${escapeForHtml(addonNote)}
+        </div>` : ''}
+        ${upsellUrl ? `<div style="background: #fff; border: 2px dashed #0a0a0a; padding: 14px 16px; margin: 0 0 18px; font-size: 13px; line-height: 1.5; text-align: center;">
+          🧺 ${escapeForHtml(upsellText)}<br/>
+          <a href="${upsellUrl}" style="display: inline-block; margin-top: 10px; font-weight: 700; color: #0a0a0a;">Order a picnic →</a>
+        </div>` : ''}
         <p style="margin: 0 0 14px; font-size: 13px; line-height: 1.5; color: #555;">
           Save this email. At the door, open the link and show each QR code to staff — one per guest.
         </p>

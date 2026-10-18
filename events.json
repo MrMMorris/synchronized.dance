@@ -7,7 +7,12 @@
     "organizer": "Ecstatic Ethos",
     "contact_email": "marcus@ecstaticethos.com",
     "contact_instagram": "ecstatic.ethos",
-    "genres": ["Ambient","House","Breakbeat","Tribal"],
+    "genres": [
+      "Ambient",
+      "House",
+      "Breakbeat",
+      "Tribal"
+    ],
     "time": "3PM – 5PM",
     "venue": "The Palm House, Penang",
     "address": "2nd Floor, 2 Gat Lebuh Chulia, 10300 George Town, Penang",
@@ -16,7 +21,10 @@
     "ticket_form_prefill_entry": "",
     "accent_color": "#879eae",
     "ticket_types": [
-      { "label": "General Admission", "price": 30 }
+      {
+        "label": "General Admission",
+        "price": 30
+      }
     ],
     "qr_only": true,
     "description": "“Dance like no one is watching”\n\nFrom Bali to New York and Barcelona, the power of ecstatic dance is spreading. It is an opportunity to ground ourselves and shake off the chaos of our daily lives. The rhythm takes over and we enter a meditative state, flowing through and relieving built up energies and emotions.\n\nEcstatic Ethos brings the pulse to Penang - building and releasing, creating a flow to get lost in.\n\nCome dance with us - no phones, no judgment, no worries.",
@@ -27,7 +35,10 @@
     "date_iso": "2026-11-14",
     "date_display": "November 14",
     "name": "Picnic & Pool Party",
-    "genres": ["House","Disco"],
+    "genres": [
+      "House",
+      "Disco"
+    ],
     "time": "4PM – 10PM",
     "venue": "Lone Pine, Penang",
     "address": "97 Jalan Batu Ferringhi, 11100 Batu Ferringhi, Penang",
@@ -36,9 +47,43 @@
     "ticket_form_prefill_entry": "",
     "accent_color": "#f26b7a",
     "ticket_types": [
-      { "label": "Entry", "price": 48, "note": "includes 1 cocktail/mocktail" }
+      {
+        "label": "Entry",
+        "price": 48,
+        "note": "includes 1 cocktail/mocktail"
+      }
     ],
     "payment_instructions": "Bank details:\nHSBC\n303875462888\nMarcus Morris",
-    "description": "SUN, SPLASH & GOOD VIBES!\n\nGet ready for the Lone Pine Picnic & Pool Party!\n\nDive into an unforgettable evening of House & Disco beats, fun games, exciting prizes, a fabulous fashion show, and poolside vibes with DJ Shlant & Poison in Groove Worker!\n\nBring your friends, family & picnic crew for an afternoon of sunshine, music and memories!"
+    "description": "SUN, SPLASH & GOOD VIBES!\n\nGet ready for the Lone Pine Picnic & Pool Party!\n\nDive into an unforgettable evening of House & Disco beats, fun games, exciting prizes, a fabulous fashion show, and poolside vibes with DJ Shlant & Poison in Groove Worker!\n\nBring your friends, family & picnic crew for an afternoon of sunshine, music and memories!",
+    "addon": {
+      "id": "14_11_2026-Pool_Party-Picnic",
+      "title": "Picnic",
+      "button": "Order Picnic",
+      "description": "Make it a proper picnic! Pre-order a poolside picnic set from Lone Pine Hotel and we'll have it ready for you at the party.\n\nShow your picnic QR at the pool bar to collect your set.",
+      "ticket_types": [
+        {
+          "label": "Picnic Set for Two",
+          "price": 98,
+          "items": [
+            "Smoked Salmon & Cream Cheese Croissants",
+            "Pani Puri with Prawn Salsa",
+            "Freshly Baked Scones with Jam & Cream",
+            "Fresh Seasonal Fruit Skewers",
+            "Tropical Mocktail of the Day"
+          ]
+        },
+        {
+          "label": "Family Picnic Set (4 Persons)",
+          "price": 168,
+          "items": [
+            "Assorted Pinwheel Sandwiches",
+            "Chicken Satay with Peanut Sauce",
+            "Chocolate Brownie Bites",
+            "Mini Fruit Tartlets",
+            "Fresh Young Coconut"
+          ]
+        }
+      ]
+    }
   }
 ]

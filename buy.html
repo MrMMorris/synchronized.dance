@@ -274,6 +274,23 @@
   }
   .trust-contact a:hover { text-decoration: underline; }
 
+  .addon-intro { font-size: 14px; line-height: 1.55; white-space: pre-wrap; margin-bottom: 16px; }
+  .addon-notice {
+    background: color-mix(in srgb, var(--flame) 12%, transparent);
+    border: 1px solid color-mix(in srgb, var(--flame) 45%, transparent);
+    border-radius: 9px;
+    padding: 12px 14px;
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 18px;
+  }
+  .addon-notice a { color: var(--gold); font-weight: 600; }
+  .menu { margin-bottom: 20px; }
+  .menu-set { padding: 12px 0; border-top: 1px dashed color-mix(in srgb, var(--gold) 25%, transparent); }
+  .menu-set h3 { display: flex; justify-content: space-between; font-size: 14px; color: var(--gold); margin-bottom: 6px; }
+  .menu-set ul { list-style: none; font-size: 13px; line-height: 1.6; opacity: 0.85; }
+  .menu-set li::before { content: '• '; color: var(--gold); }
+
   .form-error {
     background: rgba(206, 17, 38, 0.15);
     border: 1px solid var(--red);
@@ -367,8 +384,10 @@
   const params = new URLSearchParams(window.location.search);
   const eventId = params.get('event');
   const ref = params.get('ref') || '';
+  const wantsAddon = params.has('addon');
 
   let event = null;
+  let offer = null; // what's on sale: the event itself, or its add-on
   let screenshotPayload = null; // { data, mimeType, name }
   let payMethod = 'qr'; // 'qr' (default) | 'cash'
 
@@ -413,7 +432,9 @@
     }
     event = events.find(e => e.id === eventId);
     if (!event) { showState('error', 'Not found', 'We couldn’t find that event.'); return; }
-    if (!event.ticket_types || !event.ticket_types.length) {
+    if (wantsAddon && !event.addon) { showState('error', 'Not found', 'There’s no add-on for this event.'); return; }
+    offer = wantsAddon ? event.addon : event;
+    if (!offer.ticket_types || !offer.ticket_types.length) {
       showState('error', 'Coming soon', 'Tickets for this event aren’t on sale yet.');
       return;
     }
@@ -433,7 +454,7 @@
   }
 
   function renderForm() {
-    const typeOptions = event.ticket_types
+    const typeOptions = offer.ticket_types
       .map((t, i) => `<option value="${i}">${escapeHtml(t.label)} — RM${t.price}${t.note ? ' · ' + escapeHtml(t.note) : ''}</option>`)
       .join('');
     const qtyOptions = [1,2,3,4,5,6,7,8].map(n => `<option value="${n}">${n}</option>`).join('');
@@ -448,7 +469,7 @@
       <a class="back-link" href="/events/${escapeHtml(eventId)}/">← Back to event</a>
       <header>
         ${event.organizer ? '' : `<img class="top-logo" src="/events/${escapeHtml(eventId)}/logo.webp" onerror="this.onerror=function(){this.onerror=null;this.src='assets/NEXA_white.png';};this.src='/events/${escapeHtml(eventId)}/logo.png';" alt="Nexa Events" />`}
-        <h1>Get<span class="sub">Tickets</span></h1>
+        <h1>${wantsAddon ? 'Add' : 'Get'}<span class="sub">${escapeHtml(wantsAddon ? offer.title : 'Tickets')}</span></h1>
         <div class="event-meta">
           <span class="accent">${escapeHtml(event.name)}</span><br/>
           ${escapeHtml(event.date_display || '')} ✦ ${escapeHtml(event.time || '')}<br/>
@@ -458,6 +479,7 @@
 
       <form id="buyForm" class="card" novalidate>
         <div class="form-error" id="formError"></div>
+        ${wantsAddon ? addonIntro() : ''}
 
         <div class="field">
           <label class="lbl" for="f-name">Full name <span class="req">*</span></label>
@@ -509,7 +531,7 @@
           <label>Company<input type="text" name="company" tabindex="-1" autocomplete="off" /></label>
         </div>
 
-        <button type="submit" class="submit-btn" id="submitBtn">Get Tickets</button>
+        <button type="submit" class="submit-btn" id="submitBtn">${escapeHtml(submitLabel())}</button>
 
         <div class="trust-strip">
           <span>🔒 Secure form</span>
@@ -525,6 +547,22 @@
 
     wireForm();
     updateTotal();
+  }
+
+  function submitLabel() { return (wantsAddon && offer.button) || 'Get Tickets'; }
+
+  function addonIntro() {
+    const entryUrl = '/buy.html?event=' + encodeURIComponent(eventId) + (ref ? '&ref=' + encodeURIComponent(ref) : '');
+    const menu = offer.ticket_types.map(t => `
+      <div class="menu-set">
+        <h3><span>${escapeHtml(t.label)}</span><span>RM${t.price}</span></h3>
+        ${t.items ? `<ul>${t.items.map(i => `<li>${escapeHtml(i)}</li>`).join('')}</ul>` : ''}
+      </div>`).join('');
+    return `
+      ${offer.description ? `<p class="addon-intro">${escapeHtml(offer.description)}</p>` : ''}
+      <div class="addon-notice">⚠️ This is an add-on only — it <strong>does not include entry</strong> to ${escapeHtml(event.name)}.
+        Everyone in your group still needs an event ticket. <a href="${entryUrl}">Get event tickets →</a></div>
+      <div class="menu">${menu}</div>`;
   }
 
   function wireForm() {
@@ -571,7 +609,7 @@
   }
 
   function updateTotal() {
-    const t = event.ticket_types[+document.getElementById('f-type').value] || { price: 0 };
+    const t = offer.ticket_types[+document.getElementById('f-type').value] || { price: 0 };
     const qty = +document.getElementById('f-qty').value || 1;
     document.getElementById('totalAmount').textContent = 'RM' + (t.price * qty);
   }
@@ -625,14 +663,14 @@
     if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return showError('Please enter a valid email address.');
     if (pay === 'qr' && !screenshotPayload) return showError('Please upload your payment screenshot, or choose Cash.');
 
-    const t = event.ticket_types[typeIdx];
+    const t = offer.ticket_types[typeIdx];
     const payload = {
-      event_id: eventId,
+      event_id: wantsAddon ? offer.id : eventId,
       buyer_name: name,
       buyer_email: email,
       buyer_phone: '',
       ticket_type: ticketLabel(t),
-      quantity: qty * admits(event.ticket_types[typeIdx]),
+      quantity: qty * admits(t),
       payment_method: pay,
       affiliate_code: ref,
       company: company, // honeypot
@@ -649,7 +687,7 @@
       const resp = await fetch(WEB_APP_URL, { method: 'POST', body: JSON.stringify(payload), redirect: 'follow' });
       const data = await resp.json();
       if (!data.ok) {
-        btn.disabled = false; btn.textContent = 'Get Tickets';
+        btn.disabled = false; btn.textContent = submitLabel();
         return showError(data.error || 'Something went wrong. Please try again.');
       }
       if (pay === 'cash') {
@@ -661,7 +699,7 @@
           `Thanks! Once we verify your payment we’ll email your tickets to ${email}.`);
       }
     } catch (err) {
-      btn.disabled = false; btn.textContent = 'Get Tickets';
+      btn.disabled = false; btn.textContent = submitLabel();
       showError('Could not reach the server. Check your connection and try again.');
     }
   }
