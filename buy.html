@@ -285,6 +285,16 @@
     margin-bottom: 18px;
   }
   .addon-notice a { color: var(--gold); font-weight: 600; }
+  .addon-hint {
+    background: color-mix(in srgb, var(--gold) 8%, transparent);
+    border: 1px solid color-mix(in srgb, var(--gold) 25%, transparent);
+    border-radius: 9px;
+    padding: 12px 14px;
+    font-size: 13px;
+    line-height: 1.5;
+    margin-bottom: 18px;
+  }
+  .addon-hint a { color: var(--gold); font-weight: 600; }
   .menu { margin-bottom: 20px; }
   .menu-set { padding: 12px 0; border-top: 1px dashed color-mix(in srgb, var(--gold) 25%, transparent); }
   .menu-set h3 { display: flex; justify-content: space-between; font-size: 14px; color: var(--gold); margin-bottom: 6px; }
@@ -479,7 +489,7 @@
 
       <form id="buyForm" class="card" novalidate>
         <div class="form-error" id="formError"></div>
-        ${wantsAddon ? addonIntro() : ''}
+        ${wantsAddon ? addonIntro() : event.addon ? `<div class="addon-hint">🧺 Looking for the ${escapeHtml(event.addon.title.toLowerCase())} add-on? Buy your event ticket first. Your ticket email will include a link to order it.<br/><a href="/buy.html?event=${encodeURIComponent(eventId)}&addon=1${ref ? '&ref=' + encodeURIComponent(ref) : ''}">Already have tickets? Purchase a ${escapeHtml(event.addon.title.toLowerCase())} add-on here →</a></div>` : ''}
 
         <div class="field">
           <label class="lbl" for="f-name">Full name <span class="req">*</span></label>
