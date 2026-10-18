@@ -382,8 +382,17 @@
       <div class="state ${kind}">
         <h2>${escapeHtml(title)}</h2>
         <p>${escapeHtml(msg)}</p>
+        ${kind === 'success' && event ? contactLine() : ''}
         ${viewUrl ? `<a class="view-btn" href="${viewUrl}">View Your Tickets →</a>` : ''}
       </div>`;
+  }
+
+  function contactLine() {
+    const contactEmail = event.contact_email || 'nexa.events.marketing@gmail.com';
+    const contactIg = event.contact_instagram || 'nexa.events';
+    return `<p class="trust-contact">If you entered your email incorrectly or experience any issues, contact
+      <a href="mailto:${escapeHtml(contactEmail)}">${escapeHtml(contactEmail)}</a>
+      · <a href="https://instagram.com/${escapeHtml(contactIg)}" target="_blank" rel="noopener">@${escapeHtml(contactIg)}</a></p>`;
   }
 
   async function boot() {

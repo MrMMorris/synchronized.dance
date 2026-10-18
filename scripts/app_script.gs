@@ -33,6 +33,7 @@ const CONFIG = {
   TICKETS_PAGE_URL:    'https://synchronized.dance/tickets.html',
   SCANNER_PAGE_URL:    'https://synchronized.dance/scanner.html',
   AMBASSADOR_PAGE_URL: 'https://synchronized.dance/ambassador.html',
+  NTFY_TOPIC: 'nexa-orders-x7k2q9',
 };
 
 // Ticket type written for an ambassador VIP admission. Deliberately has no RMxx
@@ -790,6 +791,21 @@ function recordPurchase(fields) {
     });
   } catch (err) {
     Logger.log('Failed to send organizer notification: ' + err);
+  }
+
+  // Phone push via ntfy.sh — QR orders need a screenshot check in the sheet.
+  try {
+    UrlFetchApp.fetch('https://ntfy.sh/' + CONFIG.NTFY_TOPIC, {
+      method: 'post',
+      payload: `${buyerName} · ${quantity}× ${shortTicketType(ticketType)} · RM${totalCost} · ${eventConfig.EVENT_NAME}`,
+      headers: {
+        Title: isCashOrder ? 'New cash order' : 'New QR order: check payment',
+        Click: ss.getUrl(),
+      },
+      muteHttpExceptions: true,
+    });
+  } catch (err) {
+    Logger.log('Failed to send ntfy push: ' + err);
   }
 
   return { ok: true, payment_method: paymentType, ticket_url: ticketUrl };
