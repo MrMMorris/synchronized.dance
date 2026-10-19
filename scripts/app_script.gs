@@ -957,11 +957,11 @@ function sendOrderConfirmationEmail(email, name, ticketType, quantity, unitPrice
 
   const htmlBody = `
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 480px; margin: 0 auto; padding: 24px; color: #0a0a0a;">
-      <div style="background: #ff3d00; color: #fff7e8; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
+      <div style="background: #0a0a0a; color: #c9a227; border-bottom: 3px solid #c9a227; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
         <div style="font-size: 12px; letter-spacing: 3px; text-transform: uppercase; opacity: 0.9;">★ Nexa Events ★</div>
         <h1 style="margin: 8px 0 0; font-size: 28px; letter-spacing: -1px;">ORDER RECEIVED</h1>
       </div>
-      <div style="background: #fff7e8; padding: 24px; border-radius: 0 0 8px 8px; border: 2px solid #0a0a0a; border-top: 0;">
+      <div style="background: #ffffff; padding: 24px; border-radius: 0 0 8px 8px; border: 1px solid #0a0a0a; border-top: 0;">
         <p style="margin: 0 0 18px; font-size: 16px;">Hi <strong>${escapeForHtml(name)}</strong>,</p>
         <p style="margin: 0 0 18px; font-size: 14px; line-height: 1.5;">Thanks for your order. Here's a summary:</p>
         <div style="background: #fff; border: 2px solid #0a0a0a; padding: 16px 18px; margin: 0 0 18px;">
@@ -971,7 +971,7 @@ function sendOrderConfirmationEmail(email, name, ticketType, quantity, unitPrice
           </div>
           <hr style="border: 0; border-top: 1px dashed #0a0a0a; margin: 8px 0;" />
           <div style="display: flex; justify-content: space-between; padding: 4px 0; font-size: 18px;">
-            <strong>TOTAL</strong><strong style="background: #c6ff3a; padding: 2px 10px;">RM${totalCost}</strong>
+            <strong>TOTAL</strong><strong style="background: #c9a227; color: #0a0a0a; padding: 2px 10px;">RM${totalCost}</strong>
           </div>
         </div>
         <p style="margin: 0; font-size: 14px; line-height: 1.6;">
@@ -1018,11 +1018,11 @@ function sendNewOrderNotification(o) {
 
   const htmlBody = `
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 480px; margin: 0 auto; padding: 24px; color: #0a0a0a;">
-      <div style="background: ${o.isCashOrder ? '#0d9488' : '#ff3d00'}; color: #fff7e8; padding: 16px 20px; border-radius: 8px 8px 0 0;">
+      <div style="background: #0a0a0a; color: #c9a227; border-bottom: 3px solid #c9a227; padding: 16px 20px; border-radius: 8px 8px 0 0;">
         <div style="font-size: 12px; letter-spacing: 3px; text-transform: uppercase; opacity: 0.9;">★ Nexa Events · New Order ★</div>
         <h1 style="margin: 6px 0 0; font-size: 22px; letter-spacing: -0.5px;">${escapeForHtml(ec.EVENT_NAME)}</h1>
       </div>
-      <div style="background: #fff7e8; padding: 22px; border-radius: 0 0 8px 8px; border: 2px solid #0a0a0a; border-top: 0; font-size: 14px; line-height: 1.6;">
+      <div style="background: #ffffff; padding: 22px; border-radius: 0 0 8px 8px; border: 1px solid #0a0a0a; border-top: 0; font-size: 14px; line-height: 1.6;">
         <table style="width: 100%; border-collapse: collapse; font-size: 14px;">
           <tr><td style="padding: 3px 0; color: #555;">Name</td><td style="padding: 3px 0; text-align: right;"><strong>${escapeForHtml(o.buyerName)}</strong></td></tr>
           <tr><td style="padding: 3px 0; color: #555;">Email</td><td style="padding: 3px 0; text-align: right;">${escapeForHtml(o.buyerEmail)}</td></tr>
@@ -1033,7 +1033,7 @@ function sendNewOrderNotification(o) {
           ${o.affiliateCode ? `<tr><td style="padding: 3px 0; color: #555;">Referral</td><td style="padding: 3px 0; text-align: right;">${escapeForHtml(o.affiliateCode)}</td></tr>` : ''}
         </table>
         ${o.paymentProof ? `<div style="margin: 14px 0 0; font-size: 13px;">Proof: ${proofIsUrl ? `<a href="${escapeForHtml(o.paymentProof)}">view screenshot</a>` : escapeForHtml(o.paymentProof)}</div>` : ''}
-        <div style="margin: 16px 0 0; padding: 12px 14px; background: ${o.isCashOrder ? '#e6f7f4' : '#fff3cd'}; border: 2px solid #0a0a0a; font-size: 13px; line-height: 1.5;">
+        <div style="margin: 16px 0 0; padding: 12px 14px; background: #faf6ea; border: 1px solid #c9a227; font-size: 13px; line-height: 1.5;">
           ${o.isCashOrder ? '✅ ' : '⚠️ '}${escapeForHtml(actionLine)}
         </div>
       </div>
@@ -1198,22 +1198,22 @@ function sendTicketEmail(rowNum) {
 
   const htmlBody = `
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 480px; margin: 0 auto; padding: 24px; color: #0a0a0a;">
-      <div style="background: #ff3d00; color: #fff7e8; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
+      <div style="background: #0a0a0a; color: #c9a227; border-bottom: 3px solid #c9a227; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
         <div style="font-size: 12px; letter-spacing: 3px; text-transform: uppercase; opacity: 0.9;">★ Nexa Events ★</div>
         <h1 style="margin: 8px 0 0; font-size: 32px; letter-spacing: -1px;">YOUR TICKETS ARE READY</h1>
       </div>
-      <div style="background: #fff7e8; padding: 24px; border-radius: 0 0 8px 8px; border: 2px solid #0a0a0a; border-top: 0;">
+      <div style="background: #ffffff; padding: 24px; border-radius: 0 0 8px 8px; border: 1px solid #0a0a0a; border-top: 0;">
         <p style="margin: 0 0 14px; font-size: 16px;">Hi <strong>${escapeForHtml(buyerName)}</strong>,</p>
         <p style="margin: 0 0 18px; font-size: 14px; line-height: 1.5;">
           Your <strong>${qty} ticket${qty === 1 ? '' : 's'}</strong> (${escapeForHtml(ticketType)}) for ${escapeForHtml(eventName)} are confirmed.
         </p>
-        ${isCash ? `<div style="background: #fff3cd; border: 2px solid #0a0a0a; padding: 14px 16px; margin: 0 0 18px; font-size: 13px; line-height: 1.5;">
+        ${isCash ? `<div style="background: #faf6ea; border: 1px solid #c9a227; padding: 14px 16px; margin: 0 0 18px; font-size: 13px; line-height: 1.5;">
           &#x1F4B5; <strong>Cash payment:</strong> Please have your cash ready to pay at the door.
         </div>` : ''}
         <div style="text-align: center; margin: 24px 0;">
-          <a href="${ticketUrl}" style="display: inline-block; background: #0a0a0a; color: #c6ff3a; padding: 14px 24px; text-decoration: none; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; font-size: 14px; border-radius: 4px;">View Your Tickets →</a>
+          <a href="${ticketUrl}" style="display: inline-block; background: #0a0a0a; color: #c9a227; padding: 14px 24px; text-decoration: none; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; font-size: 14px; border-radius: 4px;">View Your Tickets →</a>
         </div>
-        ${addonNote ? `<div style="background: #fff3cd; border: 2px solid #0a0a0a; padding: 14px 16px; margin: 0 0 18px; font-size: 13px; line-height: 1.5;">
+        ${addonNote ? `<div style="background: #faf6ea; border: 1px solid #c9a227; padding: 14px 16px; margin: 0 0 18px; font-size: 13px; line-height: 1.5;">
           &#x26A0;&#xFE0F; ${escapeForHtml(addonNote)}
         </div>` : ''}
         ${upsellUrl ? `<div style="background: #fff; border: 2px dashed #0a0a0a; padding: 14px 16px; margin: 0 0 18px; font-size: 13px; line-height: 1.5; text-align: center;">
@@ -1335,17 +1335,17 @@ function sendAmbassadorWelcomeEmail(email, name, pageUrl) {
 
   const htmlBody = `
     <div style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 480px; margin: 0 auto; padding: 24px; color: #0a0a0a;">
-      <div style="background: #ff3d00; color: #fff7e8; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
+      <div style="background: #0a0a0a; color: #c9a227; border-bottom: 3px solid #c9a227; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
         <div style="font-size: 12px; letter-spacing: 3px; text-transform: uppercase; opacity: 0.9;">★ Nexa Events ★</div>
         <h1 style="margin: 8px 0 0; font-size: 28px; letter-spacing: -1px;">YOU'RE AN AMBASSADOR</h1>
       </div>
-      <div style="background: #fff7e8; padding: 24px; border-radius: 0 0 8px 8px; border: 2px solid #0a0a0a; border-top: 0;">
+      <div style="background: #ffffff; padding: 24px; border-radius: 0 0 8px 8px; border: 1px solid #0a0a0a; border-top: 0;">
         <p style="margin: 0 0 14px; font-size: 16px;">Hi <strong>${escapeForHtml(name)}</strong>,</p>
         <p style="margin: 0 0 18px; font-size: 14px; line-height: 1.5;">
           Welcome to the Nexa Events ambassador program. You earn a commission for every confirmed ticket sold through your referral link.
         </p>
         <div style="text-align: center; margin: 24px 0;">
-          <a href="${pageUrl}" style="display: inline-block; background: #0a0a0a; color: #c6ff3a; padding: 14px 24px; text-decoration: none; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; font-size: 14px; border-radius: 4px;">Open Your Ambassador Page →</a>
+          <a href="${pageUrl}" style="display: inline-block; background: #0a0a0a; color: #c9a227; padding: 14px 24px; text-decoration: none; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; font-size: 14px; border-radius: 4px;">Open Your Ambassador Page →</a>
         </div>
         <p style="margin: 0; font-size: 13px; line-height: 1.5; color: #555;">
           Your page has a personal QR code — share it with anyone interested in tickets. Your earnings are tracked automatically — prepaid tickets count once payment clears, and cash tickets once collected at the door.
