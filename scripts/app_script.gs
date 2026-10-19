@@ -809,15 +809,23 @@ function recordPurchase(fields) {
 
   // Phone push via ntfy.sh — QR orders need a screenshot check in the sheet.
   try {
-    UrlFetchApp.fetch('https://ntfy.sh/' + CONFIG.NTFY_TOPIC, {
+    const ntfyHeaders = {
+      Title: isCashOrder ? 'New cash order' : 'New QR order: check payment',
+      Click: ss.getUrl(),
+    };
+    // Apps Script shares Google's egress IPs, so anonymous pushes hit ntfy.sh's
+    // per-IP rate limit. A token (Script Property NTFY_TOKEN) bills our account instead.
+    const ntfyToken = PropertiesService.getScriptProperties().getProperty('NTFY_TOKEN');
+    if (ntfyToken) ntfyHeaders.Authorization = 'Bearer ' + ntfyToken;
+    const res = UrlFetchApp.fetch('https://ntfy.sh/' + CONFIG.NTFY_TOPIC, {
       method: 'post',
       payload: `${buyerName} · ${quantity}× ${shortTicketType(ticketType)} · RM${totalCost} · ${eventConfig.EVENT_NAME}`,
-      headers: {
-        Title: isCashOrder ? 'New cash order' : 'New QR order: check payment',
-        Click: ss.getUrl(),
-      },
+      headers: ntfyHeaders,
       muteHttpExceptions: true,
     });
+    if (res.getResponseCode() >= 300) {
+      Logger.log('ntfy push rejected: ' + res.getResponseCode() + ' ' + res.getContentText());
+    }
   } catch (err) {
     Logger.log('Failed to send ntfy push: ' + err);
   }
