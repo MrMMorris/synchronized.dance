@@ -639,6 +639,7 @@
   let html5QrCode = null;
   let scanning = false;
   let lastScanTime = 0;
+  let validating = false;
   let eventsData = [];
   let scanCount = 0;
   const log = [];
@@ -801,13 +802,17 @@
   }
 
   async function onScanSuccess(decodedText) {
+    // Ignore the camera while a ticket is being checked or a result is on
+    // screen — the QR is usually still in frame when OK is tapped.
+    if (validating || document.getElementById('resultModal')) return;
     const now = Date.now();
     if (now - lastScanTime < 1500) return;
     if (recentScans.has(decodedText)) return;
     lastScanTime = now;
     recentScans.add(decodedText);
-    setTimeout(() => recentScans.delete(decodedText), 5000);
-    validate(decodedText);
+    setTimeout(() => recentScans.delete(decodedText), 15000);
+    validating = true;
+    try { await validate(decodedText); } finally { validating = false; }
   }
 
   // Which event this door is working. Only ambassador VIP passes need it (they
