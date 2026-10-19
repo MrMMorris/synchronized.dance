@@ -1208,16 +1208,16 @@ function sendTicketEmail(rowNum) {
           Your <strong>${qty} ticket${qty === 1 ? '' : 's'}</strong> (${escapeForHtml(ticketType)}) for ${escapeForHtml(eventName)} are confirmed.
         </p>
         ${isCash ? `<div style="background: #fff3cd; border: 2px solid #0a0a0a; padding: 14px 16px; margin: 0 0 18px; font-size: 13px; line-height: 1.5;">
-          💵 <strong>Cash payment:</strong> Please have your cash ready to pay at the door.
+          &#x1F4B5; <strong>Cash payment:</strong> Please have your cash ready to pay at the door.
         </div>` : ''}
         <div style="text-align: center; margin: 24px 0;">
           <a href="${ticketUrl}" style="display: inline-block; background: #0a0a0a; color: #c6ff3a; padding: 14px 24px; text-decoration: none; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; font-size: 14px; border-radius: 4px;">View Your Tickets →</a>
         </div>
         ${addonNote ? `<div style="background: #fff3cd; border: 2px solid #0a0a0a; padding: 14px 16px; margin: 0 0 18px; font-size: 13px; line-height: 1.5;">
-          ⚠️ ${escapeForHtml(addonNote)}
+          &#x26A0;&#xFE0F; ${escapeForHtml(addonNote)}
         </div>` : ''}
         ${upsellUrl ? `<div style="background: #fff; border: 2px dashed #0a0a0a; padding: 14px 16px; margin: 0 0 18px; font-size: 13px; line-height: 1.5; text-align: center;">
-          🧺 ${escapeForHtml(upsellText)}<br/>
+          &#x1F9FA; ${escapeForHtml(upsellText)}<br/>
           <a href="${upsellUrl}" style="display: inline-block; margin-top: 10px; font-weight: 700; color: #0a0a0a;">Order a picnic →</a>
         </div>` : ''}
         <p style="margin: 0 0 14px; font-size: 13px; line-height: 1.5; color: #555;">
