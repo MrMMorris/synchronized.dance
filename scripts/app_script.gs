@@ -179,6 +179,26 @@ function doPost(e) {
 
     if (!EVENTS[body.event_id]) return jsonResponse({ ok: false, error: 'Unknown event' });
 
+    // Retries of the same order (buyer tapped submit again after a slow/dropped
+    // response) carry the same order_id. Replay the first result instead of
+    // recording a duplicate purchase.
+    const cache = CacheService.getScriptCache();
+    const orderKey = body.order_id ? 'order_' + String(body.order_id).slice(0, 64) : '';
+    if (orderKey) {
+      const dedupeLock = LockService.getScriptLock();
+      dedupeLock.waitLock(30000);
+      try {
+        const prior = cache.get(orderKey);
+        if (prior) {
+          const p = JSON.parse(prior);
+          return jsonResponse(p.pending ? { ok: true, payment_method: body.payment_method, ticket_url: '' } : p);
+        }
+        cache.put(orderKey, JSON.stringify({ pending: true }), 21600);
+      } finally {
+        dedupeLock.releaseLock();
+      }
+    }
+
     // Stash the payment screenshot (QR orders) in Drive; store its URL as proof.
     // If saving fails (e.g. Drive scope not authorized), surface the error in the
     // sheet cell rather than leaving payment_proof mysteriously blank.
@@ -203,6 +223,10 @@ function doPost(e) {
       affiliateCode: body.affiliate_code,
       source:        'Website form',
     });
+    if (orderKey) {
+      if (result.ok) cache.put(orderKey, JSON.stringify(result), 21600);
+      else cache.remove(orderKey);
+    }
     return jsonResponse(result);
   } catch (err) {
     return jsonResponse({ ok: false, error: String(err) });

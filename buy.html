@@ -660,6 +660,9 @@
     box.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
 
+  // One id per form fill — resent on every retry so the server can drop duplicates.
+  const orderId = (crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(36) + Math.random().toString(36).slice(2));
+
   async function onSubmit(e) {
     e.preventDefault();
     const name = document.getElementById('f-name').value.trim();
@@ -684,6 +687,7 @@
       payment_method: pay,
       affiliate_code: ref,
       company: company, // honeypot
+      order_id: orderId,
     };
     if (pay === 'qr' && screenshotPayload) payload.screenshot = screenshotPayload;
 
@@ -710,7 +714,7 @@
       }
     } catch (err) {
       btn.disabled = false; btn.textContent = submitLabel();
-      showError('Could not reach the server. Check your connection and try again.');
+      showError('We didn’t get a reply from the server — your order may still have gone through. Check your email first; if nothing arrives in a few minutes, tap submit again (you won’t be charged twice).');
     }
   }
 
