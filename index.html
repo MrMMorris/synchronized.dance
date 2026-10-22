@@ -108,6 +108,14 @@
     flex-shrink: 0;
     margin-top: 3px;
   }
+  .event-btn-date {
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    opacity: 0.8;
+    margin-bottom: 4px;
+  }
   .event-btn-genres {
     font-size: 11px;
     letter-spacing: 1.5px;
@@ -301,6 +309,7 @@
         : `/events/${ev.id}/`;
       html += `
         <a class="event-btn" href="${href}" onclick="trackEventClick('${ev.name}')">
+          ${ev.date_display ? `<div class="event-btn-date">${ev.date_display}${ev.time ? ` · ${ev.time}` : ''}</div>` : ''}
           <div class="event-btn-header">
             <div class="event-btn-name">${ev.name} @ ${ev.venue}</div>
             <span class="event-btn-arrow">→</span>
